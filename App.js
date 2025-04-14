@@ -1,13 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
-import { GLOBAL } from './src/styles/global';
-
+import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
   return (
-    <View style={GLOBAL.container}>
-      <Text style={GLOBAL.title}>I am Available</Text>
-      <StatusBar style="auto" />
-    </View>
+      <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
+          <HomeScreen/>
+          <StatusBar style="auto" />
+      </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+    containerSafeArea: {
+        flex: 1,
+        backgroundColor: "#0099f9"
+    }
+})
+
