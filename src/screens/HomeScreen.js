@@ -1,5 +1,12 @@
 import {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    ScrollView,
+    TouchableOpacity,
+    useWindowDimensions, Alert
+} from 'react-native';
 import initialData from '../data/initial_data';
 import Header from '../components/Header';
 import AvailabilityCard from '../components/AvailabilityCard';
@@ -10,6 +17,12 @@ export default function HomeScreen() {
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
 
     const loggedUserId = 1;
+
+    const {width} = useWindowDimensions();
+    const isSmallScreen = width < 768;
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
 
     useEffect(() => {
         const availabilitiesArray = Object.values(initialData.availabilities);
@@ -46,46 +59,83 @@ export default function HomeScreen() {
         setOtherAvailabilities(otherData);
     }, []);
 
+
     return (
         <View style={styles.container}>
-            <Header/>
-            <ScrollView style={styles.container}>
-                <View style={styles.sections}>
+
+
+            <ScrollView>
+                <Header/>
+                <View style={[
+                    isSmallScreen ? styles.sectionsSmallScreen : styles.sections
+                ]}>
+
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>My Availabilities</Text>
                         {Object.values(myAvailabilities).map(item => (
-                            <AvailabilityCard
+                            <TouchableOpacity
                                 key={item.id}
-                                name={item.userName}
-                                role={item.roleName}
-                                group={item.groupName}
-                                location={item.location}
-                                start={item.start}
-                                end={item.end}
-                            />
+                                onPress={() =>
+                                    Alert.alert('Availability Details', 'Here we go to Availability Details')
+                                }
+                            >
+                                <AvailabilityCard
+                                    name={item.userName}
+                                    role={item.roleName}
+                                    group={item.groupName}
+                                    location={item.location}
+                                    start={item.start}
+                                    end={item.end}
+                                />
+                            </TouchableOpacity>
                         ))}
+
                     </View>
 
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Other Availabilities</Text>
+                        <Text style={styles.sectionTitle}>Others Availabilities</Text>
+
                         {Object.values(otherAvailabilities).map(item => (
-                            <AvailabilityCard
-                                key={item.id}
-                                name={item.userName}
-                                role={item.roleName}
-                                group={item.groupName}
-                                location={item.location}
-                                start={item.start}
-                                end={item.end}
-                            />
+                            <TouchableOpacity>
+                                <AvailabilityCard
+                                    key={item.id}
+                                    name={item.userName}
+                                    role={item.roleName}
+                                    group={item.groupName}
+                                    location={item.location}
+                                    start={item.start}
+                                    end={item.end}
+                                />
+                            </TouchableOpacity>
+
                         ))}
+
+
                     </View>
                 </View>
             </ScrollView>
-            <TouchableOpacity style={styles.fab}>
-                <Text style={styles.fabText}>+</Text>
+
+
+            <TouchableOpacity style={styles.fab} onPress={() => setIsMenuOpen(prev => !prev)}>
+                <Text style={styles.fabText}>{isMenuOpen ? '-' : '+'}</Text>
             </TouchableOpacity>
+
+            {isMenuOpen && (
+                <View style={styles.menu}>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <Text style={styles.menuText}>Create Chat</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <Text style={styles.menuText}>Create Group</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem}>
+                        <Text style={styles.menuText}>Create Availability</Text>
+                    </TouchableOpacity>
+                </View>
+
+            )}
         </View>
+
 
     );
 }
@@ -93,28 +143,42 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        backgroundColor: COLORS.primary,
     },
     sections: {
+        flexDirection: 'row',
         padding: 16,
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        backgroundColor: COLORS.background,
+    },
+    sectionsSmallScreen: {
+        flexDirection: 'column',
+        padding: 16,
+        justifyContent: 'center',
+        backgroundColor: COLORS.background,
     },
     section: {
         backgroundColor: COLORS.primary,
         borderRadius: 16,
         padding: 16,
         marginBottom: 16,
+        margin: 10,
+        width: 350
     },
+
     sectionTitle: {
         color: 'white',
-        fontSize: 18,
+        fontSize: 22,
+        fontWeight: 500,
         marginBottom: 8,
         textAlign: 'center',
     },
     fab: {
         backgroundColor: COLORS.primary,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 80,
+        height: 80,
+        borderRadius: 60,
         position: 'absolute',
         bottom: 32,
         right: 32,
@@ -123,6 +187,24 @@ const styles = StyleSheet.create({
     },
     fabText: {
         color: 'white',
-        fontSize: 32,
+        fontSize: 48,
     },
+    menu: {
+        position: 'absolute',
+        bottom: 60,
+        right: 130,
+
+    },
+    menuItem: {
+        backgroundColor: 'white',
+        borderColor: COLORS.primary,
+        borderWidth: 3,
+        borderRadius: 20,
+        padding: 20,
+        margin: 10,
+    },
+    menuText: {
+        fontSize: 24,
+        fontWeight: 500,
+    }
 });

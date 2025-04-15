@@ -1,73 +1,75 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-export default function AvailabilityCard({ name, role, group, location, start, end }) {
-  return (
-    <View style={styles.card}>
-      <View style={styles.row}>
-        <View>
-          <Text style={styles.name}>{name}</Text>
-          <Text style={styles.role}>{role}</Text>
+export default function AvailabilityCard({name, role, group, location, start, end}) {
+    return (
+        <View style={styles.card}>
+            <View>
+                <View style={styles.row}>
+                    <View>
+                        <Text style={styles.name}>{name}</Text>
+                        <Text style={styles.role}>{role}</Text>
+                    </View>
+                </View>
+                <View style={styles.info}>
+                    <Text style={styles.label}>Group:</Text>
+                    <Text>{group}</Text>
+                </View>
+            </View>
+
+            <View>
+                <View style={styles.info}>
+                    <Text style={styles.label}>Location:</Text>
+                    <Text>{location}</Text>
+                </View>
+
+                <View style={styles.info}>
+                    <Text style={styles.label}>Time:</Text>
+                    <Text>{formatDate(start)} - {formatHour(end)}</Text>
+                </View>
+            </View>
+
         </View>
-      </View>
-
-      <View style={styles.info}>
-        <Text style={styles.label}>Group:</Text>
-        <Text>{group}</Text>
-      </View>
-
-      <View style={styles.info}>
-        <Text style={styles.label}>Location:</Text>
-        <Text>{location}</Text>
-      </View>
-
-      <View style={styles.info}>
-        <Text style={styles.label}>Time:</Text>
-        <Text>{formatDate(start)} - {formatHour(end)}</Text>
-      </View>
-    </View>
-  );
+    );
 }
 
 function formatDate(dateString) {
-  const date = new Date(dateString);
-  return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 }
 
 function formatHour(dateString) {
-  const date = new Date(dateString);
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    const date = new Date(dateString);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 8,
-    marginVertical: 8,
-    elevation: 2,
-    gap: 8
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  role: {
-    color: 'grey',
-  },
-  info: {
-    marginTop: 4,
-  },
-  label: {
-    fontWeight: 'bold',
-  },
+    card: {
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 8,
+        marginVertical: 8,
+        elevation: 2,
+        gap: 8,
+        justifyContent: 'space-between',
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12
+    },
+    name: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    role: {
+        color: 'grey',
+    },
+    info: {
+        marginTop: 4,
+    },
+    label: {
+        fontWeight: 'bold',
+    },
 });

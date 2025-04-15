@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
 import HomeScreen from './src/screens/HomeScreen';
+import {COLORS} from "./src/styles/theme";
 
 export default function App() {
   return (
@@ -15,7 +16,7 @@ export default function App() {
 const styles = StyleSheet.create({
     containerSafeArea: {
         flex: 1,
-        backgroundColor: "#0099f9"
+        backgroundColor: COLORS.primary,
     }
 })
 
