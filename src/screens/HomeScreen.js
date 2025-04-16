@@ -15,39 +15,45 @@ import {COLORS} from "../styles/theme";
 export default function HomeScreen() {
     const [myAvailabilities, setMyAvailabilities] = useState({});
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
-
+    // Define the logged user (for now)
     const loggedUserId = 1;
 
+    // This was an attempt to make web and mobile, if I have time to adapt I will, for now will do the figma first
     const {width} = useWindowDimensions();
     const isSmallScreen = width < 768;
 
+    // menu useState
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 
     useEffect(() => {
+        // Convert object of availabilities to array
         const availabilitiesArray = Object.values(initialData.availabilities);
 
+        // Map the array to enrichedAvailabilities in the format needed for now
         const enrichedAvailabilities = availabilitiesArray.map((availability) => {
             const user = initialData.users[availability.user_id];
-            const role = Object.values(initialData.roles).find(r => r.user_id === user.id);
+            // If you have multiple roles per user, adapt the logic as needed:
+            const role = Object.values(initialData.roles).find(r => r.user_id === user?.id);
             const group = initialData.groups[availability.group_id];
 
             return {
                 id: availability.id,
-                userName: user.name,
+                userName: user?.name,
                 roleName: role?.role_name,
                 groupName: group?.name,
+                location: availability.location,
                 start: availability.start_date,
                 end: availability.end_date,
-                location: availability.location,
-                userId: user.id,
+                userId: user?.id,
             };
         });
 
+        // Separate the data into myAvailabilities vs otherAvailabilities
         const myData = {};
         const otherData = {};
 
-        enrichedAvailabilities.forEach(item => {
+        enrichedAvailabilities.forEach((item) => {
             if (item.userId === loggedUserId) {
                 myData[item.id] = item;
             } else {
@@ -62,7 +68,6 @@ export default function HomeScreen() {
 
     return (
         <View style={styles.container}>
-
 
             <ScrollView>
                 <Header/>
@@ -143,7 +148,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.primary,
+        backgroundColor: COLORS.background,
     },
     sections: {
         flexDirection: 'row',

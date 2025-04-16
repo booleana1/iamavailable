@@ -3,11 +3,12 @@ import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
 import HomeScreen from './src/screens/HomeScreen';
 import {COLORS} from "./src/styles/theme";
+import SettingsScreen from "./src/screens/SettingScreen";
 
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <HomeScreen/>
+          <SettingsScreen />
           <StatusBar style="auto" />
       </SafeAreaView>
   );

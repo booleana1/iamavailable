@@ -9,9 +9,10 @@ export default function Header() {
     return (
         <View style={styles.container}>
 
-            <Image source={require('../assets/logo.png')} style={[styles.logo, isSmallScreen && styles.logoSmallScreens]}></Image>
+            <Image source={require('../assets/logo.png')}
+                   style={[styles.logo, isSmallScreen && styles.logoSmallScreens]}></Image>
 
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 40}}>
+            <View style={styles.leftContainer}>
                 <TouchableOpacity style={styles.button}>
                     <Text style={styles.buttonText}>Messages</Text>
                 </TouchableOpacity>
@@ -50,9 +51,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: 5,
     },
+    leftContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 30
+    },
     logo: {
-        width: 100,
-        height: 50,
+        marginLeft: 70,
+        width: 140,
+        height: 70,
     },
     searchContainer: {
         position: 'relative',
@@ -68,7 +75,8 @@ const styles = StyleSheet.create({
         minWidth: 20,
     },
     button: {
-        paddingVertical: 8
+        paddingVertical: 8,
+        paddingRight:20
     },
     buttonText: {
         color: 'white',

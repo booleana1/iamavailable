@@ -43,6 +43,7 @@ function formatHour(dateString) {
 }
 
 const styles = StyleSheet.create({
+
     card: {
         flex: 1,
         flexDirection: 'row',
@@ -51,8 +52,9 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginVertical: 8,
         elevation: 2,
-        gap: 8,
+        gap: 15,
         justifyContent: 'space-between',
+        flexGrow:1
     },
     row: {
         flexDirection: 'row',
