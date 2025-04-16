@@ -41,6 +41,16 @@ const initialData = {
         is_public: true,
         auto_admission: false,
         created_at: "2025-04-14 16:46:52.272337"
+      },
+      2: {
+        id: 2,
+        user_id: 1,
+        name: "Second Group",
+        hashtag: "second_group",
+        description: "Group for programming questions.",
+        is_public: true,
+        auto_admission: false,
+        created_at: "2025-04-14 16:46:52.272337"
       }
     },
     group_users: {
@@ -50,6 +60,22 @@ const initialData = {
         user_id: 2,
         status: "pending",
         request_message: "I would like to join the group.",
+        created_at: "2025-04-14 16:46:52.272343"
+      },
+      2: {
+        id: 2,
+        group_id: 1,
+        user_id: 1,
+        status: "accepted",
+        request_message: "Accepted",
+        created_at: "2025-04-14 16:46:52.272343"
+      },
+      3: {
+        id: 3,
+        group_id: 2,
+        user_id: 1,
+        status: "accepted",
+        request_message: "Accepted",
         created_at: "2025-04-14 16:46:52.272343"
       }
     },
