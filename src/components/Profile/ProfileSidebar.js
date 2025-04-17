@@ -1,5 +1,5 @@
 import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Touchable} from 'react-native';
-import {COLORS} from "../styles/theme";
+import {COLORS} from "../../styles/theme";
 import {Ionicons} from '@expo/vector-icons';
 import SettingButton from './SettingButton';
 

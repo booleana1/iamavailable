@@ -1,12 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
-import ProfileScreen from './src/screens/ProfileScreen';
+import CreateAvailability from './src/screens/CreateAvailabilityScreen';
 
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <ProfileScreen/>
+          <CreateAvailability/>
           <StatusBar style="auto" />
       </SafeAreaView>
   );

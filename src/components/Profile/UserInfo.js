@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
-import initialData from '../data/initial_data';
-import { COLORS } from '../styles/theme';
+import initialData from '../../data/initial_data';
+import { COLORS } from '../../styles/theme';
 
 export default function AccountInfo({loggedUserId}) {
 
