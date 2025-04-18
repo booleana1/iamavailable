@@ -1,7 +1,7 @@
 import { View, StyleSheet } from 'react-native';
 import Header from '../components/Header';
-import UserInfo from '../components/UserInfo';
-import Sidebar from '../components/ProfileSidebar';
+import UserInfo from '../components/Profile/UserInfo';
+import Sidebar from '../components/Profile/ProfileSidebar';
 import { COLORS } from '../styles/theme';
 
 

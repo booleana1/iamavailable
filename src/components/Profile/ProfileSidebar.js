@@ -1,72 +1,51 @@
-import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity, Touchable} from 'react-native';
-import {COLORS} from "../../styles/theme";
-import {Ionicons} from '@expo/vector-icons';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS } from '../../styles/theme';
 import SettingButton from './SettingButton';
 
-export default function Sidebar(){
+
+
+const SidePanel = ({selected, onChange}) => {
+
+
     return (
         <View style={styles.container}>
-            <Text style={styles.account}>Account</Text>
-            <SettingButton size={48}/>
+            <SettingButton size={64} style = {styles.button}/>
         </View>
     );
-}
+};
+
+export default SidePanel;
+
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: COLORS.primary,
-        paddingVertical: 24,
-        paddingHorizontal: 16,
-        width: 150, // ancho del sidebar
-        height: '100%', // altura completa
+        width: '15%',
+        height: '100%',
         alignItems: 'center',
+        backgroundColor: COLORS.primary,
+        paddingTop: 40,
+        gap: 30,
     },
-    logo: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 24,
-    },
-    account: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
-        paddingTop: 20,
-        marginBottom: 500,
-    },
-    searchContainer: {
-        position: 'relative',
-        marginVertical: 16,
-    },
-    searchIcon: {
-        position: 'absolute',
-        left: 8,
-        top: '50%',
-        transform: [{ translateY: -8 }],
-    },
-    searchInput: {
-        backgroundColor: 'white',
-        borderRadius: 15,
-        paddingVertical: 6,
-        paddingLeft: 32,
-        paddingRight: 12,
-        fontSize: 14,
+    header: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 24,
+        marginBottom: 20,
     },
     button: {
-        paddingVertical: 10,
-        marginBottom: 8,
+        width: '100%',
+        alignItems: 'center',
+        paddingVertical: 8,
+        marginTop:'200%'
+    },
+    buttonSelected: {
+        backgroundColor: COLORS.secondary,
+        paddingVertical: 15,
     },
     buttonText: {
-        color: 'white',
-        fontWeight: '700',
+        color: '#fff',
+        fontWeight: '400',
+        fontSize: 18,
     },
-    profileImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: 'white',
-        marginTop: 'auto', // Empuja la imagen al fondo del sidebar
-        alignSelf: 'center',
-    },
-})
+});

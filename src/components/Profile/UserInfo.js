@@ -55,17 +55,18 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FFF',
     flex: 1,
+    paddingLeft:'17.5%',
+    paddingRight: '50%'
+    
   },
   title: {
-    paddingLeft: 200,
     fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 16,
-    paddingTop: 20,
+    paddingTop: '10%',
     color: COLORS.primary,
   },
   pfp: {
-    marginLeft: 200,
     width: 80,
     height: 80,
     borderRadius: 40,
@@ -74,20 +75,17 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   label: {
-    paddingLeft: 200,
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 12,
     color: COLORS.text,
   },
   value: {
-    paddingLeft: 200,
     fontSize: 16,
     marginBottom: 4,
     color: COLORS.text,
   },
   groupRow: {
-    paddingLeft: 200,
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 4,

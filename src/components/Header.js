@@ -1,94 +1,108 @@
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native';
-import { COLORS } from "../styles/theme";
-import { Ionicons } from '@expo/vector-icons'
+import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity, useWindowDimensions} from 'react-native';
+import {COLORS} from "../styles/theme";
 
 export default function Header() {
-  return (
-    <View style={styles.container}>
-        
-        <Text style={styles.logo}>Logo</Text>
 
-        <View style={{ flexDirection: 'row' , alignItems: 'center', gap: 16}}>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Messages</Text>
-            </TouchableOpacity>
+    const {width} = useWindowDimensions();
+    const isSmallScreen = width < 768;
 
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Groups</Text>
-            </TouchableOpacity>
+    return (
+        <View style={styles.container}>
 
-            <View style={styles.searchContainer}>
-                <Ionicons name="search" size={16} color="#999" style={styles.searchIcon} />
+            <Image source={require('../assets/logo.png')}
+                   style={[styles.logo, isSmallScreen && styles.logoSmallScreens]}></Image>
+
+            <View style={styles.leftContainer}>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Messages</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Groups</Text>
+                </TouchableOpacity>
+
+
                 <TextInput
-                    placeholder="Search..."
+                    placeholder="Search"
                     placeholderTextColor="#999"
                     style={styles.searchInput}
                 />
+
+                <TouchableOpacity style={styles.button}>
+                    <Image
+                        source={{uri: 'https://example.com/photos/ana.jpg'}}
+                        style={styles.profileImage}
+                    />
+                </TouchableOpacity>
+
             </View>
 
-
-            <Image
-                source={{ uri: 'https://example.com/photos/ana.jpg' }}
-                style={styles.profileImage}
-            />
         </View>
-
-
-
-    </View>
-  );
+    );
 }
 
 const styles = StyleSheet.create({
     container: {
         backgroundColor: COLORS.primary,
-        paddingHorizontal: 16,
+        paddingHorizontal: 14,
         paddingVertical: 12,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 8,
+        gap: 5,
+    },
+    leftContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 30
     },
     logo: {
-        color: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
+        marginLeft: 70,
+        width: 140,
+        height: 70,
     },
     searchContainer: {
         position: 'relative',
         marginHorizontal: 8,
     },
-
-    searchIcon: {
-        position: 'absolute',
-        left: 8,
-        top: '50%',
-        transform: [{ translateY: -8 }],
-    },
-
     searchInput: {
         backgroundColor: 'white',
         borderRadius: 15,
         paddingVertical: 6,
-        paddingLeft: 32,
+        paddingLeft: 10,
         paddingRight: 12,
-        fontSize: 14,
-        minWidth: 100,
+        fontSize: 18,
+        minWidth: 20,
     },
-
     button: {
-        paddingVertical: 6,
-        paddingHorizontal: 12
+        paddingVertical: 8,
+        paddingRight:20
     },
     buttonText: {
         color: 'white',
         fontWeight: '700',
+        fontSize: 24,
     },
     profileImage: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
+        width: 48,
+        height: 48,
+        borderRadius: 30,
         borderWidth: 1,
         borderColor: 'white',
     },
-    });
+    /*Small Screens*/
+    logoSmallScreens: {
+        width: 60,
+        height: 30,
+    },
+    searchInputSmallScreens: {
+        fontSize: 14,
+    },
+    buttonTextSmallScreens: {
+        fontSize: 16,
+    },
+    profileImageSmallScreens: {
+        width: 36,
+        height: 36,
+    },
+});

@@ -15,7 +15,7 @@ export default function ProfileScreen() {
             <Calendar/>
             <Form/>
             <MeetingMap/>
-            <DoneButton style={{bottom:80, right:120}}/>
+            <DoneButton style={{bottom:80, right:120}}/>                  
 
 
         </View>
