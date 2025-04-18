@@ -5,7 +5,7 @@ import {
     StyleSheet,
     ScrollView,
     TouchableOpacity,
-    useWindowDimensions, Alert
+    useWindowDimensions,
 } from 'react-native';
 import initialData from '../data/initial_data';
 import Header from '../components/Header';
@@ -16,6 +16,7 @@ export default function HomeScreen() {
     const [myAvailabilities, setMyAvailabilities] = useState({});
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
     // Define the logged user (for now)
+    // TODO: put this in App.js and send as a prop
     const loggedUserId = 1;
 
     // This was an attempt to make web and mobile, if I have time to adapt I will, for now will do the figma first
@@ -33,8 +34,7 @@ export default function HomeScreen() {
         // Map the array to enrichedAvailabilities in the format needed for now
         const enrichedAvailabilities = availabilitiesArray.map((availability) => {
             const user = initialData.users[availability.user_id];
-            // If you have multiple roles per user, adapt the logic as needed:
-            const role = Object.values(initialData.roles).find(r => r.user_id === user?.id);
+            const role = initialData.roles[availability.role_id];
             const group = initialData.groups[availability.group_id];
 
             return {
@@ -81,7 +81,7 @@ export default function HomeScreen() {
                             <TouchableOpacity
                                 key={item.id}
                                 onPress={() =>
-                                    Alert.alert('Availability Details', 'Here we go to Availability Details')
+                                    alert('Here we go to Availability Details')
                                 }
                             >
                                 <AvailabilityCard
@@ -101,7 +101,11 @@ export default function HomeScreen() {
                         <Text style={styles.sectionTitle}>Others Availabilities</Text>
 
                         {Object.values(otherAvailabilities).map(item => (
-                            <TouchableOpacity>
+                            <TouchableOpacity
+                                key={item.id}
+                                onPress={() =>
+                                alert('Here we go to Availability Details')
+                            }>
                                 <AvailabilityCard
                                     key={item.id}
                                     name={item.userName}
@@ -127,13 +131,28 @@ export default function HomeScreen() {
 
             {isMenuOpen && (
                 <View style={styles.menu}>
-                    <TouchableOpacity style={styles.menuItem}>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() =>
+                            alert('Create Chat')
+                        }
+                    >
                         <Text style={styles.menuText}>Create Chat</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem}>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() =>
+                            alert('Create Group')
+                        }
+                    >
                         <Text style={styles.menuText}>Create Group</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem}>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() =>
+                            alert('Create Availability')
+                        }
+                    >
                         <Text style={styles.menuText}>Create Availability</Text>
                     </TouchableOpacity>
                 </View>

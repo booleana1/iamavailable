@@ -8,16 +8,32 @@ export default function Header() {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity
+                onPress={() =>
+                    alert('HomeScreen')
+                }>
+                <Image source={require('../assets/logo.png')}
+                       style={[styles.logo, isSmallScreen && styles.logoSmallScreens]
+                }></Image>
+            </TouchableOpacity>
 
-            <Image source={require('../assets/logo.png')}
-                   style={[styles.logo, isSmallScreen && styles.logoSmallScreens]}></Image>
 
             <View style={styles.leftContainer}>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() =>
+                        alert('Messages')
+                    }
+                >
                     <Text style={styles.buttonText}>Messages</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() =>
+                        alert('Groups')
+                    }
+                >
                     <Text style={styles.buttonText}>Groups</Text>
                 </TouchableOpacity>
 
@@ -28,7 +44,12 @@ export default function Header() {
                     style={styles.searchInput}
                 />
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() =>
+                        alert('Profile')
+                    }
+                >
                     <Image
                         source={{uri: 'https://example.com/photos/ana.jpg'}}
                         style={styles.profileImage}
@@ -76,7 +97,7 @@ const styles = StyleSheet.create({
     },
     button: {
         paddingVertical: 8,
-        paddingRight:20
+        paddingRight: 20
     },
     buttonText: {
         color: 'white',
