@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { COLORS } from '../styles/theme';
 import CancelSaveButtons from "./CancelSaveButtons";
+import {SETTINGS} from "../styles/settings";
 import {GLOBAL} from "../styles/global";
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
@@ -94,9 +95,9 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
 
 
     return (
-        <ScrollView contentContainerStyle={GLOBAL.settings_container}>
-            <Text style={GLOBAL.title}>Notifications</Text>
-            <Text style={GLOBAL.description}>
+        <ScrollView contentContainerStyle={SETTINGS.container}>
+            <Text style={SETTINGS.title}>Notifications</Text>
+            <Text style={SETTINGS.description}>
                 Search for the groups, roles, or users you want to receive notifications.
             </Text>
 
@@ -119,17 +120,17 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
 
                             {/* SUGGESTION */}
                             {suggestions.length > 0 && (
-                                <View style={styles.suggestionsBox}>
+                                <View style={GLOBAL.suggestionsBox}>
                                     {suggestions.map(item => (
                                         <TouchableOpacity
                                             key={item.id}
-                                            style={styles.suggestionRow}
+                                            style={GLOBAL.suggestionRow}
                                             onPress={() => {
                                                 toggleItem(key, item.id, true);
                                                 setInputs(prev => ({ ...prev, [key]: '' }));
                                             }}
                                         >
-                                            <Text style={styles.suggestionText}>{item.name}</Text>
+                                            <Text style={GLOBAL.suggestionText}>{item.name}</Text>
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -198,23 +199,7 @@ const styles = StyleSheet.create({
         borderColor: '#c2c2c2',
         borderWidth: 1,
     },
-    suggestionsBox: {
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#dcdcdc',
-        borderRadius: 6,
-        marginTop: 4,
-        marginBottom: 20,
-        maxHeight: 120,
-    },
-    suggestionRow: {
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-    },
-    suggestionText: {
-        fontSize: 13,
-        color: COLORS.text,
-    },
+
     subscribedLabel: {
         height: 20,
         fontSize: 16,

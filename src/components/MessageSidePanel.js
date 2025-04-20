@@ -18,7 +18,7 @@ export const NEW_CHAT = "__NEW_CHAT__";
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SidePanelChat = ({ selected, onChange, loggedUserId, data }) => {
+const MessageSidePanel = ({ selected, onChange, loggedUserId, data }) => {
     const [query, setQuery] = useState("");
 
     const handleSelect = useCallback(
@@ -102,7 +102,7 @@ const SidePanelChat = ({ selected, onChange, loggedUserId, data }) => {
     );
 };
 
-export default SidePanelChat;
+export default MessageSidePanel;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

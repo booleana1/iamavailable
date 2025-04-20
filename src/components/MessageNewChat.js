@@ -1,22 +1,24 @@
 import React, { useState, useMemo } from "react";
 import {View, TextInput, TouchableOpacity, Text, StyleSheet, FlatList} from "react-native";
 import { COLORS } from "../styles/theme";
-import initialData from '../data/initial_data';
+import {GLOBAL} from "../styles/global";
+
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const NewChat = ({ onStart }) => {
+const MessageNewChat = ({ onStart, dataUser }) => {
     const [query, setQuery] = useState("");
 
     // compute suggestions from initialData.users
     const suggestions = useMemo(() => {
         if (!query.trim()) return [];
         const q = query.toLowerCase();
-        return Object.values(initialData.users)
+        return Object.values(dataUser)
             .filter(u =>
                 u.name.toLowerCase().includes(q)
             )
-            .slice(0, 5); // limit to first 5
-    }, [query]);
+            .slice(0, 5);
+        // limit to first 5
+    }, [query, dataUser]);
 
     const handleSelect = (username) => {
         setQuery(username);
@@ -43,16 +45,16 @@ const NewChat = ({ onStart }) => {
                     onChangeText={setQuery}
                 />
                 {suggestions.length > 0 && (
-                    <View style={styles.suggestionsBox}>
+                    <View style={GLOBAL.suggestionsBox}>
                         <FlatList
                             data={suggestions}
                             keyExtractor={item => String(item.id)}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
-                                    style={styles.suggestionRow}
+                                    style={GLOBAL.suggestionRow}
                                     onPress={() => handleSelect(item.name)}
                                 >
-                                    <Text style={styles.suggestionText}>{item.name}</Text>
+                                    <Text style={GLOBAL.suggestionText}>{item.name}</Text>
                                 </TouchableOpacity>
                             )}
                         />
@@ -67,7 +69,7 @@ const NewChat = ({ onStart }) => {
     );
 };
 
-export default NewChat;
+export default MessageNewChat;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
@@ -92,24 +94,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.white,
         color: COLORS.text,
     },
-    suggestionsBox: {
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: COLORS.gray,
-        borderRadius: 6,
-        marginTop: 4,
-        marginBottom: 20,
-        maxHeight: 120,
-        width: '100%',
-    },
-    suggestionRow: {
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-    },
-    suggestionText: {
-        fontSize: 13,
-        color: COLORS.text,
-    },
+
     button: {
         width: '100%',
         marginTop: 16,

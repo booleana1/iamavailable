@@ -30,6 +30,7 @@ export default function App() {
             />}
             {selected === 'MessageScreen' && <MessageScreen loggedUserId={loggedUserId}
                                                             data={initialData.private_messages}
+                                                            dataUsers={initialData.users}
             />}
             {selected === 'SettingScreen' && <SettingsScreen loggedUserId={loggedUserId}
                                                              dataGroups={initialData.groups}

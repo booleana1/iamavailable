@@ -13,7 +13,7 @@ const formatHour = (dateString) => {
 }
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const AvailabilityCard = ({name, role, group, location, start, end}) => {
+const HomeAvailabilityCard = ({name, role, group, location, start, end}) => {
     return (
         <View style={styles.card}>
             <View>
@@ -45,7 +45,7 @@ const AvailabilityCard = ({name, role, group, location, start, end}) => {
     );
 }
 
-export default AvailabilityCard;
+export default HomeAvailabilityCard;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

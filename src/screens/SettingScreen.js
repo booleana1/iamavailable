@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
-import SidePanelSettings from '../components/SidePanelSettings';
+import SettingsSidePanel from '../components/SettingsSidePanel';
 import SettingsAccount from '../components/SettingsAccount';
 import SettingsSecurity from '../components/SettingsSecurity';
 import SettingsNotifications from '../components/SettingsNotifications';
@@ -28,7 +28,7 @@ export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dat
         <View style={styles.container}>
 
             <View style={styles.body}>
-                <SidePanelSettings selected={selected} onChange={setSelected}/>
+                <SettingsSidePanel selected={selected} onChange={setSelected}/>
 
                 <View style={styles.content}>
                     {selected === 'Account' && <SettingsAccount loggedUserId={loggedUserId}

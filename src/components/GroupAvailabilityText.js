@@ -5,7 +5,7 @@ import { COLORS } from "../styles/theme";
 import IconPressButton from "./IconPressButton";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const AvailabilityText = ({ name, date, time }) => {
+const GroupAvailabilityText = ({ name, date, time }) => {
     const [yesCount, setYesCount] = useState(0);
     const [noCount, setNoCount] = useState(0);
     const [userVoted, setUserVoted] = useState("");
@@ -68,7 +68,7 @@ const AvailabilityText = ({ name, date, time }) => {
     );
 };
 
-export default AvailabilityText;
+export default GroupAvailabilityText;
 
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //

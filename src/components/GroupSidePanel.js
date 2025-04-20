@@ -37,7 +37,7 @@ const filterGroups = (groups, query) => {
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
+const GroupSidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
     const [query, setQuery] = useState("");
     const [myGroups, setMyGroups] = useState([]);
     const [otherGroups, setOtherGroups] = useState([]);
@@ -137,11 +137,10 @@ const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGro
     );
 };
 
-export default SidePanelGroups;
+export default GroupSidePanel;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
-
     sectionHeader: {
         paddingHorizontal: 16,
         paddingVertical: 8,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import AvailabilityCard from '../components/AvailabilityCard';
+import HomeAvailabilityCard from '../components/HomeAvailabilityCard';
 import {COLORS} from "../styles/theme";
 
 export default function HomeScreen({loggedUserId, dataAvailabilities, dataUsers, dataRoles,dataGroups}) {
@@ -65,7 +65,7 @@ export default function HomeScreen({loggedUserId, dataAvailabilities, dataUsers,
                                     alert('Here we go to Availability Details')
                                 }
                             >
-                                <AvailabilityCard
+                                <HomeAvailabilityCard
                                     name={item.userName}
                                     role={item.roleName}
                                     group={item.groupName}
@@ -87,7 +87,7 @@ export default function HomeScreen({loggedUserId, dataAvailabilities, dataUsers,
                                 onPress={() =>
                                 alert('Here we go to Availability Details')
                             }>
-                                <AvailabilityCard
+                                <HomeAvailabilityCard
                                     key={item.id}
                                     name={item.userName}
                                     role={item.roleName}

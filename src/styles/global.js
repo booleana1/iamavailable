@@ -1,24 +1,25 @@
-import { StyleSheet } from 'react-native';
-import { SIZES, COLORS, FONTS } from './theme';
+import {StyleSheet, Text, View} from 'react-native'
+import React from 'react'
+import {COLORS} from "./colors";
+
 
 export const GLOBAL = StyleSheet.create({
-  settings_container: {
-    paddingHorizontal: 30,
-    paddingTop: 20,
-  },
-  title: {
-    fontSize: 38,
-    fontWeight: 'bold',
-    color: COLORS.text,
-  },
-  subtitle: {
-    fontSize: 24,
-    color: COLORS.text,
-    marginTop: 40,
-  },
-  description: {
-    fontSize: 16,
-    color: COLORS.text,
-    marginVertical: 30,
-  },
-});
+    suggestionsBox: {
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#dcdcdc',
+        borderRadius: 6,
+        marginTop: 4,
+        marginBottom: 20,
+        maxHeight: 120,
+        width: '100%',
+    },
+    suggestionRow: {
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+    },
+    suggestionText: {
+        fontSize: 13,
+        color: COLORS.text,
+    },
+})

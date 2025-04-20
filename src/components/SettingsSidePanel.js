@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../styles/theme';
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SidePanelSettings = ({selected, onChange}) => {
+const SettingsSidePanel = ({selected, onChange}) => {
     const OPTIONS = ['Account', 'Security', 'Notifications'];
 
     const handleSelect = useCallback(option => {
@@ -35,7 +35,7 @@ const SidePanelSettings = ({selected, onChange}) => {
     );
 };
 
-export default SidePanelSettings;
+export default SettingsSidePanel;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

@@ -2,6 +2,7 @@ import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity} from 'react-
 import {COLORS} from "../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
 import React, {useState} from "react";
+import {SIDEPANEL} from "../styles/sidepanel";
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const PAGES = {
@@ -47,12 +48,15 @@ export default function Header({onChange}) {
                 </TouchableOpacity>
 
                 {/* Search Bar */}
-                <TextInput
+                <View style={styles.searchContainer}>
+                    <Ionicons name="search" size={18} style={styles.searchIcon} />
+                    <TextInput
                     placeholder="Search"
                     placeholderTextColor="#999"
                     style={styles.searchInput}
                     onSubmitEditing={()=>alert("SearchScreen")}
                 />
+                </View>
 
                 {/* Profile (Settings for demo) */}
                 <TouchableOpacity
@@ -91,17 +95,25 @@ const styles = StyleSheet.create({
         height: 70,
     },
     searchContainer: {
-        position: 'relative',
-        marginHorizontal: 8,
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: 'white',
+        borderRadius: 20,
+        minWidth: 20,
+        height: 40,
+        marginHorizontal: 16,
+        paddingHorizontal: 12,
+    },
+    searchIcon: {
+        marginRight: 8,
+        color: COLORS.text,
     },
     searchInput: {
-        backgroundColor: 'white',
-        borderRadius: 15,
-        paddingVertical: 6,
+        paddingVertical: 0,
         paddingLeft: 10,
         paddingRight: 12,
         fontSize: 18,
-        minWidth: 20,
+
     },
     button: {
         paddingVertical: 8,

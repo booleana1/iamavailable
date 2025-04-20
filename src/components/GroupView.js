@@ -2,8 +2,9 @@ import React, {useState, useEffect} from "react";
 import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../styles/theme";
-import AvailabilityText from "./AvailabilityText";
+import GroupAvailabilityText from "./GroupAvailabilityText";
 import IconPressButton from "./IconPressButton";
+import {CHAT} from "../styles/chat";
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
 const getGroupMessages = (data, group) => {
@@ -68,8 +69,8 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
         if (item.type === "message") {
             const isOutgoing = item.sender_id === loggedUserId;
             return (
-                <View style={isOutgoing ? styles.outgoing : styles.incoming}>
-                    <Text style={isOutgoing ? styles.textOutgoing : styles.textIncoming}>
+                <View style={isOutgoing ? CHAT.outgoing : [CHAT.incoming,styles.incoming]}>
+                    <Text style={isOutgoing ? CHAT.messageTextOutgoing : [CHAT.messageTextIncoming, {color: COLORS.white}]}>
                         {item.content}
                     </Text>
                 </View>
@@ -80,19 +81,17 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
         const bubbleStyle = isOwner ? styles.outgoingAvailability : styles.incomingAvailability;
         return (
             <View style={bubbleStyle}>
-                <AvailabilityText
+                <GroupAvailabilityText
                     name={item.name}
                     date={item.start_date.slice(0, 10).split("-").reverse().join("/")}
                     time={item.start_date.slice(11, 16)}
-                    yesCount={item.yesCount}
-                    noCount={item.noCount}
                 />
             </View>
         );
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[CHAT.container, styles.container]}>
             {isOwner &&
                 <View style={styles.groupHeader}>
                     <Text style={styles.title}>{group.name}</Text>
@@ -128,26 +127,26 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
                     contentContainerStyle={styles.list}
                 />
 
-                {isOwner && <View style={styles.inputContainer}>
+                {isOwner && <View style={CHAT.inputContainer}>
 
                     <IconPressButton
-                        styleTouchable={styles.iconButton}
+                        styleTouchable={CHAT.sendButton}
                         onPress={handleNewAvailability}
                         icon={"add-circle-outline"}
                         size={36}
                         color={COLORS.primary}
                     />
                     <TextInput
-                        style={styles.input}
+                        style={CHAT.input}
                         value={text}
                         onChangeText={setText}
                         placeholder="Write your message"
                     />
-                    <IconPressButton styleTouchable={styles.iconButton} onPress={handleSendMessage}
+                    <IconPressButton styleTouchable={CHAT.sendButton} onPress={handleSendMessage}
                                      icon={"send-outline"} size={28} color={COLORS.primary}/>
                 </View>}
-                {!isOwner && <View style={styles.inputContainer}>
-                    <View style={[styles.input, {alignItems: "center", justifyContent: "center"}]}>
+                {!isOwner && <View style={CHAT.inputContainer}>
+                    <View style={[CHAT.input, {alignItems: "center", justifyContent: "center"}]}>
                         <Text style={{color: "#777"}}>Only the administrator can write in this group</Text>
                     </View>
                 </View>}
@@ -163,8 +162,6 @@ export default GroupChatView;
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
         padding: 8,
     },
     groupHeader: {
@@ -190,24 +187,6 @@ const styles = StyleSheet.create({
     list: {
         padding: 16
     },
-    incoming: {
-        alignSelf: "flex-start",
-        backgroundColor: COLORS.primary,
-        borderRadius: 30,
-        marginVertical: 4,
-        padding: 12,
-        paddingHorizontal: 20,
-        maxWidth: "80%"
-    },
-    outgoing: {
-        alignSelf: "flex-end",
-        backgroundColor: COLORS.primary,
-        borderRadius: 30,
-        marginVertical: 4,
-        padding: 12,
-        paddingHorizontal: 20,
-        maxWidth: "80%"
-    },
     incomingAvailability: {
         alignSelf: "flex-start",
         marginVertical: 4,
@@ -218,31 +197,9 @@ const styles = StyleSheet.create({
         marginVertical: 4,
         maxWidth: "80%"
     },
-    textIncoming: {
-        color: COLORS.white,
-        fontSize: 14
-    },
-    textOutgoing: {
-        color: COLORS.white,
-        fontSize: 14
-    },
-    inputContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 8,
-        width: "80%",
-        alignSelf: "center",
-    },
-    input: {
-        flex: 1,
-        height: 40,
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        backgroundColor: COLORS.gray,
-        color: COLORS.text,
-    },
-    iconButton: {
-        marginLeft: 8,
-        padding: 4
+    incoming:{
+        backgroundColor: COLORS.primary,
     }
+
+
 });

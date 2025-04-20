@@ -3,10 +3,10 @@ import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "rea
 import {COLORS} from "../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
 import IconPressButton from "./IconPressButton";
-
+import {CHAT} from "../styles/chat";
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
-const getChatMessages = (data, userId, loggedUserId) =>{
+const getChatMessages = (data, userId, loggedUserId) => {
     return Object.values(data)
         .filter(
             (m) =>
@@ -17,12 +17,12 @@ const getChatMessages = (data, userId, loggedUserId) =>{
 }
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const ChatWindow = ({userId, loggedUserId, data}) => {
+const MessageChatWindow = ({userId, loggedUserId, data}) => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
 
     useEffect(() => {
-        const msgs = getChatMessages(data,userId, loggedUserId);
+        const msgs = getChatMessages(data, userId, loggedUserId);
         setMessages(msgs);
     }, [userId, data]);
 
@@ -41,21 +41,22 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
 
     // compare if the sender ID is the logged user or not
     const renderItem = ({item}) => (
-        <View style={item.sender_id === loggedUserId ? styles.outgoing : styles.incoming}>
-            <Text style={item.sender_id === loggedUserId ? styles.messageTextOutgoing: styles.messageTextIncoming}>{item.content}</Text>
+        <View style={item.sender_id === loggedUserId ? CHAT.outgoing : [CHAT.incoming,styles.incoming]}>
+            <Text
+                style={item.sender_id === loggedUserId ? CHAT.messageTextOutgoing : CHAT.messageTextIncoming}>{item.content}</Text>
         </View>
     );
 
     return (
-        <View style={styles.container}>
+        <View style={[CHAT.container, styles.container]}>
             <FlatList
                 data={messages}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={renderItem}
             />
-            <View style={styles.inputContainer}>
+            <View style={[CHAT.inputContainer, {padding: 30}]}>
                 <TextInput
-                    style={styles.input}
+                    style={CHAT.input}
                     value={text}
                     onChangeText={setText}
                     placeholder="Write your message"
@@ -64,7 +65,7 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
                     icon="send-outline"
                     color={COLORS.primary}
                     size={30}
-                    styleTouchable={styles.sendButton}
+                    styleTouchable={CHAT.sendButton}
                     onPress={handleSend}
                 />
             </View>
@@ -72,55 +73,13 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
     );
 };
 
-export default ChatWindow;
+export default MessageChatWindow;
 
-// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         padding: 30,
-        backgroundColor: "#fff"
     },
     incoming: {
-        alignSelf: "flex-start",
         backgroundColor: COLORS.gray,
-        borderRadius: 30,
-        marginVertical: 4,
-        padding: 12,
-        paddingHorizontal:20,
-        maxWidth: "80%"
-    },
-    outgoing: {
-        alignSelf: "flex-end",
-        backgroundColor: COLORS.primary,
-        borderRadius: 30,
-        marginVertical: 4,
-        padding: 12,
-        paddingHorizontal:20,
-        maxWidth: "80%"
-
-    },
-    messageTextIncoming: {
-        color: COLORS.text,
-        fontSize: 14
-    },
-    messageTextOutgoing: {
-        color: COLORS.white,
-        fontSize: 14
-    },
-    inputContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 8,
-    },
-    input: {
-        flex: 1,
-        height: 40,
-        borderRadius: 20,
-        paddingHorizontal: 18,
-        backgroundColor: COLORS.gray,
-        color: COLORS.text,
-    },
-    sendButton: {marginLeft: 8, padding: 8},
-
-});
+    }
+})

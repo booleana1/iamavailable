@@ -1,31 +1,31 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import SidePanelChat, { NEW_CHAT } from "../components/SidePanelChat";
+import MessageSidePanel, { NEW_CHAT } from "../components/MessageSidePanel";
 import EmptyState from "../components/EmptyState";
-import NewChat from "../components/NewChat";
-import ChatWindow from "../components/ChatWindow";
+import MessageNewChat from "../components/MessageNewChat";
+import MessageChatWindow from "../components/MessageChatWindow";
 import { COLORS } from "../styles/theme";
 
-const MessageScreen = ({loggedUserId, data}) => {
+const MessageScreen = ({loggedUserId, data, dataUsers}) => {
 
     const [selected, setSelected] = useState(null);
 
     const renderContent = () => {
         if (selected === NEW_CHAT) {
-            return <NewChat onStart={(userId) => setSelected(userId)} />;
+            return <MessageNewChat onStart={(userId) => setSelected(userId)} dataUser={dataUsers} />;
         }
         if (selected == null) {
             return <EmptyState />;
         }
         // userId -> secondary user | loggedUserId -> main user
-        return <ChatWindow userId={selected} loggedUserId={loggedUserId} data={data} />;
+        return <MessageChatWindow userId={selected} loggedUserId={loggedUserId} data={data} />;
     };
 
     return (
         <View style={styles.container}>
 
         <View style={styles.body}>
-                <SidePanelChat selected={selected} onChange={setSelected} loggedUserId={loggedUserId} data={data} />
+                <MessageSidePanel selected={selected} onChange={setSelected} loggedUserId={loggedUserId} data={data} />
                 <View style={styles.content}>{renderContent()}</View>
             </View>
         </View>

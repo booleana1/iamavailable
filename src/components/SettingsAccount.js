@@ -4,7 +4,7 @@ import {COLORS} from '../styles/theme';
 import AvatarPicker from './AvatarPicker';
 import CancelSaveButtons from "./CancelSaveButtons";
 import InputField from "./InputField";
-import {GLOBAL} from "../styles/global";
+import {SETTINGS} from "../styles/settings";
 
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
@@ -86,10 +86,10 @@ const SettingsAccount = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, o
     };
 
     return (
-        <ScrollView contentContainerStyle={GLOBAL.settings_container}>
-            <Text style={GLOBAL.title}>Account</Text>
-            <Text style={GLOBAL.subtitle}>Profile</Text>
-            <Text style={GLOBAL.description}>
+        <ScrollView contentContainerStyle={SETTINGS.container}>
+            <Text style={SETTINGS.title}>Account</Text>
+            <Text style={SETTINGS.subtitle}>Profile</Text>
+            <Text style={SETTINGS.description}>
                 This information will be displayed publicly so be careful what you share
             </Text>
 

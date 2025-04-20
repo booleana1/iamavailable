@@ -10,7 +10,7 @@ import {
 import { COLORS } from '../styles/theme';
 import CancelSaveButtons from "./CancelSaveButtons";
 import InputField from "./InputField";
-import {GLOBAL} from "../styles/global";
+import {SETTINGS} from "../styles/settings";
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
@@ -31,10 +31,10 @@ const SettingsSecurity = ({loggedUserId}) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={GLOBAL.settings_container}>
-            <Text style={GLOBAL.title}>Security</Text>
-            <Text style={GLOBAL.subtitle}>Password</Text>
-            <Text style={GLOBAL.description}>Protect your privacy</Text>
+        <ScrollView contentContainerStyle={SETTINGS.container}>
+            <Text style={SETTINGS.title}>Security</Text>
+            <Text style={SETTINGS.subtitle}>Password</Text>
+            <Text style={SETTINGS.description}>Protect your privacy</Text>
 
             <View style={styles.formWrapper}>
                 <InputField
