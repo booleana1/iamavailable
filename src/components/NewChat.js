@@ -3,6 +3,7 @@ import {View, TextInput, TouchableOpacity, Text, StyleSheet, FlatList} from "rea
 import { COLORS } from "../styles/theme";
 import initialData from '../data/initial_data';
 
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const NewChat = ({ onStart }) => {
     const [query, setQuery] = useState("");
 
@@ -68,6 +69,7 @@ const NewChat = ({ onStart }) => {
 
 export default NewChat;
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
         flex: 1,

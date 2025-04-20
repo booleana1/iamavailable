@@ -2,19 +2,27 @@ import React, {useState, useEffect} from "react";
 import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
 import {COLORS} from "../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
+import IconPressButton from "./IconPressButton";
 
+
+// ─────────────────────────────── UTILS ─────────────────────────────── //
+const getChatMessages = (data, userId, loggedUserId) =>{
+    return Object.values(data)
+        .filter(
+            (m) =>
+                (m.sender_id === userId && m.receiver_id === loggedUserId) ||
+                (m.sender_id === loggedUserId && m.receiver_id === userId)
+        )
+        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+}
+
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const ChatWindow = ({userId, loggedUserId, data}) => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
 
     useEffect(() => {
-        const msgs = Object.values(data)
-            .filter(
-                (m) =>
-                    (m.sender_id === userId && m.receiver_id === loggedUserId) ||
-                    (m.sender_id === loggedUserId && m.receiver_id === userId)
-            )
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const msgs = getChatMessages(data,userId, loggedUserId);
         setMessages(msgs);
     }, [userId, data]);
 
@@ -31,10 +39,9 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
         setText("");
     };
 
+    // compare if the sender ID is the logged user or not
     const renderItem = ({item}) => (
-        <View
-            style={item.sender_id === loggedUserId ? styles.outgoing : styles.incoming}
-        >
+        <View style={item.sender_id === loggedUserId ? styles.outgoing : styles.incoming}>
             <Text style={item.sender_id === loggedUserId ? styles.messageTextOutgoing: styles.messageTextIncoming}>{item.content}</Text>
         </View>
     );
@@ -53,9 +60,13 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
                     onChangeText={setText}
                     placeholder="Write your message"
                 />
-                <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-                    <Ionicons name="send-outline" size={30}/>
-                </TouchableOpacity>
+                <IconPressButton
+                    icon="send-outline"
+                    color={COLORS.primary}
+                    size={30}
+                    styleTouchable={styles.sendButton}
+                    onPress={handleSend}
+                />
             </View>
         </View>
     );
@@ -63,6 +74,7 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
 
 export default ChatWindow;
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -110,5 +122,5 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     sendButton: {marginLeft: 8, padding: 8},
-    sendText: {color: COLORS.primary, fontSize: 16},
+
 });

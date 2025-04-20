@@ -3,59 +3,63 @@ import {COLORS} from "../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
 import React, {useState} from "react";
 
-export default function Header({ onChange }) {
+// ─────────────────────────────── CONSTANT ─────────────────────────────── //
+const PAGES = {
+    HOME: "HomeScreen",
+    MESSAGES: "MessageScreen",
+    GROUPS: "GroupScreen",
+    SETTINGS: "SettingScreen",
+};
+
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
+export default function Header({onChange}) {
     // TODO: change navigability
 
+    // this page/setPage is used to underline or not "Messages" and "Groups" on header
     const [page, setPage] = useState('');
+
+    const handlePageChange = (p) => {
+        onChange(p);
+        setPage(p);
+    }
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity
-                onPress={() =>{
-                    onChange('HomeScreen')
-                    setPage('HomeScreen')
-                }}>
+            {/* Logo */}
+            <TouchableOpacity onPress={() => handlePageChange(PAGES.HOME)}>
                 <Image source={require('../assets/logo.png')} style={styles.logo}></Image>
             </TouchableOpacity>
 
 
             <View style={styles.leftContainer}>
+                {/* Messages */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() =>{
-                        onChange('MessageScreen')
-                        setPage('MessageScreen')
-                    }}
-                >
-                    <Text style={[styles.buttonText, page ==='MessageScreen' && styles.selected]}>Messages</Text>
+                    onPress={() => handlePageChange(PAGES.MESSAGES)}>
+                    <Text style={[styles.buttonText, page === PAGES.MESSAGES && styles.selected]}>Messages</Text>
                 </TouchableOpacity>
 
+                {/* Groups */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() =>{
-                        onChange('GroupScreen')
-                        setPage('GroupScreen')
-                    }}
-                >
-                    <Text style={[styles.buttonText, page ==='GroupScreen' && styles.selected]}>Groups</Text>
+                    onPress={() => handlePageChange(PAGES.GROUPS)}>
+                    <Text style={[styles.buttonText, page === PAGES.GROUPS && styles.selected]}>Groups</Text>
                 </TouchableOpacity>
 
-
+                {/* Search Bar */}
                 <TextInput
                     placeholder="Search"
                     placeholderTextColor="#999"
                     style={styles.searchInput}
+                    onSubmitEditing={()=>alert("SearchScreen")}
                 />
 
+                {/* Profile (Settings for demo) */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() =>{
-                        onChange('SettingScreen')
-                        setPage('SettingScreen')
-                    }}
-                >
+                    onPress={() => handlePageChange(PAGES.SETTINGS)}>
                     <View style={styles.avatarWrapper}>
-                        <Ionicons name="person" size={24} />
+                        <Ionicons name="person" size={24}/>
                     </View>
                 </TouchableOpacity>
 
@@ -65,6 +69,7 @@ export default function Header({ onChange }) {
     );
 }
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
         backgroundColor: COLORS.primary,
@@ -107,7 +112,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         fontSize: 24,
     },
-    selected:{
+    selected: {
         textDecorationLine: 'underline',
     },
     profileImage: {
@@ -122,7 +127,7 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         borderWidth: 3,
-        borderColor:  COLORS.border,
+        borderColor: COLORS.border,
         alignItems: "center",
         justifyContent: "center",
         marginRight: 12,

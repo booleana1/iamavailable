@@ -1,8 +1,42 @@
-import React, {useState, useEffect, useCallback} from "react";
+
+// ─────────────────────────────── IMPORTS ─────────────────────────────── //
+import React, {useState, useEffect, useCallback, useMemo} from "react";
 import { View, TextInput, SectionList, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../styles/theme";
+import {SIDEPANEL} from "../styles/sidepanel";
 
+
+// ─────────────────────────────── UTILS ─────────────────────────────── //
+const getUserOwnedGroups = (groups, userId) => {
+    return Object.values(groups)
+        .filter((group) => group.user_id === userId)
+        .map((group) => ({
+            id: group.id,
+            name: group.name,
+        }));
+};
+
+const getUserMemberGroups = (groups, groupUsers, userId) => {
+    return Object.values(groupUsers)
+        .filter((gu) => gu.user_id === userId && gu.status === "approved")
+        .map((gu) => {
+            const group = groups[gu.group_id] || Object.values(groups).find(g => g.id === gu.group_id);
+            return group ? { id: group.id, name: group.name } : null;
+        })
+        .filter(Boolean);
+};
+
+const filterGroups = (groups, query) => {
+    return groups
+        .filter((g) =>
+            g.name?.toLowerCase().includes(query.toLowerCase())
+        )
+        .sort((a, b) => a.name.localeCompare(b.name));
+};
+
+
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
     const [query, setQuery] = useState("");
     const [myGroups, setMyGroups] = useState([]);
@@ -19,58 +53,47 @@ const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGro
     // Get groups the user is in, wither by being main actor, or secondary actor
     useEffect(() => {
         // groups the user owns
-        const myData = Object.values(dataGroups)
-                                    .filter((group) =>
-                                        group.user_id === loggedUserId
-                                    )
-                                    .map((group) => {
-                                        return {
-                                            id: group.id,
-                                            name: group.name,
-                                        }
-                                    })
+        const myData = getUserOwnedGroups(dataGroups,loggedUserId);
 
         // groups user is a member
-        const otherData = Object.values(dataGroupUsers)
-            .filter((group) =>
-                group.user_id === loggedUserId &&
-                group.status === "approved"
-            )
-            .map((group) => {
-                return {
-                    id: group.group_id,
-                    name: Object.values(dataGroups)
-                        .filter((g) => g.id === group.group_id)
-                        .map((gr) => gr.name),
-                }
-            })
+        const otherData = getUserMemberGroups(dataGroups,dataGroupUsers,loggedUserId);
+
         setMyGroups(myData);
         setOtherGroups(otherData);
+
     }, [loggedUserId,dataGroups,dataGroupUsers]);
 
+    // Apply search filter, and sort by name
+    const filteredMyGroups = useMemo(() => {
+        return filterGroups(myGroups,query);
+    }, [myGroups, query]);
+
+    const filteredOtherGroups = useMemo(() => {
+        return filterGroups(otherGroups,query);
+    }, [otherGroups, query]);
 
     // render group icon and name
     const renderItem = ({ item }) => {
         const isActive = selected === item.id;
         return (
             <TouchableOpacity
-                style={[styles.item, isActive && styles.itemSelected]}
+                style={[SIDEPANEL.item, isActive && SIDEPANEL.itemSelected]}
                 onPress={() => handleSelect(item.id)}
                 activeOpacity={0.6}
             >
                 {/*TODO: when doing backend put group avatar here*/}
-                <View style={styles.avatarWrapper}>
+                <View style={SIDEPANEL.avatarWrapper}>
                     <Ionicons name="people" size={24} />
                 </View>
-                <Text style={styles.name}>{item.name}</Text>
+                <Text style={SIDEPANEL.name}>{item.name}</Text>
             </TouchableOpacity>
         );
     };
 
     // define sections
     const sections = [
-        { title: "My Groups", data: myGroups },
-        { title: "Other Groups", data: otherGroups },
+        { title: "My Groups", data: filteredMyGroups },
+        { title: "Other Groups", data: filteredOtherGroups },
     ];
 
     // render section header
@@ -79,12 +102,12 @@ const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGro
     );
 
     return (
-        <View style={styles.container}>
+        <View style={SIDEPANEL.container}>
             {/* Search bar */}
-            <View style={styles.searchContainer}>
-                <Ionicons name="search" size={18} style={styles.searchIcon} />
+            <View style={SIDEPANEL.searchContainer}>
+                <Ionicons name="search" size={18} style={SIDEPANEL.searchIcon} />
                 <TextInput
-                    style={styles.searchInput}
+                    style={SIDEPANEL.searchInput}
                     placeholder="Search groups"
                     value={query}
                     onChangeText={setQuery}
@@ -97,9 +120,9 @@ const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGro
                 keyExtractor={(item) => String(item.id)}
                 renderSectionHeader={renderSectionHeader}
                 renderItem={renderItem}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
+                ItemSeparatorComponent={() => <View style={SIDEPANEL.separator} />}
                 showsVerticalScrollIndicator={false}
-                style={styles.list}
+                style={SIDEPANEL.list}
             />
             {/* New group button */}
             <View style={styles.newGroupContainer}>
@@ -116,38 +139,9 @@ const SidePanelGroups = ({ selected, onChange, loggedUserId, dataGroups, dataGro
 
 export default SidePanelGroups;
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
-    container: {
-        width: 260,
-        height: '100%',
-        backgroundColor: COLORS.white,
-        borderRightWidth: 1,
-        borderRightColor: COLORS.border,
-        paddingTop: 12,
-    },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: COLORS.gray,
-        marginHorizontal: 16,
-        paddingHorizontal: 12,
-        marginBottom: 16,
-    },
-    searchIcon: {
-        marginRight: 8,
-        color: COLORS.text,
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 14,
-        paddingVertical: 0,
-        color: COLORS.text,
-    },
-    list: {
-        flex: 1,
-    },
+
     sectionHeader: {
         paddingHorizontal: 16,
         paddingVertical: 8,
@@ -155,34 +149,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: COLORS.text,
         backgroundColor: COLORS.background,
-    },
-    item: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-    itemSelected: {
-        backgroundColor: COLORS.lightBlue,
-    },
-    avatarWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 12,
-    },
-    name: {
-        fontSize: 16,
-        color: COLORS.text,
-    },
-    separator: {
-        height: 1,
-        backgroundColor: COLORS.border,
-        marginHorizontal: 16,
     },
     newGroupContainer: {
         alignItems: "center",

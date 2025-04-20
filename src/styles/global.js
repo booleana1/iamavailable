@@ -2,12 +2,23 @@ import { StyleSheet } from 'react-native';
 import { SIZES, COLORS, FONTS } from './theme';
 
 export const GLOBAL = StyleSheet.create({
-  container: {
-    flex: 1,
+  settings_container: {
+    paddingHorizontal: 30,
+    paddingTop: 20,
   },
   title: {
-    fontSize: SIZES.title, 
-    color: COLORS.text,    
-    fontFamily: FONTS.bold, 
+    fontSize: 38,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  subtitle: {
+    fontSize: 24,
+    color: COLORS.text,
+    marginTop: 40,
+  },
+  description: {
+    fontSize: 16,
+    color: COLORS.text,
+    marginVertical: 30,
   },
 });

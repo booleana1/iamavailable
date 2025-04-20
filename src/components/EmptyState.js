@@ -1,6 +1,7 @@
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import {Image, StyleSheet, View} from "react-native";
 
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const EmptyState = () => (
     <View style={styles.container}>
         <Image
@@ -13,6 +14,7 @@ const EmptyState = () => (
 
 export default EmptyState;
 
+// ─────────────────────────────── STYLE ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
         flex: 1,

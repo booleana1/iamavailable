@@ -1,6 +1,19 @@
+// ─────────────────────────────── IMPORTS ─────────────────────────────── //
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function AvailabilityCard({name, role, group, location, start, end}) {
+// ─────────────────────────────── UTILS ─────────────────────────────── //
+const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
+const formatHour = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+}
+
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
+const AvailabilityCard = ({name, role, group, location, start, end}) => {
     return (
         <View style={styles.card}>
             <View>
@@ -32,16 +45,9 @@ export default function AvailabilityCard({name, role, group, location, start, en
     );
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-}
+export default AvailabilityCard;
 
-function formatHour(dateString) {
-    const date = new Date(dateString);
-    return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-}
-
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
 
     card: {

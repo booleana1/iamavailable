@@ -3,7 +3,25 @@ import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "rea
 import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../styles/theme";
 import AvailabilityText from "./AvailabilityText";
+import IconPressButton from "./IconPressButton";
 
+// ─────────────────────────────── UTILS ─────────────────────────────── //
+const getGroupMessages = (data, group) => {
+    return Object.values(data)
+        .filter(m => m.group_id === group.id)
+        .map(m => ({...m, type: "message"}));
+}
+
+const getGroupAvailability = (data, group) => {
+    return Object.values(data)
+        .filter(av => av.group_id === group.id)
+        .map(av => ({
+            ...av,
+            type: "availability",
+        }));
+}
+
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabilities}) => {
     const [items, setItems] = useState([]);
     const [text, setText] = useState("");
@@ -12,16 +30,9 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
 
     // Load messages and availabilities for this group
     useEffect(() => {
-        const messages = Object.values(dataGroupMessages)
-            .filter(m => m.group_id === group.id)
-            .map(m => ({...m, type: "message"}));
+        const messages = getGroupMessages(dataGroupMessages, group);
 
-        const availabilities = Object.values(dataAvailabilities)
-            .filter(av => av.group_id === group.id)
-            .map(av => ({
-                ...av,
-                type: "availability",
-            }));
+        const availabilities = getGroupAvailability(dataAvailabilities, group);
 
         const combined = [...messages, ...availabilities]
             .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -96,11 +107,16 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
             {!isOwner &&
                 <View style={styles.groupHeader}>
                     <Text style={styles.title}>{group.name}</Text>
-                    <TouchableOpacity style={styles.iconHeader} onPress={() => {
-                        alert("Group members")
-                    }}>
-                        <Ionicons name={"people-outline"} size={30}/>
-                    </TouchableOpacity>
+
+                    <IconPressButton
+                        styleTouchable={styles.iconHeader}
+                        onPress={() => {
+                            alert("Group members")
+                        }}
+                        icon={"people-outline"}
+                        size={30}
+                        color={COLORS.text}
+                    />
 
                 </View>
             }
@@ -113,18 +129,22 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
                 />
 
                 {isOwner && <View style={styles.inputContainer}>
-                    <TouchableOpacity onPress={handleNewAvailability} style={styles.iconButton}>
-                        <Ionicons name="add-circle-outline" size={36} color={COLORS.primary}/>
-                    </TouchableOpacity>
+
+                    <IconPressButton
+                        styleTouchable={styles.iconButton}
+                        onPress={handleNewAvailability}
+                        icon={"add-circle-outline"}
+                        size={36}
+                        color={COLORS.primary}
+                    />
                     <TextInput
                         style={styles.input}
                         value={text}
                         onChangeText={setText}
                         placeholder="Write your message"
                     />
-                    <TouchableOpacity onPress={handleSendMessage} style={styles.iconButton}>
-                        <Ionicons name="send-outline" size={28} color={COLORS.primary}/>
-                    </TouchableOpacity>
+                    <IconPressButton styleTouchable={styles.iconButton} onPress={handleSendMessage}
+                                     icon={"send-outline"} size={28} color={COLORS.primary}/>
                 </View>}
                 {!isOwner && <View style={styles.inputContainer}>
                     <View style={[styles.input, {alignItems: "center", justifyContent: "center"}]}>
@@ -140,6 +160,7 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
 
 export default GroupChatView;
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -150,7 +171,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         position: "relative",
-        borderBottomWidth:1,
+        borderBottomWidth: 1,
         borderBottomColor: COLORS.text,
         paddingBottom: 8,
     },

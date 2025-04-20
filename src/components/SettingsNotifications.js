@@ -9,9 +9,13 @@ import {
     Switch,
 } from 'react-native';
 import { COLORS } from '../styles/theme';
+import CancelSaveButtons from "./CancelSaveButtons";
+import {GLOBAL} from "../styles/global";
 
+// ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const CATEGORY_KEYS = ['groups', 'roles', 'users'];
 
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers, onSave, onCancel }) => {
 
     const allItems = useMemo(() => {
@@ -90,17 +94,20 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
 
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Notifications</Text>
-            <Text style={styles.subtitle}>
+        <ScrollView contentContainerStyle={GLOBAL.settings_container}>
+            <Text style={GLOBAL.title}>Notifications</Text>
+            <Text style={GLOBAL.description}>
                 Search for the groups, roles, or users you want to receive notifications.
             </Text>
+
 
             <View style={styles.columnsWrapper}>
                 {CATEGORY_KEYS.map((key, idx) => {
                     const suggestions = getSuggestions(key, inputs[key]);
                     return (
                         <View key={key} style={styles.column}>
+
+                            {/* INPUT/SEARCH */}
                             <Text style={styles.columnTitle}>{{ groups: 'Groups', roles: 'Roles', users: 'Users' }[key]}:</Text>
                             <TextInput
                                 placeholder={key.slice(0, -1).replace(/^./, c => c.toUpperCase())}
@@ -110,7 +117,7 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
                                 style={styles.searchInput}
                             />
 
-                            {/* Suggestions */}
+                            {/* SUGGESTION */}
                             {suggestions.length > 0 && (
                                 <View style={styles.suggestionsBox}>
                                     {suggestions.map(item => (
@@ -134,7 +141,7 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
                                 <View style={styles.subscribedLabel} />
                             )}
 
-
+                            {/* TOGGLE LISTS */}
                             <View style={styles.card}>
                                 {formState[key]
                                     .filter(item => item.active || item.wasActive || item.touched) // show if previously active OR currently active
@@ -158,39 +165,16 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
                 })}
             </View>
 
-            <View style={styles.bottomContainer}>
-                <View style={styles.line} />
-                <View style={styles.buttonRow}>
-                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-                        <Text style={styles.cancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                        <Text style={styles.saveButtonText}>Save</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+            <CancelSaveButtons handleCancel={handleCancel} handleSave={handleSave} />
         </ScrollView>
     );
 };
 
 export default SettingsNotifications;
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 30,
-        paddingTop: 20,
-    },
-    title: {
-        fontSize: 38,
-        fontWeight: 'bold',
-        color: COLORS.text,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: COLORS.text,
-        marginTop: 30,
-        marginBottom: 40,
-    },
+
     columnsWrapper: {
         width: '90%',
         flexDirection: 'row',
@@ -267,46 +251,5 @@ const styles = StyleSheet.create({
         color: COLORS.success,
         fontWeight: '700',
     },
-    bottomContainer: {
-        width: '60%',
-        marginTop: 40,
-        alignItems: 'flex-end',
-    },
-    line: {
-        width: '100%',
-        height: 1,
-        backgroundColor: COLORS.gray,
-    },
-    buttonRow: {
-        width: '40%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 20,
-        marginTop: 40,
-    },
-    cancelButton: {
-        flex: 1,
-        borderColor: COLORS.gray,
-        borderRadius: 8,
-        borderWidth: 1,
-        paddingVertical: 12,
-        alignItems: 'center',
-    },
-    cancelButtonText: {
-        color: COLORS.text,
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    saveButton: {
-        flex: 1,
-        backgroundColor: COLORS.success,
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    saveButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
+
 });

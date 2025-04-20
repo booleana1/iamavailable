@@ -3,6 +3,7 @@ import {Image, Text, TouchableOpacity, StyleSheet, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../styles/theme';
 
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const AvatarPicker = ({ uri, onChange, size = 100 }) => {
     const [photoUri, setPhotoUri] = useState(uri);
 
@@ -55,6 +56,7 @@ const AvatarPicker = ({ uri, onChange, size = 100 }) => {
 
 export default AvatarPicker;
 
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
     wrapper: {
         flexDirection: 'row',

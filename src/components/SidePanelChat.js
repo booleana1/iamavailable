@@ -10,9 +10,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import initialData from "../data/initial_data";
 import { COLORS } from "../styles/theme";
+import { SIDEPANEL} from "../styles/sidepanel";
 
+
+// ─────────────────────────────── CONSTANT ─────────────────────────────── //
 export const NEW_CHAT = "__NEW_CHAT__";
 
+
+// ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const SidePanelChat = ({ selected, onChange, loggedUserId, data }) => {
     const [query, setQuery] = useState("");
 
@@ -48,25 +53,25 @@ const SidePanelChat = ({ selected, onChange, loggedUserId, data }) => {
         const isActive = selected === item.id;
         return (
             <TouchableOpacity
-                style={[styles.item, isActive && styles.itemSelected]}
+                style={[SIDEPANEL.item, isActive && SIDEPANEL.itemSelected]}
                 onPress={() => handleSelect(item.id)}
                 activeOpacity={0.6}
             >
-                <View style={styles.avatarWrapper}>
+                <View style={SIDEPANEL.avatarWrapper}>
                     <Ionicons name="person" size={24} />
                 </View>
-                <Text style={styles.name}>{item.name}</Text>
+                <Text style={SIDEPANEL.name}>{item.name}</Text>
             </TouchableOpacity>
         );
     };
 
     return (
-        <View style={styles.container}>
+        <View style={SIDEPANEL.container}>
             {/* Search bar */}
-            <View style={styles.searchContainer}>
-                <Ionicons name="search" size={18} style={styles.searchIcon} />
+            <View style={SIDEPANEL.searchContainer}>
+                <Ionicons name="search" size={18} style={SIDEPANEL.searchIcon} />
                 <TextInput
-                    style={styles.searchInput}
+                    style={SIDEPANEL.searchInput}
                     placeholder="Search contacts"
                     value={query}
                     onChangeText={setQuery}
@@ -78,9 +83,9 @@ const SidePanelChat = ({ selected, onChange, loggedUserId, data }) => {
                 data={contacts}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={renderItem}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
+                ItemSeparatorComponent={() => <View style={SIDEPANEL.separator} />}
                 showsVerticalScrollIndicator={false}
-                style={styles.list}
+                style={SIDEPANEL.list}
             />
 
             {/* New Chat button */}
@@ -99,66 +104,8 @@ const SidePanelChat = ({ selected, onChange, loggedUserId, data }) => {
 
 export default SidePanelChat;
 
-
+// ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({
-    container: {
-        width: 260,
-        backgroundColor: COLORS.white,
-        borderRightWidth: 1,
-        borderRightColor: COLORS.border,
-        paddingTop: 12,
-    },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: COLORS.gray,
-        marginHorizontal: 16,
-        paddingHorizontal: 12,
-        marginBottom: 16,
-    },
-    searchIcon: {
-        marginRight: 8,
-        color: COLORS.text,
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 14,
-        paddingVertical: 0,
-        color: COLORS.text,
-    },
-    list: {
-        flex: 1,
-    },
-    item: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-    itemSelected: {
-        backgroundColor: COLORS.lightBlue,
-    },
-    avatarWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor:  COLORS.border,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 12,
-    },
-    name: {
-        fontSize: 16,
-        color: COLORS.text,
-    },
-    separator: {
-        height: 1,
-        backgroundColor:  COLORS.border,
-        marginHorizontal: 16,
-    },
     newChatContainer: {
         alignItems: "center",
         paddingVertical: 12,
