@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import React from 'react';
+import { View, StyleSheet} from 'react-native';
 import Header from '../components/Header';
 import Calendar from '../components/Availability/CalendarComp';
 import Map from '../components/Availability/MeetingMap';

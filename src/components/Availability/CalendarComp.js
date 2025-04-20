@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, TextInput } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { FONTS, COLORS } from '../../styles/theme'; // Ajusta la ruta según tu estructura
+import { FONTS, COLORS } from '../../styles/theme'; 
 
 export default function CalendarComp() {
   const [selectedDate, setSelectedDate] = useState(null);
