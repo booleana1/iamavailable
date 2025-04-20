@@ -1,36 +1,84 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { COLORS, FONTS } from '../../styles/theme';
 
-export default function Forms() {
+const Forms = forwardRef((props, ref) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    role: '',
+    group: '',
+    link: '',
+  });
+
+  useImperativeHandle(ref, () => ({
+    getFormData() {
+      return formData;
+    },
+    clearForm() {
+      setFormData({
+        name: '',
+        role: '',
+        group: '',
+        link: '',
+      });
+    },
+  }));
+
+  const handleChange = (name, value) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
   return (
-    <View style={styles.container} behavior="padding">
-        <View style={styles.form}>
-          <Text style={styles.title}>Create a new Availability</Text>
+    <View style={styles.container}>
+      <View style={styles.form}>
+        <Text style={styles.title}>Create a new Availability</Text>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Name</Text>
-            <TextInput placeholder="Name" style={styles.input} />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Role</Text>
-            <TextInput placeholder="Role" style={styles.input} />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Group</Text>
-            <TextInput placeholder="Group" style={styles.input} />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Link (if online)</Text>
-            <TextInput placeholder="Link" style={styles.input} />
-          </View>
+        <View style={styles.field}>
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            placeholder="Name"
+            style={styles.input}
+            value={formData.name}
+            onChangeText={(text) => handleChange('name', text)}
+          />
         </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Role</Text>
+          <TextInput
+            placeholder="Role"
+            style={styles.input}
+            value={formData.role}
+            onChangeText={(text) => handleChange('role', text)}
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Group</Text>
+          <TextInput
+            placeholder="Group"
+            style={styles.input}
+            value={formData.group}
+            onChangeText={(text) => handleChange('group', text)}
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Link (if online)</Text>
+          <TextInput
+            placeholder="Link"
+            style={styles.input}
+            value={formData.link}
+            onChangeText={(text) => handleChange('link', text)}
+          />
+        </View>
+      </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -39,18 +87,17 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 150,
     top: 100,
-    backgroundColor: COLORS.background, 
+    backgroundColor: COLORS.background,
   },
   form: {
-    width: '100%', 
-    padding: 20, 
-    backgroundColor: 'white', 
-
+    width: '100%',
+    padding: 20,
+    backgroundColor: 'white',
   },
   title: {
     fontSize: 30,
     fontFamily: FONTS.bold,
-    textAlign: 'center', 
+    textAlign: 'center',
     marginBottom: 40,
   },
   field: {
@@ -59,7 +106,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 20,
     fontFamily: FONTS.regular,
-    marginLeft:'12.5%',
+    marginLeft: '12.5%',
     marginBottom: 8,
     textAlign: 'left',
   },
@@ -70,7 +117,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.gray,
     paddingLeft: 12,
-    marginLeft:'12.5%',
+    marginLeft: '12.5%',
     fontFamily: FONTS.regular,
   },
 });
+
+export default Forms;

@@ -1,11 +1,9 @@
-// SelectLocationMap.js
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Icono para el marcador
 const markerIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png',
   iconSize: [25, 41],
@@ -24,24 +22,38 @@ const LocationMarker = ({ position, setPosition }) => {
   ) : null;
 };
 
-export default function SelectLocationMap() {
+const SelectLocationMap = forwardRef((props, ref) => {
   const [position, setPosition] = useState(null);
+
+  useImperativeHandle(ref, () => ({
+    getMapData() {
+      return {
+        latitude: position ? position.lat : null,
+        longitude: position ? position.lng : null,
+        is_geolocated: !!position,
+        location: position ? `Lat: ${position.lat.toFixed(5)} | Lng: ${position.lng.toFixed(5)}` : '',
+      };
+    },
+    clearMap() {
+      setPosition(null);
+    },
+  }));
 
   return (
     <View style={styles.container}>
-        <Text style = {styles.Title}>Location</Text>
-        <MapContainer
-          center={[41.79648, -6.76942]}
-          zoom={16}
-          scrollWheelZoom={false}
-          style={styles.map}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <LocationMarker position={position} setPosition={setPosition} />
-        </MapContainer>
-      
+      <Text style={styles.Title}>Location</Text>
+      <MapContainer
+        center={[41.79648, -6.76942]}
+        zoom={16}
+        scrollWheelZoom={false}
+        style={styles.map}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <LocationMarker position={position} setPosition={setPosition} />
+      </MapContainer>
+
       {position && (
         <Text style={styles.coords}>
           Lat: {position.lat.toFixed(5)} | Lng: {position.lng.toFixed(5)}
@@ -49,20 +61,20 @@ export default function SelectLocationMap() {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
-    position:'absolute',
+    position: 'absolute',
     right: 150,
-    bottom:200,
+    bottom: 200,
     width: '40%',
     height: '50%',
     alignItems: 'center',
     justifyContent: 'center',
   },
   map: {
-    marginLeft:'50%',
+    marginLeft: '50%',
     width: '60%',
     height: '100%',
     borderRadius: 8,
@@ -73,7 +85,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'black',
   },
-  Title:{
-    fontSize:20
+  Title: {
+    fontSize: 20
   }
 });
+
+export default SelectLocationMap;

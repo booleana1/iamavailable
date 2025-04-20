@@ -7,7 +7,7 @@ import ProfileScreen from './src/screens/ProfileScreen'
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <ProfileScreen/>
+          <CreateAvailability/>
           <StatusBar style="auto" />
       </SafeAreaView>
   );

@@ -1,18 +1,33 @@
-import React, { useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, StyleSheet, Text, TextInput } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { FONTS, COLORS } from '../../styles/theme'; // Ajusta la ruta según tu estructura
+import { FONTS, COLORS } from '../../styles/theme';
 
-export default function CalendarComp() {
+const CalendarComp = forwardRef((props, ref) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [time, setTime] = useState('');
+
+  useImperativeHandle(ref, () => ({
+    getCalendarData() {
+      return {
+        start_date: selectedDate ? `${selectedDate}T${time}:00` : '',
+        end_date: selectedDate ? `${selectedDate}T${time}:00` : '',
+      };
+    },
+    clearCalendar() {
+      setSelectedDate(null);
+      setTime('');
+    },
+  }));
+
+  const handleDayPress = (day) => {
+    setSelectedDate(day.dateString);
+  };
 
   return (
     <View style={styles.container}>
       <Calendar
-        onDayPress={(day) => {
-          setSelectedDate(day.dateString);
-        }}
+        onDayPress={handleDayPress}
         markedDates={{
           [selectedDate]: { selected: true, marked: true, selectedColor: 'blue' },
         }}
@@ -21,12 +36,16 @@ export default function CalendarComp() {
 
       <View style={styles.field}>
         <Text style={styles.label}>Hour</Text>
-        <TextInput placeholder="e.g. 15:30" style={styles.input}/>
-
+        <TextInput
+          placeholder="e.g. 15:30"
+          style={styles.input}
+          value={time}
+          onChangeText={setTime}
+        />
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -42,14 +61,14 @@ const styles = StyleSheet.create({
     marginTop: '25%',
   },
   field: {
-    marginTop:'1%',
+    marginTop: '1%',
     marginBottom: 24,
-    marginRight:'7%',
+    marginRight: '7%',
   },
   label: {
     fontSize: 20,
     fontFamily: FONTS.regular,
-    marginLeft:'12.5%',
+    marginLeft: '12.5%',
     marginBottom: 8,
     textAlign: 'left',
   },
@@ -60,6 +79,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.gray,
     paddingLeft: 12,
-    marginLeft:'11%',
+    marginLeft: '11%',
   },
 });
+
+export default CalendarComp;
