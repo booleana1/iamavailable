@@ -9,12 +9,10 @@ import {
     Switch,
 } from 'react-native';
 import { COLORS } from '../styles/theme';
-import initialData from '../data/initial_data';
 
 const CATEGORY_KEYS = ['groups', 'roles', 'users'];
-// TODO: review code
 
-const SettingsNotifications = ({ loggedUserId = 1 }) => {
+const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers, onSave, onCancel }) => {
 
     const allItems = useMemo(() => {
         const build = list =>
@@ -27,11 +25,11 @@ const SettingsNotifications = ({ loggedUserId = 1 }) => {
             }));
 
         return {
-            groups: build(Object.values(initialData.groups)),
-            roles: build(Object.values(initialData.roles)),
-            users: build(Object.values(initialData.users)),
+            groups: build(Object.values(dataGroups)),
+            roles: build(Object.values(dataRoles)),
+            users: build(Object.values(dataUsers)),
         };
-    }, []);
+    }, [dataGroups, dataRoles, dataUsers]);
 
     const [formState, setFormState] = useState(allItems);
     const [inputs, setInputs] = useState({ groups: '', roles: '', users: '' });
@@ -55,11 +53,17 @@ const SettingsNotifications = ({ loggedUserId = 1 }) => {
     const handleCancel = () => {
         setFormState(allItems);
         setInputs({ groups: '', roles: '', users: '' });
-        alert('Changes discarded');
+        onCancel?.();
     };
 
     const handleSave = () => {
+        // filters active subscription
+        const subscriptionUpdate = CATEGORY_KEYS.reduce((subs, cat) => {
+            subs[cat] = formState[cat].filter(item => item.active);
+            return subs;
+        }, {});
 
+        // reset touched, and set wasActive with the last active status
         setFormState(prev =>
             CATEGORY_KEYS.reduce((acc, cat) => {
                 acc[cat] = prev[cat].map(i => ({
@@ -70,10 +74,10 @@ const SettingsNotifications = ({ loggedUserId = 1 }) => {
                 return acc;
             }, {}),
         );
-
-        console.log(`Updated subscriptions for user ${loggedUserId} →`, formState);
-        alert('Saved! Check the console for the updated subscriptions.');
+        // send active subscription to parent
+        onSave?.({subscriptionUpdate});
     };
+
 
 
     const getSuggestions = (category, query) => {

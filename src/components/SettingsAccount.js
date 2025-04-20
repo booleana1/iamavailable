@@ -1,16 +1,9 @@
-import React, {useState} from 'react';
-import {
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-    TouchableOpacity,
-    ScrollView,
-} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, ScrollView } from 'react-native';
 import {COLORS} from '../styles/theme';
-import initialData from '../data/initial_data';
-import AvatarPicker from '../components/AvatarPicker';
-// TODO: review code
+import AvatarPicker from './AvatarPicker';
+
+
 const InputField = ({label, placeholder, value, onChangeText, onSubmitEditing}) => (
     <View style={styles.field}>
         <Text style={styles.inputLabel}>{label}</Text>
@@ -26,18 +19,27 @@ const InputField = ({label, placeholder, value, onChangeText, onSubmitEditing}) 
     </View>
 );
 
-const SettingsAccount = ({loggedUserId = 1}) => {
-    const user = initialData.users[loggedUserId];
-
-    const currentRoles = Object.values(initialData.roles)
-        .filter(r => r.user_id === loggedUserId)
-        .map(r => r.role_name);
+const SettingsAccount = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, onCancel}) => {
+    const user = dataUsers[loggedUserId];
 
     const [name, setName] = useState('');
     const [username, setUsername] = useState('');
-    const [roles, setRoles] = useState(currentRoles);
+    const [prevRoles, setPrevRoles] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [newRole, setNewRole] = useState('');
     const [photoUrl, setPhotoUrl] = useState(user.photo_url);
+
+    useEffect(()=>{
+
+        const currentRoles = Object.values(dataUserHasRole)
+            .filter(r => r.user_id === loggedUserId)
+            .map(r => dataRoles[r.role_id].role_name)
+            .filter(Boolean);
+
+        setRoles(currentRoles);
+        setPrevRoles(currentRoles);
+    },[loggedUserId, dataUserHasRole, dataRoles]);
+
 
     const addRole = () => {
         if (newRole.trim() && !roles.includes(newRole.trim())) {
@@ -54,36 +56,38 @@ const SettingsAccount = ({loggedUserId = 1}) => {
         // Reset local changes
         setName('');
         setUsername('');
-        setRoles(currentRoles);
+        setRoles(prevRoles);
         setNewRole('');
-        alert('Changes discarded');
+        onCancel?.();
+
     };
 
     const handleSave = () => {
-        const updated = JSON.parse(JSON.stringify(initialData));
-
-        updated.users[user.id] = {
-            ...updated.users[user.id],
-            name: name || user.name,
-            hashtag: username || user.hashtag,
+        // minimal update payload
+        const updatedUser = {
+            id: user.id,
+            name: name.trim() || user.name,
+            hashtag: username.trim() || user.hashtag,
+            photo_url: photoUrl
         };
 
-        Object.keys(updated.roles).forEach(key => {
-            if (updated.roles[key].user_id === user.id) delete updated.roles[key];
+        // map role names to role objects (role_name + hashtag)
+        const updatedRoles = roles.map(roleName => ({
+            user_id: user.id,
+            role_name: roleName,
+            role_hashtag: roleName.toLowerCase()
+                .replace(/\s+/g, '_')
+        }));
+
+        // hand off to parent via onSave
+        onSave?.({
+            user: updatedUser,
+            roles: updatedRoles
         });
 
-        roles.forEach(roleName => {
-            const nextId = String(Object.keys(updated.roles).length + 1);
-            updated.roles[nextId] = {
-                id: Number(nextId),
-                user_id: user.id,
-                role_name: roleName,
-                role_hashtag: `${roleName.toLowerCase()}_${username || user.hashtag}`,
-            };
-        });
+        // update prevRoles so cancel works after save
+        setPrevRoles(roles);
 
-        console.log('Updated data →', updated);
-        alert('Saved! Check the console for the updated JSON.');
     };
 
     return (
@@ -234,7 +238,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
         alignItems: 'flex-end',
     },
-    line:{
+    line: {
         width: '100%',
         height: 1,
         backgroundColor: COLORS.gray,
@@ -243,7 +247,7 @@ const styles = StyleSheet.create({
         width: '40%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap:20,
+        gap: 20,
         marginTop: 40,
     },
     cancelButton: {

@@ -1,41 +1,25 @@
-import {useEffect, useState} from 'react';
-import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    useWindowDimensions,
-} from 'react-native';
-import initialData from '../data/initial_data';
-import Header from '../components/Header';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import AvailabilityCard from '../components/AvailabilityCard';
 import {COLORS} from "../styles/theme";
 
-export default function HomeScreen() {
+export default function HomeScreen({loggedUserId, dataAvailabilities, dataUsers, dataRoles,dataGroups}) {
     const [myAvailabilities, setMyAvailabilities] = useState({});
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
-    // Define the logged user (for now)
-    // TODO: put this in App.js and send as a prop
-    const loggedUserId = 1;
-
-    // This was an attempt to make web and mobile, if I have time to adapt I will, for now will do the figma first
-    const {width} = useWindowDimensions();
-    const isSmallScreen = width < 768;
 
     // menu useState
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-
+    // get availability data when the app stars when dataAvailabilities change and when loggedUserId changes
     useEffect(() => {
         // Convert object of availabilities to array
-        const availabilitiesArray = Object.values(initialData.availabilities);
+        const availabilitiesArray = Object.values(dataAvailabilities);
 
         // Map the array to enrichedAvailabilities in the format needed for now
         const enrichedAvailabilities = availabilitiesArray.map((availability) => {
-            const user = initialData.users[availability.user_id];
-            const role = initialData.roles[availability.role_id];
-            const group = initialData.groups[availability.group_id];
+            const user = dataUsers[availability.user_id];
+            const role = dataRoles[availability.role_id];
+            const group = dataGroups[availability.group_id];
 
             return {
                 id: availability.id,
@@ -63,17 +47,14 @@ export default function HomeScreen() {
 
         setMyAvailabilities(myData);
         setOtherAvailabilities(otherData);
-    }, []);
+    }, [loggedUserId, dataAvailabilities]);
 
 
     return (
         <View style={styles.container}>
 
             <ScrollView>
-                <Header/>
-                <View style={[
-                    isSmallScreen ? styles.sectionsSmallScreen : styles.sections
-                ]}>
+                <View style={styles.sections}>
 
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>My Availabilities</Text>
@@ -176,12 +157,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         backgroundColor: COLORS.background,
     },
-    sectionsSmallScreen: {
-        flexDirection: 'column',
-        padding: 16,
-        justifyContent: 'center',
-        backgroundColor: COLORS.background,
-    },
+
     section: {
         backgroundColor: COLORS.primary,
         borderRadius: 16,

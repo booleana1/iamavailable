@@ -1,40 +1,43 @@
-import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity, useWindowDimensions} from 'react-native';
+import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity} from 'react-native';
 import {COLORS} from "../styles/theme";
+import {Ionicons} from "@expo/vector-icons";
+import React, {useState} from "react";
 
-export default function Header() {
+export default function Header({ onChange }) {
+    // TODO: change navigability
 
-    const {width} = useWindowDimensions();
-    const isSmallScreen = width < 768;
+    const [page, setPage] = useState('');
 
     return (
         <View style={styles.container}>
             <TouchableOpacity
-                onPress={() =>
-                    alert('HomeScreen')
-                }>
-                <Image source={require('../assets/logo.png')}
-                       style={[styles.logo, isSmallScreen && styles.logoSmallScreens]
-                }></Image>
+                onPress={() =>{
+                    onChange('HomeScreen')
+                    setPage('HomeScreen')
+                }}>
+                <Image source={require('../assets/logo.png')} style={styles.logo}></Image>
             </TouchableOpacity>
 
 
             <View style={styles.leftContainer}>
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() =>
-                        alert('Messages')
-                    }
+                    onPress={() =>{
+                        onChange('MessageScreen')
+                        setPage('MessageScreen')
+                    }}
                 >
-                    <Text style={styles.buttonText}>Messages</Text>
+                    <Text style={[styles.buttonText, page ==='MessageScreen' && styles.selected]}>Messages</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() =>
-                        alert('Groups')
-                    }
+                    onPress={() =>{
+                        onChange('GroupScreen')
+                        setPage('GroupScreen')
+                    }}
                 >
-                    <Text style={styles.buttonText}>Groups</Text>
+                    <Text style={[styles.buttonText, page ==='GroupScreen' && styles.selected]}>Groups</Text>
                 </TouchableOpacity>
 
 
@@ -46,14 +49,14 @@ export default function Header() {
 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() =>
-                        alert('Profile')
-                    }
+                    onPress={() =>{
+                        onChange('SettingScreen')
+                        setPage('SettingScreen')
+                    }}
                 >
-                    <Image
-                        source={{uri: 'https://example.com/photos/ana.jpg'}}
-                        style={styles.profileImage}
-                    />
+                    <View style={styles.avatarWrapper}>
+                        <Ionicons name="person" size={24} />
+                    </View>
                 </TouchableOpacity>
 
             </View>
@@ -104,6 +107,9 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         fontSize: 24,
     },
+    selected:{
+        textDecorationLine: 'underline',
+    },
     profileImage: {
         width: 48,
         height: 48,
@@ -111,19 +117,14 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'white',
     },
-    /*Small Screens*/
-    logoSmallScreens: {
-        width: 60,
-        height: 30,
-    },
-    searchInputSmallScreens: {
-        fontSize: 14,
-    },
-    buttonTextSmallScreens: {
-        fontSize: 16,
-    },
-    profileImageSmallScreens: {
-        width: 36,
-        height: 36,
+    avatarWrapper: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        borderWidth: 3,
+        borderColor:  COLORS.border,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 12,
     },
 });

@@ -8,7 +8,7 @@ import {
     ScrollView,
 } from 'react-native';
 import { COLORS } from '../styles/theme';
-// TODO: review code
+
 const InputField = ({ label, placeholder, value, onChangeText }) => (
     <View style={styles.field}>
         <Text style={styles.inputLabel}>{label}</Text>
@@ -23,7 +23,7 @@ const InputField = ({ label, placeholder, value, onChangeText }) => (
     </View>
 );
 
-const SettingsSecurity = () => {
+const SettingsSecurity = ({loggedUserId}) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword]       = useState('');
 
