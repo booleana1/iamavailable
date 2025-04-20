@@ -7,14 +7,14 @@ import {
     TouchableOpacity,
     ScrollView,
 } from 'react-native';
-import { COLORS } from '../styles/theme';
-import CancelSaveButtons from "./CancelSaveButtons";
-import InputField from "./InputField";
-import {SETTINGS} from "../styles/settings";
+import { COLORS } from '../../styles/theme';
+import CancelSaveButtons from "../CancelSaveButtons";
+import InputField from "../InputField";
+import {SETTINGS} from "../../styles/settings";
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SettingsSecurity = ({loggedUserId}) => {
+const Security = ({loggedUserId}) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword]       = useState('');
 
@@ -58,7 +58,7 @@ const SettingsSecurity = ({loggedUserId}) => {
     );
 };
 
-export default SettingsSecurity;
+export default Security;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

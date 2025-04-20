@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { COLORS } from '../styles/theme';
+import { COLORS } from '../../styles/theme';
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SettingsSidePanel = ({selected, onChange}) => {
+const SidePanel = ({selected, onChange}) => {
     const OPTIONS = ['Account', 'Security', 'Notifications'];
 
     const handleSelect = useCallback(option => {
@@ -35,7 +35,7 @@ const SettingsSidePanel = ({selected, onChange}) => {
     );
 };
 
-export default SettingsSidePanel;
+export default SidePanel;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

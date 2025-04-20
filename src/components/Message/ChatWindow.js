@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from "react";
 import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
-import {COLORS} from "../styles/theme";
+import {COLORS} from "../../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
-import IconPressButton from "./IconPressButton";
-import {CHAT} from "../styles/chat";
+import IconPressButton from "../IconPressButton";
+import {CHAT} from "../../styles/chat";
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
 const getChatMessages = (data, userId, loggedUserId) => {
@@ -17,7 +17,7 @@ const getChatMessages = (data, userId, loggedUserId) => {
 }
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const MessageChatWindow = ({userId, loggedUserId, data}) => {
+const ChatWindow = ({userId, loggedUserId, data}) => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
 
@@ -73,7 +73,7 @@ const MessageChatWindow = ({userId, loggedUserId, data}) => {
     );
 };
 
-export default MessageChatWindow;
+export default ChatWindow;
 
 const styles = StyleSheet.create({
     container: {

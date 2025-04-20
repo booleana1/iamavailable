@@ -8,16 +8,16 @@ import {
     ScrollView,
     Switch,
 } from 'react-native';
-import { COLORS } from '../styles/theme';
-import CancelSaveButtons from "./CancelSaveButtons";
-import {SETTINGS} from "../styles/settings";
-import {GLOBAL} from "../styles/global";
+import { COLORS } from '../../styles/theme';
+import CancelSaveButtons from "../CancelSaveButtons";
+import {SETTINGS} from "../../styles/settings";
+import {GLOBAL} from "../../styles/global";
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const CATEGORY_KEYS = ['groups', 'roles', 'users'];
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers, onSave, onCancel }) => {
+const Notifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers, onSave, onCancel }) => {
 
     const allItems = useMemo(() => {
         const build = list =>
@@ -171,7 +171,7 @@ const SettingsNotifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers,
     );
 };
 
-export default SettingsNotifications;
+export default Notifications;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

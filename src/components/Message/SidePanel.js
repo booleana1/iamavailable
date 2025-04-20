@@ -8,9 +8,9 @@ import {
     StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import initialData from "../data/initial_data";
-import { COLORS } from "../styles/theme";
-import { SIDEPANEL} from "../styles/sidepanel";
+import initialData from "../../data/initial_data";
+import { COLORS } from "../../styles/theme";
+import { SIDEPANEL} from "../../styles/sidepanel";
 
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
@@ -18,7 +18,7 @@ export const NEW_CHAT = "__NEW_CHAT__";
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const MessageSidePanel = ({ selected, onChange, loggedUserId, data }) => {
+const SidePanel = ({ selected, onChange, loggedUserId, data }) => {
     const [query, setQuery] = useState("");
 
     const handleSelect = useCallback(
@@ -102,7 +102,7 @@ const MessageSidePanel = ({ selected, onChange, loggedUserId, data }) => {
     );
 };
 
-export default MessageSidePanel;
+export default SidePanel;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
-import GroupSidePanel from "../components/GroupSidePanel";
-import MyGroupView from "../components/GroupView";
+import SidePanel from "../components/Group/SidePanel";
+import MyGroupView from "../components/Group/View";
 import initialData from "../data/initial_data";
 import EmptyState from "../components/EmptyState";
 
@@ -27,7 +27,7 @@ const GroupsScreen = ({ loggedUserId,  dataGroupMessages, dataAvailabilities, da
 
     return (
         <View style={styles.container}>
-            <GroupSidePanel
+            <SidePanel
                 selected={selected}
                 onChange={setSelected}
                 loggedUserId={loggedUserId}

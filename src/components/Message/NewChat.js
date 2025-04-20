@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
 import {View, TextInput, TouchableOpacity, Text, StyleSheet, FlatList} from "react-native";
-import { COLORS } from "../styles/theme";
-import {GLOBAL} from "../styles/global";
+import { COLORS } from "../../styles/theme";
+import {GLOBAL} from "../../styles/global";
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const MessageNewChat = ({ onStart, dataUser }) => {
+const NewChat = ({ onStart, dataUser }) => {
     const [query, setQuery] = useState("");
 
     // compute suggestions from initialData.users
@@ -69,7 +69,7 @@ const MessageNewChat = ({ onStart, dataUser }) => {
     );
 };
 
-export default MessageNewChat;
+export default NewChat;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

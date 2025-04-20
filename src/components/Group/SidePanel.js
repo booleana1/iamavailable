@@ -3,8 +3,8 @@
 import React, {useState, useEffect, useCallback, useMemo} from "react";
 import { View, TextInput, SectionList, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../styles/theme";
-import {SIDEPANEL} from "../styles/sidepanel";
+import { COLORS } from "../../styles/theme";
+import {SIDEPANEL} from "../../styles/sidepanel";
 
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
@@ -37,7 +37,7 @@ const filterGroups = (groups, query) => {
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const GroupSidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
+const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
     const [query, setQuery] = useState("");
     const [myGroups, setMyGroups] = useState([]);
     const [otherGroups, setOtherGroups] = useState([]);
@@ -137,7 +137,7 @@ const GroupSidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGrou
     );
 };
 
-export default GroupSidePanel;
+export default SidePanel;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

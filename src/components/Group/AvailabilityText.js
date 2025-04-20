@@ -1,11 +1,11 @@
 // ─────────────────────────────── IMPORTS ─────────────────────────────── //
 import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { COLORS } from "../styles/theme";
-import IconPressButton from "./IconPressButton";
+import { COLORS } from "../../styles/theme";
+import IconPressButton from "../IconPressButton";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const GroupAvailabilityText = ({ name, date, time }) => {
+const AvailabilityText = ({ name, date, time }) => {
     const [yesCount, setYesCount] = useState(0);
     const [noCount, setNoCount] = useState(0);
     const [userVoted, setUserVoted] = useState("");
@@ -68,7 +68,7 @@ const GroupAvailabilityText = ({ name, date, time }) => {
     );
 };
 
-export default GroupAvailabilityText;
+export default AvailabilityText;
 
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //

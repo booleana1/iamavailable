@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableOpacity, ScrollView } from 'react-native';
-import {COLORS} from '../styles/theme';
-import AvatarPicker from './AvatarPicker';
-import CancelSaveButtons from "./CancelSaveButtons";
-import InputField from "./InputField";
-import {SETTINGS} from "../styles/settings";
+import {COLORS} from '../../styles/theme';
+import AvatarPicker from '../AvatarPicker';
+import CancelSaveButtons from "../CancelSaveButtons";
+import InputField from "../InputField";
+import {SETTINGS} from "../../styles/settings";
 
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
@@ -17,7 +17,7 @@ const getCurrentRoles = (dataUserHasRole,loggedUserId,dataRoles) =>{
         .filter(Boolean);
 }
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SettingsAccount = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, onCancel}) => {
+const Account = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, onCancel}) => {
     const user = dataUsers[loggedUserId];
 
     const [name, setName] = useState('');
@@ -144,7 +144,7 @@ const SettingsAccount = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, o
     );
 };
 
-export default SettingsAccount;
+export default Account;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from "react";
 import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
-import {COLORS} from "../styles/theme";
-import GroupAvailabilityText from "./GroupAvailabilityText";
-import IconPressButton from "./IconPressButton";
-import {CHAT} from "../styles/chat";
+import {COLORS} from "../../styles/theme";
+import AvailabilityText from "./AvailabilityText";
+import IconPressButton from "../IconPressButton";
+import {CHAT} from "../../styles/chat";
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
 const getGroupMessages = (data, group) => {
@@ -81,7 +81,7 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
         const bubbleStyle = isOwner ? styles.outgoingAvailability : styles.incomingAvailability;
         return (
             <View style={bubbleStyle}>
-                <GroupAvailabilityText
+                <AvailabilityText
                     name={item.name}
                     date={item.start_date.slice(0, 10).split("-").reverse().join("/")}
                     time={item.start_date.slice(11, 16)}

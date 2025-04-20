@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {View, StyleSheet} from 'react-native';
-import SettingsSidePanel from '../components/SettingsSidePanel';
-import SettingsAccount from '../components/SettingsAccount';
-import SettingsSecurity from '../components/SettingsSecurity';
-import SettingsNotifications from '../components/SettingsNotifications';
+import SidePanel from '../components/Settings/SidePanel';
+import Account from '../components/Settings/Account';
+import Security from '../components/Settings/Security';
+import Notifications from '../components/Settings/Notifications';
 import {COLORS} from "../styles/theme";
 
 export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dataUsers, dataUserHasRole}) {
@@ -28,23 +28,23 @@ export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dat
         <View style={styles.container}>
 
             <View style={styles.body}>
-                <SettingsSidePanel selected={selected} onChange={setSelected}/>
+                <SidePanel selected={selected} onChange={setSelected}/>
 
                 <View style={styles.content}>
-                    {selected === 'Account' && <SettingsAccount loggedUserId={loggedUserId}
-                                                                dataUsers={dataUsers}
-                                                                dataUserHasRole={dataUserHasRole}
-                                                                dataRoles={dataRoles}
-                                                                onSave={handleSaveAccount}
-                                                                onCancel={handleCancelAccount}
+                    {selected === 'Account' && <Account loggedUserId={loggedUserId}
+                                                        dataUsers={dataUsers}
+                                                        dataUserHasRole={dataUserHasRole}
+                                                        dataRoles={dataRoles}
+                                                        onSave={handleSaveAccount}
+                                                        onCancel={handleCancelAccount}
                     />}
-                    {selected === 'Security' && <SettingsSecurity loggedUserId={loggedUserId}/>}
-                    {selected === 'Notifications' && <SettingsNotifications loggedUserId={loggedUserId}
-                                                                            dataGroups={dataGroups}
-                                                                            dataRoles={dataRoles}
-                                                                            dataUsers={dataUsers}
-                                                                            onSave={handleSaveNotifications}
-                                                                            onCancel={handleCancelNotifications}
+                    {selected === 'Security' && <Security loggedUserId={loggedUserId}/>}
+                    {selected === 'Notifications' && <Notifications loggedUserId={loggedUserId}
+                                                                    dataGroups={dataGroups}
+                                                                    dataRoles={dataRoles}
+                                                                    dataUsers={dataUsers}
+                                                                    onSave={handleSaveNotifications}
+                                                                    onCancel={handleCancelNotifications}
                     />}
 
                 </View>
