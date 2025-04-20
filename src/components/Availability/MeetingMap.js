@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -10,35 +10,19 @@ const markerIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-const LocationMarker = ({ position, setPosition }) => {
+const LocationMarker = () => {
+  const [position, setPosition] = useState(null);
+
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
     },
   });
 
-  return position ? (
-    <Marker position={position} icon={markerIcon} />
-  ) : null;
+  return position ? <Marker position={position} icon={markerIcon} /> : null;
 };
 
-const SelectLocationMap = forwardRef((props, ref) => {
-  const [position, setPosition] = useState(null);
-
-  useImperativeHandle(ref, () => ({
-    getMapData() {
-      return {
-        latitude: position ? position.lat : null,
-        longitude: position ? position.lng : null,
-        is_geolocated: !!position,
-        location: position ? `Lat: ${position.lat.toFixed(5)} | Lng: ${position.lng.toFixed(5)}` : '',
-      };
-    },
-    clearMap() {
-      setPosition(null);
-    },
-  }));
-
+export default function LocationMap() {
   return (
     <View style={styles.container}>
       <Text style={styles.Title}>Location</Text>
@@ -48,20 +32,12 @@ const SelectLocationMap = forwardRef((props, ref) => {
         scrollWheelZoom={false}
         style={styles.map}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <LocationMarker position={position} setPosition={setPosition} />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <LocationMarker />
       </MapContainer>
-
-      {position && (
-        <Text style={styles.coords}>
-          Lat: {position.lat.toFixed(5)} | Lng: {position.lng.toFixed(5)}
-        </Text>
-      )}
     </View>
   );
-});
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -80,14 +56,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
   },
-  coords: {
-    marginTop: 10,
-    fontSize: 14,
-    color: 'black',
-  },
   Title: {
-    fontSize: 20
-  }
+    fontSize: 20,
+  },
 });
-
-export default SelectLocationMap;

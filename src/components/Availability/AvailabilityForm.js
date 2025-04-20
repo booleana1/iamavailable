@@ -13,23 +13,13 @@ const Forms = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     getFormData() {
       return formData;
-    },
-    clearForm() {
-      setFormData({
-        name: '',
-        role: '',
-        group: '',
-        link: '',
-      });
-    },
+    }
   }));
 
-  const handleChange = (name, value) => {
-    setFormData(prevData => ({
-      ...prevData,
-      [name]: value,
-    }));
+  const handleChange = (key, value) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
   };
+
 
   return (
     <View style={styles.container}>
@@ -38,48 +28,28 @@ const Forms = forwardRef((props, ref) => {
 
         <View style={styles.field}>
           <Text style={styles.label}>Name</Text>
-          <TextInput
-            placeholder="Name"
-            style={styles.input}
-            value={formData.name}
-            onChangeText={(text) => handleChange('name', text)}
-          />
+          <TextInput placeholder="Name" style={styles.input} value={formData.name} onChangeText={text => setFormData({ ...formData, name: text })}/>
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Role</Text>
-          <TextInput
-            placeholder="Role"
-            style={styles.input}
-            value={formData.role}
-            onChangeText={(text) => handleChange('role', text)}
-          />
+          <TextInput placeholder="Role" style={styles.input} value={formData.role} onChangeText={text => setFormData({ ...formData, role: text })}/>
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Group</Text>
-          <TextInput
-            placeholder="Group"
-            style={styles.input}
-            value={formData.group}
-            onChangeText={(text) => handleChange('group', text)}
-          />
+          <TextInput placeholder="Group" style={styles.input} value={formData.group} onChangeText={text => setFormData({ ...formData, group: text })}/>
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Link (if online)</Text>
-          <TextInput
-            placeholder="Link"
-            style={styles.input}
-            value={formData.link}
-            onChangeText={(text) => handleChange('link', text)}
-          />
+          <TextInput placeholder="Link" style={styles.input} value={formData.link} onChangeText={text=>setFormData({ ...formData, link: text })} />
         </View>
       </View>
     </View>
   );
 });
-
+export default Forms;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -120,6 +90,5 @@ const styles = StyleSheet.create({
     marginLeft: '12.5%',
     fontFamily: FONTS.regular,
   },
-});
 
-export default Forms;
+});
