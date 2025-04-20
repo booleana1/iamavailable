@@ -26,12 +26,12 @@ export default function AvailabilityDetails({ availabilityId }) {
 
         <View style={styles.field}>
           <Text style={styles.label}>Role</Text>
-          <Text style={styles.value}>{role?.role_name || "Desconocido"}</Text>
+          <Text style={styles.value}>{role?.role_name || "Unkown"}</Text>
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Group</Text>
-          <Text style={styles.value}>{group?.name || "Desconocido"}</Text>
+          <Text style={styles.value}>{group?.name || "Unkonwn"}</Text>
         </View>
 
         <View style={styles.field}>

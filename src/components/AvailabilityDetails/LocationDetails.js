@@ -16,10 +16,8 @@ export default function LocationDetails({ availabilityId }) {
   const availability = initialData.availabilities[availabilityId];
   const hasCoords = availability?.latitude !== null && availability?.longitude !== null;
 
-  // Coordenadas predeterminadas
   const defaultCenter = [41.79648, -6.76942];
 
-  // Si hay coordenadas, las usamos; de lo contrario, usamos las predeterminadas
   const location = hasCoords
     ? [availability.latitude, availability.longitude]
     : defaultCenter;
@@ -28,7 +26,7 @@ export default function LocationDetails({ availabilityId }) {
     <View style={styles.container}>
       <Text style={styles.title}>Location</Text>
 
-      {/* Mapa */}
+      {/* Map */}
       <MapContainer
         center={location}
         zoom={16}
@@ -37,11 +35,9 @@ export default function LocationDetails({ availabilityId }) {
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         
-        {/* Si hay coordenadas, mostramos un marcador */}
         {hasCoords && <Marker position={location} icon={markerIcon} />}
       </MapContainer>
 
-      {/* Mensaje si no está geolocalizado */}
       {!hasCoords && <Text style={styles.note}>Not geolocated</Text>}
     </View>
   );

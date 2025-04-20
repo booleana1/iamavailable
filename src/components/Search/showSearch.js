@@ -22,10 +22,10 @@ const Datalist = () => {
       (gu) => gu.group_id === groupId && gu.status === 'approved'
     ).length;
 
-  // NUEVO: Filtrado de grupos por nombre
+
   const filteredGroupsArray = filterBySearch(groupsArray, 'name');
 
-  // NUEVO: Filtrado de availabilities por nombre de usuario
+
   const filteredAvailabilitiesArray = availabilitiesArray.filter(availability => {
     const user = getUserById(availability.user_id);
     return user && user.name.toLowerCase().includes(searchText.toLowerCase());
