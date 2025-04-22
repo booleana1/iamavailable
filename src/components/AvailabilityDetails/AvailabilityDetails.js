@@ -36,7 +36,7 @@ export default function AvailabilityDetails({ availabilityId }) {
 
         <View style={styles.field}>
           <Text style={styles.label}>Link </Text>
-          <Text style={styles.value}>{availability.link ?? "Geolocated"}</Text>
+          <Text style={styles.value}>{availability.location ?? "Geolocated"}</Text>
         </View>
       </View>
     </View>
