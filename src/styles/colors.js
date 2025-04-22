@@ -5,6 +5,9 @@ export const COLORS = {
     text: '#333333',
     success: '#4CAF50',
     danger: '#E53935',
-    gray: '#CCCCCC',
+    gray: '#CCC',
+    white: '#FFFFFF',
+    lightBlue: '#98d6fc',
+    border: '#000',
   };
   
