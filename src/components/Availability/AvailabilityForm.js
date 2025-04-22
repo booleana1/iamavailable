@@ -2,24 +2,7 @@ import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { COLORS, FONTS } from '../../styles/theme';
 
-const Forms = forwardRef((props, ref) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    group: '',
-    link: '',
-  });
-
-  useImperativeHandle(ref, () => ({
-    getFormData() {
-      return formData;
-    }
-  }));
-
-  const handleChange = (key, value) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-  };
-
+export default function Forms() {
 
   return (
     <View style={styles.container}>
@@ -28,28 +11,27 @@ const Forms = forwardRef((props, ref) => {
 
         <View style={styles.field}>
           <Text style={styles.label}>Name</Text>
-          <TextInput placeholder="Name" style={styles.input} value={formData.name} onChangeText={text => setFormData({ ...formData, name: text })}/>
+          <TextInput placeholder="Name" style={styles.input} />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Role</Text>
-          <TextInput placeholder="Role" style={styles.input} value={formData.role} onChangeText={text => setFormData({ ...formData, role: text })}/>
+          <TextInput placeholder="Role" style={styles.input} />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Group</Text>
-          <TextInput placeholder="Group" style={styles.input} value={formData.group} onChangeText={text => setFormData({ ...formData, group: text })}/>
+          <TextInput placeholder="Group" style={styles.input} />
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Link (if online)</Text>
-          <TextInput placeholder="Link" style={styles.input} value={formData.link} onChangeText={text=>setFormData({ ...formData, link: text })} />
+          <TextInput placeholder="Link" style={styles.input} />
         </View>
       </View>
     </View>
   );
-});
-export default Forms;
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
