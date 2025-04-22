@@ -1,7 +1,7 @@
 # I am Available App
 
 This project is developed as part of the **Multiplatform Development** course (Computer Engineering Degree) at IPB - 2024/2025.  
-It consists of a mobile application that allows users to signal their availability for specific roles, times, locations, and user groups.
+It consists of an application that allows users to signal their availability for specific roles, times, locations, and user groups.
 
 ## 📱 About the App
 
