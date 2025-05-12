@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, Picker } from 'react-native';  // Asegúrate de importar Picker
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase.config';
 import { COLORS, FONTS } from '../../styles/theme';
@@ -12,6 +12,7 @@ export default function Forms() {
   const [role, setRole] = useState('');  // Role name, not id
   const [group, setGroup] = useState(''); // Group hashtag, not group_id
   const [link, setLink] = useState('');
+  const [periodicity, setPeriodicity] = useState('unique'); // Default periodicity
 
   const [date, setDate] = useState(null);
   const [hour, setHour] = useState('');
@@ -35,7 +36,7 @@ export default function Forms() {
 
   // Function to get groupId from hashtag
   const getGroupIdFromHashtag = async (hashtag) => {
-    const groupsRef = collection(db, 'groups'); // Assuming 'groups' is the collection where groups are stored
+    const groupsRef = collection(db, 'groups');
     const querySnapshot = await getDocs(groupsRef);
     let groupId = null;
 
@@ -74,8 +75,8 @@ export default function Forms() {
       group_id: groupId, // Use group_id instead of group
       location: link || '',
       start_date: `${date}T${hour}`,
-      end_date: `${date}T${hour}`, // Puedes ajustar esto según lo necesites
-      periodicity: 'unique',
+      end_date: `${date}T${hour}`,
+      periodicity,  // Add the selected periodicity
       is_geolocated: latitude !== null && longitude !== null,
       latitude: latitude ?? null,
       longitude: longitude ?? null,
@@ -118,6 +119,19 @@ export default function Forms() {
           <View style={styles.field}>
             <Text style={styles.label}>Link (if online)</Text>
             <TextInput value={link} onChangeText={setLink} placeholder="Optional link" style={styles.input} />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Select Periodicity</Text>
+            <Picker
+              selectedValue={periodicity}
+              onValueChange={(itemValue) => setPeriodicity(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Unique" value="unique" />
+              <Picker.Item label="Weekly" value="weekly" />
+              <Picker.Item label="Monthly" value="monthly" />
+            </Picker>
           </View>
         </View>
 
@@ -191,5 +205,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: 'flex-end',
     width: 120,
+  },
+  picker: {
+    height: 40,
+    borderColor: COLORS.gray,
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
   },
 });
