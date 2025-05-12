@@ -1,25 +1,55 @@
-import React, { useState, useMemo, useCallback } from "react";
-import {
-    View,
-    TextInput,
-    FlatList,
-    TouchableOpacity,
-    Text,
-    StyleSheet,
-} from "react-native";
+import React, {useState, useMemo, useCallback, useEffect} from "react";
+import {View, TextInput, FlatList, TouchableOpacity, Text, StyleSheet,} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import initialData from "../../data/initial_data";
-import { COLORS } from "../../styles/theme";
 import { SIDEPANEL} from "../../styles/sidepanel";
+import {app, db, auth} from '../../../firebase.config'
+import {collection,  query, where, onSnapshot, doc, getDoc, Timestamp, orderBy} from "firebase/firestore";
 
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 export const NEW_CHAT = "__NEW_CHAT__";
 
-
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SidePanel = ({ selected, onChange, loggedUserId, data }) => {
-    const [query, setQuery] = useState("");
+const SidePanel = ({ selected, onChange, loggedUserId}) => {
+    const [search, setSearch] = useState('');
+    const [contacts, setContacts] = useState([]);
+
+    useEffect(() => {
+        if (!loggedUserId) return;
+
+        const q = query(
+            collection(db, 'chats'),
+            where('participants', 'array-contains', loggedUserId)
+        );
+
+        const unsubscribe = onSnapshot(q, async snap => {
+            // get the other participant id in 'chats'
+            const rows = snap.docs.map(d => {
+                const { participants, updatedAt } = d.data();
+                const otherId = participants.find(uid => uid !== loggedUserId);
+                return otherId ? { chatId: d.id, userId: otherId, updatedAt } : null;
+            }).filter(Boolean)
+                .sort((a, b) => b.updatedAt - a.updatedAt);
+
+            // get the other user data
+            const withProfile = await Promise.all(
+                rows.map(async r => {
+                    const snap = await getDoc(doc(db, 'users', String(r.userId)));
+                    return snap.exists() ? { ...r, ...snap.data() } : null;
+                })
+            );
+
+            setContacts(withProfile.filter(Boolean));
+        });
+
+        return () => unsubscribe();
+    }, [loggedUserId]);
+
+    const filtered = useMemo(() => {
+        return contacts
+            .filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+            .sort((a, b) => b.updatedAt - a.updatedAt);
+    }, [contacts, search]);
 
     const handleSelect = useCallback(
         (value) => {
@@ -28,33 +58,12 @@ const SidePanel = ({ selected, onChange, loggedUserId, data }) => {
         [onChange]
     );
 
-    // Gather unique contact IDs from messages involving the current user
-    const contactIds = useMemo(() => {
-        const ids = new Set();
-        Object.values(data).forEach((msg) => {
-            if (msg.sender_id === loggedUserId) ids.add(msg.receiver_id);
-            if (msg.receiver_id === loggedUserId) ids.add(msg.sender_id);
-        });
-        return Array.from(ids);
-    }, [loggedUserId, data]);
-
-    // Map IDs to user objects, apply search filter, and sort by name
-    const contacts = useMemo(() => {
-        return contactIds
-            .map((id) => initialData.users[id])
-            .filter(Boolean)
-            .filter((user) =>
-                user.name.toLowerCase().includes(query.toLowerCase())
-            )
-            .sort((a, b) => a.name.localeCompare(b.name));
-    }, [contactIds, query]);
-
     const renderItem = ({ item }) => {
-        const isActive = selected === item.id;
+        const isActive = selected === item;
         return (
             <TouchableOpacity
                 style={[SIDEPANEL.item, isActive && SIDEPANEL.itemSelected]}
-                onPress={() => handleSelect(item.id)}
+                onPress={() => handleSelect(item)}
                 activeOpacity={0.6}
             >
                 <View style={SIDEPANEL.avatarWrapper}>
@@ -73,14 +82,14 @@ const SidePanel = ({ selected, onChange, loggedUserId, data }) => {
                 <TextInput
                     style={SIDEPANEL.searchInput}
                     placeholder="Search contacts"
-                    value={query}
-                    onChangeText={setQuery}
+                    value={search}
+                    onChangeText={setSearch}
                 />
             </View>
 
             {/* Contact list */}
             <FlatList
-                data={contacts}
+                data={filtered}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={renderItem}
                 ItemSeparatorComponent={() => <View style={SIDEPANEL.separator} />}

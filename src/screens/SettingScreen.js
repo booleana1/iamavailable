@@ -6,23 +6,10 @@ import Security from '../components/Settings/Security';
 import Notifications from '../components/Settings/Notifications';
 import {COLORS} from "../styles/theme";
 
+
+
 export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dataUsers, dataUserHasRole}) {
     const [selected, setSelected] = useState('Account');
-
-    const handleSaveAccount = ({user,roles}) => {
-        console.log('Updated data →', user,roles);
-        alert('Saved! Check the console for the updated JSON.');
-    }
-    const handleCancelAccount = () => {
-        alert('Changes discarded');
-    }
-    const handleSaveNotifications = ({subscriptionUpdate}) => {
-        console.log(`Updated subscriptions for user ${loggedUserId} →`, subscriptionUpdate);
-        alert('Saved! Check the console for the updated subscriptions.');
-    }
-    const handleCancelNotifications = () => {
-        alert('Changes discarded');
-    }
 
     return (
         <View style={styles.container}>
@@ -31,20 +18,12 @@ export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dat
                 <SidePanel selected={selected} onChange={setSelected}/>
 
                 <View style={styles.content}>
-                    {selected === 'Account' && <Account loggedUserId={loggedUserId}
-                                                        dataUsers={dataUsers}
-                                                        dataUserHasRole={dataUserHasRole}
-                                                        dataRoles={dataRoles}
-                                                        onSave={handleSaveAccount}
-                                                        onCancel={handleCancelAccount}
-                    />}
+                    {selected === 'Account' && <Account loggedUserId={loggedUserId}/>}
                     {selected === 'Security' && <Security loggedUserId={loggedUserId}/>}
                     {selected === 'Notifications' && <Notifications loggedUserId={loggedUserId}
                                                                     dataGroups={dataGroups}
                                                                     dataRoles={dataRoles}
                                                                     dataUsers={dataUsers}
-                                                                    onSave={handleSaveNotifications}
-                                                                    onCancel={handleCancelNotifications}
                     />}
 
                 </View>

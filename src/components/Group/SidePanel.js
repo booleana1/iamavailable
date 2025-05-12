@@ -1,84 +1,128 @@
 
-// ─────────────────────────────── IMPORTS ─────────────────────────────── //
 import React, {useState, useEffect, useCallback, useMemo} from "react";
 import { View, TextInput, SectionList, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../styles/theme";
 import {SIDEPANEL} from "../../styles/sidepanel";
+import {app, db, auth} from '../../../firebase.config'
+import {collection,  query, where, onSnapshot, doc, getDocs, documentId, orderBy} from "firebase/firestore";
 
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
-const getUserOwnedGroups = (groups, userId) => {
-    return Object.values(groups)
-        .filter((group) => group.user_id === userId)
-        .map((group) => ({
-            id: group.id,
-            name: group.name,
-        }));
-};
 
-const getUserMemberGroups = (groups, groupUsers, userId) => {
-    return Object.values(groupUsers)
-        .filter((gu) => gu.user_id === userId && gu.status === "approved")
-        .map((gu) => {
-            const group = groups[gu.group_id] || Object.values(groups).find(g => g.id === gu.group_id);
-            return group ? { id: group.id, name: group.name } : null;
-        })
-        .filter(Boolean);
-};
-
-const filterGroups = (groups, query) => {
+const filterGroups = (groups, q) => {
     return groups
         .filter((g) =>
-            g.name?.toLowerCase().includes(query.toLowerCase())
+            g.name?.toLowerCase().includes(q.toLowerCase())
         )
         .sort((a, b) => a.name.localeCompare(b.name));
 };
 
+const makeChunks = (arr, size = 10) => {
+    const unique = [...new Set(
+        arr
+            .filter(id => id != null)
+            .map(id => String(id))
+    )];
+
+    const chunks = [];
+    for (let i = 0; i < unique.length; i += size) {
+        chunks.push(unique.slice(i, i + size));
+    }
+    return chunks;
+};
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
-    const [query, setQuery] = useState("");
+    const [queryText, setQueryText] = useState("");
     const [myGroups, setMyGroups] = useState([]);
     const [otherGroups, setOtherGroups] = useState([]);
+
+    // Get groups the user is in, wither by being main actor, or secondary actor
+    useEffect(() => {
+        if(!loggedUserId) return;
+        // groups the user owns
+        const q = query(
+            collection(db,"groups"),
+            where("user_id", "==", loggedUserId)
+        )
+
+        const unsubscribe = onSnapshot(q, qSnap => {
+            const groups = qSnap.docs.map(d => ({
+                id:   d.id,
+                name: d.data().name,
+                ownerId: loggedUserId,
+            }));
+            setMyGroups(groups);
+        }, err => console.error(err));
+
+        return () => unsubscribe();
+    }, [loggedUserId]);
+
+    // get groups user are not owner (secondary actor)
+    useEffect(() => {
+        if (!loggedUserId) return;
+
+        const qq = query(
+            collection(db, 'group_users'),
+            where('user_id', '==', loggedUserId),
+            where('status',  '==', 'approved')
+        );
+
+        const unsub = onSnapshot(qq, async snap => {
+            const groupIds = snap.docs.map(d => d.data().group_id);
+            if (groupIds.length === 0) { setOtherGroups([]); return; }
+
+            const chunks = makeChunks(groupIds, 10);
+            const promises = chunks
+                .filter(ids => ids.length)
+                .map(ids =>
+                    getDocs(
+                        query(
+                            collection(db, 'groups'),
+                            where(documentId(), 'in', ids)
+                        )
+                    )
+                );
+
+            const snaps = await Promise.all(promises);
+            const groups = snaps
+                .flatMap(s => s.docs)
+                .map(d => ({ id: d.id, name: d.data().name, ownerId: d.data().user_id }))
+                .filter(g => g.ownerId !== loggedUserId);
+
+            setOtherGroups(groups);
+        });
+
+        return () => unsub();
+    }, [loggedUserId]);
+
+
+    // Apply search filter, and sort by name
+    const filteredMyGroups = useMemo(() => {
+        return filterGroups(myGroups ?? [],queryText);
+    }, [myGroups, queryText]);
+
+    const filteredOtherGroups = useMemo(() => {
+        return filterGroups(otherGroups ?? [],queryText);
+    }, [otherGroups, queryText]);
 
     // handle when user select a group to see the chat
     const handleSelect = useCallback(
         (value) => {
-            onChange?.(value);
+            onChange?.(value); // group -> {id,name}
         },
         [onChange]
     );
 
-    // Get groups the user is in, wither by being main actor, or secondary actor
-    useEffect(() => {
-        // groups the user owns
-        const myData = getUserOwnedGroups(dataGroups,loggedUserId);
-
-        // groups user is a member
-        const otherData = getUserMemberGroups(dataGroups,dataGroupUsers,loggedUserId);
-
-        setMyGroups(myData);
-        setOtherGroups(otherData);
-
-    }, [loggedUserId,dataGroups,dataGroupUsers]);
-
-    // Apply search filter, and sort by name
-    const filteredMyGroups = useMemo(() => {
-        return filterGroups(myGroups,query);
-    }, [myGroups, query]);
-
-    const filteredOtherGroups = useMemo(() => {
-        return filterGroups(otherGroups,query);
-    }, [otherGroups, query]);
-
     // render group icon and name
     const renderItem = ({ item }) => {
-        const isActive = selected === item.id;
+        const isActive = selected === item;
+
         return (
             <TouchableOpacity
                 style={[SIDEPANEL.item, isActive && SIDEPANEL.itemSelected]}
-                onPress={() => handleSelect(item.id)}
+                onPress={() => handleSelect(item)} // chat id
                 activeOpacity={0.6}
             >
                 {/*TODO: when doing backend put group avatar here*/}
@@ -92,8 +136,8 @@ const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUser
 
     // define sections
     const sections = [
-        { title: "My Groups", data: filteredMyGroups },
-        { title: "Other Groups", data: filteredOtherGroups },
+        { title: "My Groups", data: filteredMyGroups ?? [] },
+        { title: "Other Groups", data: filteredOtherGroups ?? [] },
     ];
 
     // render section header
@@ -109,8 +153,8 @@ const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUser
                 <TextInput
                     style={SIDEPANEL.searchInput}
                     placeholder="Search groups"
-                    value={query}
-                    onChangeText={setQuery}
+                    value={queryText}
+                    onChangeText={setQueryText}
                 />
             </View>
 

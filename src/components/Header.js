@@ -2,7 +2,6 @@ import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity} from 'react-
 import {COLORS} from "../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
 import React, {useState} from "react";
-import {SIDEPANEL} from "../styles/sidepanel";
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const PAGES = {

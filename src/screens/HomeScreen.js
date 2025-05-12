@@ -2,52 +2,96 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import AvailabilityCard from '../components/Home/AvailabilityCard';
 import {COLORS} from "../styles/theme";
+import { collection, query, where, getDoc, getDocs, doc, or } from "firebase/firestore";
+import {app, db, auth} from '../../firebase.config'
 
-export default function HomeScreen({loggedUserId, dataAvailabilities, dataUsers, dataRoles,dataGroups}) {
+const getUserApprovedGroupIds = async (userId) => {
+    const q = query(
+        collection(db, 'group_users'),
+        where('user_id', '==', userId),
+        where('status', '==', 'approved')
+    );
+
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => doc.data().group_id);
+};
+
+const buildAvailability = async (aval) => {
+    const [userSnap, roleSnap, groupSnap] = await Promise.all([
+        getDoc(doc(db, 'users', String(aval.user_id))),
+        getDoc(doc(db, 'roles', String(aval.role_id))),
+        getDoc(doc(db, 'groups', String(aval.group_id))),
+    ]);
+
+    return {
+        id: aval.id,
+        userName: userSnap.data()?.name,
+        roleName: roleSnap.data()?.role_name,
+        groupName: groupSnap.data()?.name,
+        location: aval.location,
+        start: aval.start_date,
+        end: aval.end_date,
+        userId: userSnap.data()?.id,
+    };
+};
+
+
+export default function HomeScreen({loggedUserId}) {
     const [myAvailabilities, setMyAvailabilities] = useState({});
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
 
+    useEffect(() => {
+
+        const loadData = async () => {
+            try {
+                const groupIds = await getUserApprovedGroupIds(loggedUserId);
+
+                const userSnap = await getDocs(
+                    query(collection(db, 'availabilities'), where('user_id', '==', loggedUserId))
+                );
+
+                let groupSnap = { docs: [] };
+                if (groupIds.length > 0) {
+                    groupSnap = await getDocs(
+                        query(collection(db, 'availabilities'), where('group_id', 'in', groupIds))
+                    );
+                }
+
+                const allDocs = [...userSnap.docs, ...groupSnap.docs];
+
+                const my = {};
+                const others = {};
+
+                await Promise.all(
+                    allDocs.map(async (docSnap) => {
+                        const availabilities = { id: docSnap.id, ...docSnap.data() };
+                        if ((availabilities.user_id === loggedUserId && my[availabilities.id]) ||
+                            (groupIds.includes(availabilities.group_id) && others[availabilities.id])) {
+                            return;
+                        }
+                        const enriched = await buildAvailability(availabilities);
+                        if (availabilities.user_id === loggedUserId)
+                            my[enriched.id] = enriched;
+                        else if (groupIds.includes(availabilities.group_id))
+                            others[enriched.id] = enriched;
+                    }),
+                );
+
+                setMyAvailabilities(my);
+                setOtherAvailabilities(others);
+            } catch (error) {
+                console.error('Error loading availabilities:', error);
+            }
+        };
+
+        loadData();
+    }, [loggedUserId]);
+
+
+
+
     // menu useState
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    // get availability data when the app stars when dataAvailabilities change and when loggedUserId changes
-    useEffect(() => {
-        // Convert object of availabilities to array
-        const availabilitiesArray = Object.values(dataAvailabilities);
-
-        // Map the array to enrichedAvailabilities in the format needed for now
-        const enrichedAvailabilities = availabilitiesArray.map((availability) => {
-            const user = dataUsers[availability.user_id];
-            const role = dataRoles[availability.role_id];
-            const group = dataGroups[availability.group_id];
-
-            return {
-                id: availability.id,
-                userName: user?.name,
-                roleName: role?.role_name,
-                groupName: group?.name,
-                location: availability.location,
-                start: availability.start_date,
-                end: availability.end_date,
-                userId: user?.id,
-            };
-        });
-
-        // Separate the data into myAvailabilities vs otherAvailabilities
-        const myData = {};
-        const otherData = {};
-
-        enrichedAvailabilities.forEach((item) => {
-            if (item.userId === loggedUserId) {
-                myData[item.id] = item;
-            } else {
-                otherData[item.id] = item;
-            }
-        });
-
-        setMyAvailabilities(myData);
-        setOtherAvailabilities(otherData);
-    }, [loggedUserId, dataAvailabilities]);
 
 
     return (

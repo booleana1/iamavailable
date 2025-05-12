@@ -6,7 +6,7 @@ import SettingsScreen from "./src/screens/SettingScreen";
 import MessageScreen from "./src/screens/MessageScreen";
 import React, {useState} from "react";
 import Header from "./src/components/Header";
-import GroupScreen from "./src/screens/GroupScreen";
+import GroupScreen from "./src/screens/GroupScreen"
 import initialData from "./src/data/initial_data";
 
 export default function App() {
@@ -20,7 +20,6 @@ export default function App() {
     return (
         <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
             <Header onChange={setSelected}/>
-
             {/* data needed from the JSON file is sended by props to child */}
             {selected === 'HomeScreen' && <HomeScreen loggedUserId={loggedUserId}
                                                       dataAvailabilities={initialData.availabilities}
@@ -29,7 +28,7 @@ export default function App() {
                                                       dataGroups={initialData.groups}
             />}
             {selected === 'MessageScreen' && <MessageScreen loggedUserId={loggedUserId}
-                                                            data={initialData.private_messages}
+                                                            data = {initialData.private_messages}
                                                             dataUsers={initialData.users}
             />}
             {selected === 'SettingScreen' && <SettingsScreen loggedUserId={loggedUserId}

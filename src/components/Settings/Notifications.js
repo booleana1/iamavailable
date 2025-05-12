@@ -1,17 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import {
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-    TouchableOpacity,
-    ScrollView,
-    Switch,
-} from 'react-native';
+import {StyleSheet, Text, TextInput, View, TouchableOpacity, ScrollView, Switch,} from 'react-native';
 import { COLORS } from '../../styles/theme';
 import CancelSaveButtons from "../CancelSaveButtons";
 import {SETTINGS} from "../../styles/settings";
 import {GLOBAL} from "../../styles/global";
+
+// TODO: criar notifications no bd
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const CATEGORY_KEYS = ['groups', 'roles', 'users'];

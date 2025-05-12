@@ -6,26 +6,28 @@ import NewChat from "../components/Message/NewChat";
 import ChatWindow from "../components/Message/ChatWindow";
 import { COLORS } from "../styles/theme";
 
-const MessageScreen = ({loggedUserId, data, dataUsers}) => {
 
+const MessageScreen = ({loggedUserId, data, dataUsers}) => {
     const [selected, setSelected] = useState(null);
 
     const renderContent = () => {
         if (selected === NEW_CHAT) {
-            return <NewChat onStart={(userId) => setSelected(userId)} dataUser={dataUsers} />;
+            return <NewChat onStart={(chat) => setSelected(chat)} loggedUserId={loggedUserId}/>;
         }
         if (selected == null) {
             return <EmptyState />;
         }
         // userId -> secondary user | loggedUserId -> main user
-        return <ChatWindow userId={selected} loggedUserId={loggedUserId} data={data} />;
+        return <ChatWindow chat={selected} loggedUserId={loggedUserId}/>;
     };
 
     return (
         <View style={styles.container}>
 
         <View style={styles.body}>
-                <SidePanel selected={selected} onChange={setSelected} loggedUserId={loggedUserId} data={data} />
+                <SidePanel selected={selected}
+                           onChange={setSelected}
+                           loggedUserId={loggedUserId} />
                 <View style={styles.content}>{renderContent()}</View>
             </View>
         </View>

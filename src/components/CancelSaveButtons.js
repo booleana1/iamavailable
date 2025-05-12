@@ -1,28 +1,37 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
-import React from 'react'
+import {StyleSheet, Text, View} from 'react-native'
+import React, {useState} from 'react'
 import {COLORS} from "../styles/colors";
 import Button from "./Button";
 
-const CancelSaveButtons = ({handleCancel, handleSave}) => {
+const CancelSaveButtons = ({ handleCancel, handleSave, feedbackMessage }) => {
     return (
         <View style={styles.bottomContainer}>
             <View style={styles.line}></View>
 
             <View style={styles.buttonRow}>
-                <Button text={"Cancel"}
-                        stylesButton={styles.cancelButton}
-                        stylesButtonText={styles.cancelButtonText}
-                        handle={handleCancel}
+                <Button
+                    text={"Cancel"}
+                    stylesButton={styles.cancelButton}
+                    stylesButtonText={styles.cancelButtonText}
+                    handle={handleCancel}
                 />
-                <Button text={"Save"}
-                        stylesButton={styles.saveButton}
-                        stylesButtonText={styles.saveButtonText}
-                        handle={handleSave}
+                <Button
+                    text={"Save"}
+                    stylesButton={styles.saveButton}
+                    stylesButtonText={styles.saveButtonText}
+                    handle={handleSave}
                 />
             </View>
+
+            {feedbackMessage !== '' && (
+                <Text style={{ color: COLORS.text, marginTop: 10, alignSelf: 'flex-end' }}>
+                    {feedbackMessage}
+                </Text>
+            )}
         </View>
-    )
-}
+    );
+};
+
 export default CancelSaveButtons
 const styles = StyleSheet.create({
     bottomContainer: {

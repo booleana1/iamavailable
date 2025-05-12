@@ -1,40 +1,64 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, ScrollView } from 'react-native';
-import {COLORS} from '../../styles/theme';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import AvatarPicker from '../AvatarPicker';
 import CancelSaveButtons from "../CancelSaveButtons";
 import InputField from "../InputField";
 import {SETTINGS} from "../../styles/settings";
+import { db } from '../../../firebase.config'
+import {collection, getDoc, doc, getDocs, query, where, setDoc, updateDoc} from "firebase/firestore";
 
-
-// ─────────────────────────────── UTILS ─────────────────────────────── //
-
-
-const getCurrentRoles = (dataUserHasRole,loggedUserId,dataRoles) =>{
-    return Object.values(dataUserHasRole)
-        .filter(r => r.user_id === loggedUserId)
-        .map(r => dataRoles[r.role_id].role_name)
-        .filter(Boolean);
-}
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const Account = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, onCancel}) => {
-    const user = dataUsers[loggedUserId];
+const Account = ({loggedUserId}) => {
 
     const [name, setName] = useState('');
     const [username, setUsername] = useState('');
+    const [photoUrl, setPhotoUrl] = useState('');
+    const [user, setUser] = useState({});
+    const [feedbackMessage, setFeedbackMessage] = useState('');
+
+    const [newRole, setNewRole] = useState('');
     const [prevRoles, setPrevRoles] = useState([]);
     const [roles, setRoles] = useState([]);
-    const [newRole, setNewRole] = useState('');
-    const [photoUrl, setPhotoUrl] = useState(user.photo_url);
+    const [remRoles, setRemRoles] = useState([]);
 
-    useEffect(()=>{
+    // get data
+    useEffect(() => {
+        const loadData = async () => {
+            try{
+                // get user data and set to state variable
+                const userDataSnap = await getDoc(doc(db, 'users', String(loggedUserId)));
+                const userData = userDataSnap.data();
+                setUser(userData);
 
-        const currentRoles = getCurrentRoles(dataUserHasRole,loggedUserId,dataRoles)
+                // get ids of user roles
+                const q = query(collection(db, 'user_has_role'), where("user_id","==", loggedUserId));
+                const userRolesSnaps = await getDocs(q);
+                const userRolesIds = userRolesSnaps.docs
+                    // filter if is active
+                    .filter(doc => doc.data()?.active)
+                    .map((doc) => String(doc.data().role_id));
 
-        setRoles(currentRoles);
-        setPrevRoles(currentRoles);
-    },[loggedUserId, dataUserHasRole, dataRoles]);
+                // get roles names -> the if is needed because in where(field,'in',arr) the arr cannot ever be empty
+                let userRolesNames = [];
+                if (userRolesIds.length > 0) {
+                    // get all the roles names
+                    const rolesQuery = query(
+                        collection(db, 'roles'),
+                        where('__name__', 'in', userRolesIds)
+                    );
+                    const userRolesSnap = await getDocs(rolesQuery);
+                    userRolesNames = userRolesSnap.docs
+                        .map(doc => doc.data()?.role_name);
+                }
 
+                setRoles(userRolesNames);
+                setPrevRoles(userRolesNames);
+            }catch(err){
+                console.log(err);
+            }
+        };
+        loadData();
+    }, [loggedUserId]);
 
     const addRole = () => {
         if (newRole.trim() && !roles.includes(newRole.trim())) {
@@ -45,45 +69,122 @@ const Account = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, o
 
     const removeRole = roleToDelete => {
         setRoles(prev => prev.filter(r => r !== roleToDelete));
+        if (roleToDelete.trim() && !remRoles.includes(roleToDelete.trim())) {
+            setRemRoles(prev => [...prev, roleToDelete.trim()]);
+        }
     };
 
     const handleCancel = () => {
-        // Reset local changes
         setName('');
         setUsername('');
         setRoles(prevRoles);
         setNewRole('');
-        onCancel?.();
 
+        setFeedbackMessage('Changes discarded.');
+        setTimeout(() => setFeedbackMessage(''), 3000);
     };
 
-    const handleSave = () => {
+    const capitalize = (str) => {
+        return str
+            .toLowerCase()
+            .split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+    };
 
+    const handleSave = async () => {
+        // update user
         const updatedUser = {
-            id: user.id,
             name: name.trim() || user.name,
             hashtag: username.trim() || user.hashtag,
             photo_url: photoUrl
         };
 
+        await setDoc(doc(db, 'users', String(loggedUserId)), updatedUser);
 
-        const updatedRoles = roles.map(roleName => ({
-            user_id: user.id,
-            role_name: roleName,
-            role_hashtag: roleName.toLowerCase()
-                .replace(/\s+/g, '_')
-        }));
+        // create roles/associate created roles with user
+        for (const role of roles) {
+            // if the role was already set to user, do nothing
+            if(role in prevRoles) {continue;}
 
-        // send to parent via onSave
-        onSave?.({
-            user: updatedUser,
-            roles: updatedRoles
-        });
+            // get new roles data from firebase
+            const q = query(
+                collection(db, 'roles'),
+                where('role_name', '==', role)
+            );
+            const snap = await getDocs(q);
 
-        // update prevRoles so cancel works after save
+            // if the role doesn't exist, create
+            let roleId;
+            if (snap.empty) {
+                const newRoleRef = doc(collection(db, 'roles'));
+                await setDoc(newRoleRef, {
+                    role_name: capitalize(role.trim()),
+                    role_hashtag: role.trim().toLowerCase().replace(/\s+/g, '_')
+                });
+                // get roleId to search it in user_has_roles
+                roleId = newRoleRef.id;
+            } else {
+                roleId = snap.docs[0].id;
+            }
+            // check if role is already in user_has_role, because as is not recommended to delete doc, it was implemented a field 'active'
+            const userHasRoleQuery = query(
+                collection(db, 'user_has_role'),
+                where('user_id', '==', loggedUserId),
+                where('role_id', '==', roleId)
+            );
+            const userHasRoleSnap = await getDocs(userHasRoleQuery);
+            // if role is not in user_has_role:
+            if (userHasRoleSnap.empty) {
+                // create new
+                const newUserRoleRef = doc(collection(db, 'user_has_role'));
+                await setDoc(newUserRoleRef, {
+                    user_id: loggedUserId,
+                    role_id: roleId,
+                    active: true,
+                });
+            } else {
+                // update to active
+                const existingDocRef = userHasRoleSnap.docs[0].ref;
+                await updateDoc(existingDocRef, {
+                    active: true
+                });
+            }
+        }
+
+        // delete roles TODO: corrigir
+        for (const role of remRoles) {
+            const q = query(
+                collection(db, 'roles'),
+                where('role_name', '==', role)
+            );
+            const snap = await getDocs(q);
+
+            if (snap.empty) continue;
+
+            const roleId = snap.docs[0].id;
+
+            const userRoleQuery = query(
+                collection(db, 'user_has_role'),
+                where('user_id', '==', loggedUserId),
+                where('role_id', '==', roleId)
+            );
+            const userRoleSnap = await getDocs(userRoleQuery);
+
+            for (const docSnap of userRoleSnap.docs) {
+                await updateDoc(docSnap.ref, {
+                    active: false
+                });
+            }
+        }
+
+
+        setFeedbackMessage('Changes saved!');
+        setTimeout(() => setFeedbackMessage(''), 3000);
+
         setPrevRoles(roles);
-
     };
+
 
     return (
         <ScrollView contentContainerStyle={SETTINGS.container}>
@@ -97,13 +198,13 @@ const Account = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, o
                 <View>
                     <InputField
                         label="Name"
-                        placeholder={user.name}
+                        placeholder={user?.name || ''}
                         value={name}
                         onChangeText={setName}
                     />
                     <InputField
                         label="Username"
-                        placeholder={user.hashtag}
+                        placeholder={user?.hashtag || ''}
                         value={username}
                         onChangeText={setUsername}
                     />
@@ -138,7 +239,7 @@ const Account = ({loggedUserId, dataUsers, dataUserHasRole, dataRoles, onSave, o
                 />
             </View>
 
-            <CancelSaveButtons handleCancel={handleCancel} handleSave={handleSave} />
+            <CancelSaveButtons handleCancel={handleCancel} handleSave={handleSave} feedbackMessage={feedbackMessage} />
 
         </ScrollView>
     );

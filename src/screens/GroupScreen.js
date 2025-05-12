@@ -1,40 +1,31 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet } from "react-native";
 import SidePanel from "../components/Group/SidePanel";
 import MyGroupView from "../components/Group/View";
-import initialData from "../data/initial_data";
 import EmptyState from "../components/EmptyState";
 
-const GroupsScreen = ({ loggedUserId,  dataGroupMessages, dataAvailabilities, dataGroups, dataGroupUsers }) => {
+const GroupsScreen = ({ loggedUserId }) => {
     const [selected, setSelected] = useState(null);
 
-    let content;
-    if (selected) {
-        const group = initialData.groups[selected];
-        content = (
-            <MyGroupView
-                group={group}
+    const renderContent = () => {
+        if (selected) {
+            return <MyGroupView
+                group={selected}
                 loggedUserId={loggedUserId}
-                dataGroupMessages={dataGroupMessages}
-                dataAvailabilities={dataAvailabilities}
             />
-        );
-    } else {
-        content = (
-            <EmptyState/>
-        );
-    }
 
+        } else {
+            return <EmptyState/>
+        }
+    }
     return (
         <View style={styles.container}>
             <SidePanel
                 selected={selected}
                 onChange={setSelected}
                 loggedUserId={loggedUserId}
-                dataGroups={dataGroups}
-                dataGroupUsers={dataGroupUsers}
             />
-            <View style={styles.content}>{content}</View>
+            <View style={styles.content}>{renderContent()}</View>
         </View>
     );
 };

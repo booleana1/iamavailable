@@ -1,42 +1,62 @@
-import React, {useState, useEffect} from "react";
-import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
+import React, {useState, useEffect, useRef} from "react";
+import {View, FlatList, Text, TextInput, StyleSheet} from "react-native";
 import {COLORS} from "../../styles/theme";
-import {Ionicons} from "@expo/vector-icons";
 import IconPressButton from "../IconPressButton";
 import {CHAT} from "../../styles/chat";
-
-// ─────────────────────────────── UTILS ─────────────────────────────── //
-const getChatMessages = (data, userId, loggedUserId) => {
-    return Object.values(data)
-        .filter(
-            (m) =>
-                (m.sender_id === userId && m.receiver_id === loggedUserId) ||
-                (m.sender_id === loggedUserId && m.receiver_id === userId)
-        )
-        .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-}
+import {app, db, auth} from '../../../firebase.config'
+import {collection,  query, doc, writeBatch, onSnapshot} from "firebase/firestore";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const ChatWindow = ({userId, loggedUserId, data}) => {
+const ChatWindow = ({chat, loggedUserId}) => {
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
+    // allows auto scrolling to last msg sent
+    const flatListRef = useRef(null);
 
+    // get messages
     useEffect(() => {
-        const msgs = getChatMessages(data, userId, loggedUserId);
-        setMessages(msgs);
-    }, [userId, data]);
 
-    const handleSend = () => {
-        if (!text.trim()) return;
+        if(!chat){return;}
+        const msgQuery = query(
+            collection(db, 'chats', chat.chatId, 'messages'),
+        );
+
+        const unsubscribe = onSnapshot(msgQuery, (snapshot) => {
+            const msgData = snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a, b) => a.created_at - b.created_at);
+
+            setMessages(msgData);
+        });
+
+        return () => unsubscribe();
+
+
+    }, [chat]);
+
+
+    const handleSend = async () => {
+        const cleanText = text.trim();
+        if (!cleanText) return;
+
         const newMsg = {
-            id: Date.now(),
-            sender_id: loggedUserId,
-            receiver_id: userId,
-            content: text.trim(),
-            created_at: new Date().toISOString(),
+            sender_id:   loggedUserId,
+            receiver_id: chat.userId,
+            content:     cleanText,
+            created_at:  new Date().toISOString().replace('Z', '')
         };
-        setMessages((prev) => [...prev, newMsg]);
-        setText("");
+
+        // refs
+        const chatRef = doc(db, 'chats', chat.chatId);
+        const msgRef  = doc(collection(chatRef, 'messages'));
+
+        // batch
+        const batch = writeBatch(db);
+        batch.set(msgRef, newMsg);
+        batch.update(chatRef, { updatedAt: new Date().toISOString().replace('Z', '') });
+
+        await batch.commit();
+        setText('');
     };
 
     // compare if the sender ID is the logged user or not
@@ -53,6 +73,8 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
                 data={messages}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={renderItem}
+                ref={flatListRef}
+                onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             />
             <View style={[CHAT.inputContainer, {padding: 30}]}>
                 <TextInput
@@ -60,6 +82,8 @@ const ChatWindow = ({userId, loggedUserId, data}) => {
                     value={text}
                     onChangeText={setText}
                     placeholder="Write your message"
+                    onSubmitEditing={handleSend}
+                    blurOnSubmit={false}
                 />
                 <IconPressButton
                     icon="send-outline"

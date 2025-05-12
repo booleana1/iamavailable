@@ -1,6 +1,5 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native'
+import {Text, TouchableOpacity} from 'react-native'
 import React from 'react'
-import {COLORS} from "../styles/colors";
 
 const Button = ({text,stylesButton,stylesButtonText, handle}) => {
     return (
@@ -10,4 +9,3 @@ const Button = ({text,stylesButton,stylesButtonText, handle}) => {
     )
 }
 export default Button
-const styles = StyleSheet.create({})

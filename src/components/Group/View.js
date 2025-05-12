@@ -1,68 +1,141 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {View, FlatList, Text, TextInput, TouchableOpacity, StyleSheet} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import {COLORS} from "../../styles/theme";
 import AvailabilityText from "./AvailabilityText";
 import IconPressButton from "../IconPressButton";
 import {CHAT} from "../../styles/chat";
+import {app, db, auth} from '../../../firebase.config'
+import {collection, query, doc, where, writeBatch, onSnapshot, getDoc, setDoc, updateDoc, increment} from "firebase/firestore";
 
-// ─────────────────────────────── UTILS ─────────────────────────────── //
-const getGroupMessages = (data, group) => {
-    return Object.values(data)
-        .filter(m => m.group_id === group.id)
-        .map(m => ({...m, type: "message"}));
-}
-
-const getGroupAvailability = (data, group) => {
-    return Object.values(data)
-        .filter(av => av.group_id === group.id)
-        .map(av => ({
-            ...av,
-            type: "availability",
-        }));
-}
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabilities}) => {
+const GroupChatView = ({group, loggedUserId}) => {
     const [items, setItems] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [availabilities, setAvailabilities] = useState([]);
     const [text, setText] = useState("");
+    const isOwner = loggedUserId === group.ownerId;
+    // allows auto scrolling to last msg sent
+    const flatListRef = useRef(null);
 
-    const isOwner = group.user_id === loggedUserId;
 
-    // Load messages and availabilities for this group
+    // get messages and availabilities for this group
     useEffect(() => {
-        const messages = getGroupMessages(dataGroupMessages, group);
+        if (!group || !group.id) return;
 
-        const availabilities = getGroupAvailability(dataAvailabilities, group);
+        const messageQuery = query(
+            collection(db, 'groups', group.id, 'messages'),
+        );
 
-        const combined = [...messages, ...availabilities]
-            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const unsub = onSnapshot(messageQuery, (snapshot) => {
+            const messageData = snapshot.docs
+                .map(doc => ({
+                    id:doc.id,
+                    ...doc.data(),
+                    type: 'message'
+                }));
 
-        setItems(combined);
-
-    }, [group, dataGroupMessages, dataAvailabilities]);
-
-
-    // Send a text message
-    const handleSendMessage = () => {
-        if (!text.trim()) return;
-        const newMsg = {
-            id: Date.now(),
-            sender_id: loggedUserId,
-            receiver_id: null,
-            group_id: group.id,
-            content: text.trim(),
-            createdAt: new Date().toISOString(),
-            type: "message"
+            setMessages(messageData);
+        });
+        return () => {
+            setMessages([]);
+            unsub();
         };
-        setItems(prev => [...prev, newMsg]);
+    }, [group]);
+
+    // get availabilities
+    useEffect(() => {
+        if (!group || !group.id) return;
+
+        const availQuery = query(
+            collection(db, 'availabilities'),
+            where('group_id', '==', Number(group.id))
+        );
+
+        const unsub = onSnapshot(availQuery, (snapshot) => {
+            const availData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                name: doc.data().name,
+                start_date: doc.data().start_date,
+                created_at: doc.data().created_at,
+                yesCount: doc.data().yes_count || 0,
+                noCount: doc.data().no_count || 0,
+                type: 'availability'
+            }));
+            setAvailabilities(availData);
+        });
+
+        return () => {
+            setAvailabilities([]);
+            unsub();
+        };
+    }, [group]);
+
+    useEffect(() => {
+        const combined = [...messages, ...availabilities]
+            .filter(Boolean)
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        setItems(combined);
+    }, [messages, availabilities]);
+    // Send a text message
+    const handleSendMessage = async () => {
+        const cleanText = text.trim();
+        if (!cleanText) return;
+
+        const newMsg = {
+            sender_id: loggedUserId,
+            group_id: group.id,
+            content: cleanText,
+            created_at: new Date().toISOString().replace('Z', '')
+        };
+
+        // refs
+        const groupRef = doc(db, 'groups', group.id);
+        const itemRef  = doc(collection(groupRef, 'messages'));
+
+        // batch
+        const batch = writeBatch(db);
+        batch.set(itemRef, newMsg);
+        batch.update(groupRef, { updatedAt: new Date().toISOString().replace('Z', '')});
+
+        await batch.commit();
+
         setText("");
     };
 
     //
     const handleNewAvailability = () => {
         alert("Create new availability");
+        // TODO: in last assignment call availability create
     };
+
+    // handle vote
+    const voteOnAvailability = async (availabilityId, voteType) => {
+        if (voteType !== "yes" && voteType !== "no") return;
+        const voteRef = doc(db, 'availabilities', availabilityId, 'votes', String(loggedUserId));
+        const voteSnap = await getDoc(voteRef);
+        const availabilityRef = doc(db, 'availabilities', availabilityId);
+
+        if (voteSnap.exists()) {
+            const previousVote = voteSnap.data().vote;
+            if (previousVote === voteType) {
+                return;
+            }
+            // change vote
+            await setDoc(voteRef, { vote: voteType });
+            await updateDoc(availabilityRef, {
+                [`${previousVote}_count`]: increment(-1),
+                [`${voteType}_count`]: increment(1)
+            });
+        } else {
+            await setDoc(voteRef, { vote: voteType });
+            await updateDoc(availabilityRef, {
+                [`${voteType}_count`]: increment(1)
+            });
+        }
+    };
+
 
     // Render each item based on its type
     const renderItem = ({item}) => {
@@ -78,13 +151,25 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
         }
 
         // Availability item
-        const bubbleStyle = isOwner ? styles.outgoingAvailability : styles.incomingAvailability;
+        const bubbleStyle = isOwner? styles.outgoingAvailability : styles.incomingAvailability;
         return (
             <View style={bubbleStyle}>
                 <AvailabilityText
                     name={item.name}
-                    date={item.start_date.slice(0, 10).split("-").reverse().join("/")}
-                    time={item.start_date.slice(11, 16)}
+                    date={
+                        item.start_date
+                            ? item.start_date.slice(0, 10).split("-").reverse().join("/")
+                            : "??/??/????"
+                    }
+                    time={
+                        item.start_date
+                            ? item.start_date.slice(11, 16)
+                            : "--:--"
+                    }
+                    availabilityId={item.id}
+                    yesCount={item.yesCount}
+                    noCount={item.noCount}
+                    onVote={voteOnAvailability}
                 />
             </View>
         );
@@ -120,10 +205,13 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
                 </View>
             }
             <View style={styles.content}>
+
                 <FlatList
                     data={items}
                     keyExtractor={item => `${item.type}-${item.id}`}
                     renderItem={renderItem}
+                    ref={flatListRef}
+                    onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                     contentContainerStyle={styles.list}
                 />
 
@@ -141,6 +229,8 @@ const GroupChatView = ({group, loggedUserId, dataGroupMessages, dataAvailabiliti
                         value={text}
                         onChangeText={setText}
                         placeholder="Write your message"
+                        onSubmitEditing={handleSendMessage}
+                        blurOnSubmit={false}
                     />
                     <IconPressButton styleTouchable={CHAT.sendButton} onPress={handleSendMessage}
                                      icon={"send-outline"} size={28} color={COLORS.primary}/>

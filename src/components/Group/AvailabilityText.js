@@ -5,26 +5,7 @@ import { COLORS } from "../../styles/theme";
 import IconPressButton from "../IconPressButton";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const AvailabilityText = ({ name, date, time }) => {
-    const [yesCount, setYesCount] = useState(0);
-    const [noCount, setNoCount] = useState(0);
-    const [userVoted, setUserVoted] = useState("");
-
-    const updateVote = useCallback((voteType) => {
-        if (voteType === userVoted) return;
-
-        if (voteType === "Yes") {
-            if (userVoted === "No") setNoCount((c) => c - 1);
-            setYesCount((c) => c + 1);
-        }
-
-        if (voteType === "No") {
-            if (userVoted === "Yes") setYesCount((c) => c - 1);
-            setNoCount((c) => c + 1);
-        }
-
-        setUserVoted(voteType);
-    }, [userVoted]);
+const AvailabilityText = ({ name, date, time,availabilityId,yesCount,noCount,onVote }) => {
 
     return (
         <View style={styles.container}>
@@ -53,7 +34,7 @@ const AvailabilityText = ({ name, date, time }) => {
                     icon="checkmark"
                     color={COLORS.success}
                     size={24}
-                    onPress={() => updateVote("Yes")}
+                    onPress={() => onVote(availabilityId,"yes")}
                 />
                 <Text>{noCount}</Text>
                 <IconPressButton
@@ -61,7 +42,7 @@ const AvailabilityText = ({ name, date, time }) => {
                     icon="close"
                     color={COLORS.danger}
                     size={24}
-                    onPress={() => updateVote("No")}
+                    onPress={() => onVote(availabilityId,"no")}
                 />
             </View>
         </View>
