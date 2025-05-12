@@ -48,6 +48,7 @@ export default function Forms() {
 
     return groupId;
   };
+  
 
   const handleSubmit = async () => {
     if (!name || !role || !group || !date || !hour) {
@@ -84,8 +85,11 @@ export default function Forms() {
       user_id: 1,
     };
 
+    const cleanString = (str) =>
+    str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
+
     try {
-      const newId = `${Date.now()}`;
+      const newId = `${cleanString(name)}_${cleanString(group)}_${Date.now()}`;
       await setDoc(doc(db, 'availabilities', newId), availability);
       Alert.alert('Success', 'Availability created successfully!');
     } catch (error) {
