@@ -1,8 +1,8 @@
 
 import React, {useState, useEffect, useCallback, useMemo} from "react";
-import { View, TextInput, SectionList, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, TextInput, SectionList, TouchableOpacity, Text, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../../styles/theme";
+import {COLORS, GLOBAL} from "../../styles/theme";
 import {SIDEPANEL} from "../../styles/sidepanel";
 import {app, db, auth} from '../../../firebase.config'
 import {collection,  query, where, onSnapshot, doc, getDocs, documentId, orderBy} from "firebase/firestore";
@@ -126,8 +126,15 @@ const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUser
                 activeOpacity={0.6}
             >
                 {/*TODO: when doing backend put group avatar here*/}
-                <View style={SIDEPANEL.avatarWrapper}>
-                    <Ionicons name="people" size={24} />
+                <View style={GLOBAL.avatarWrapperMsg}>
+                    {item.photo_url && item.photo_url.startsWith('data:image') ? (
+                        <Image
+                            source={{ uri: item.photo_url }}
+                            style={GLOBAL.avatarMsg}
+                        />
+                    ) : (
+                        <Ionicons name="people" size={24} color="#000" />
+                    )}
                 </View>
                 <Text style={SIDEPANEL.name}>{item.name}</Text>
             </TouchableOpacity>

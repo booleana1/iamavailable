@@ -1,38 +1,116 @@
-import React, { useState, useMemo } from 'react';
+import React, {useState, useMemo, useEffect} from 'react';
 import {StyleSheet, Text, TextInput, View, TouchableOpacity, ScrollView, Switch,} from 'react-native';
-import { COLORS } from '../../styles/theme';
 import CancelSaveButtons from "../CancelSaveButtons";
-import {SETTINGS} from "../../styles/settings";
-import {GLOBAL} from "../../styles/global";
+import {GLOBAL, SETTINGS, COLORS} from "../../styles/theme";
 
-// TODO: criar notifications no bd
+import { doc, setDoc, getDoc, getDocs,collection } from "firebase/firestore";
+import {app, db, auth} from '../../../firebase.config'
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const CATEGORY_KEYS = ['groups', 'roles', 'users'];
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const Notifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers, onSave, onCancel }) => {
+const Notifications = ({ loggedUserId,onSave, onCancel }) => {
+    const [preferences, setPreferences] = useState({groups: [],roles: [],users: []});
+    const [allGroups, setAllGroups] = useState([]);
+    const [allRoles, setAllRoles] = useState([]);
+    const [allUsers, setAllUsers] = useState([]);
+    const [formState, setFormState] = useState({groups: [],roles: [],users: []});
+
+    const [inputs, setInputs] = useState({ groups: '', roles: '', users: '' });
+
+    // get all data needed to suggestions
+    useEffect(() => {
+        const fetchAllData = async () => {
+            try {
+                const groupsSnap = await getDocs(collection(db, 'groups'));
+                const rolesSnap = await getDocs(collection(db, 'roles'));
+                const usersSnap = await getDocs(collection(db, 'users'));
+
+                setAllGroups(groupsSnap.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().name
+                })));
+
+                setAllRoles(rolesSnap.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().role_name
+                })));
+
+                setAllUsers(usersSnap.docs.map(doc => ({
+                    id: doc.id,
+                    name: doc.data().name
+                })));
+            } catch (err) {
+                console.log( err);
+            }
+        };
+        fetchAllData();
+    }, []);
 
     const allItems = useMemo(() => {
-        const build = list =>
+        const build = (list, activeIds = []) =>
             list.map(obj => ({
                 id: obj.id,
-                name: obj.name ?? obj.role_name,
-                active: obj.active ?? false,
-                wasActive: obj.active ?? false, // persisted state
-                touched: false, // changed in current session
+                name: obj.name,
+                active: activeIds.includes(obj.id),
+                wasActive: activeIds.includes(obj.id),
+                touched: false,
             }));
 
         return {
-            groups: build(Object.values(dataGroups)),
-            roles: build(Object.values(dataRoles)),
-            users: build(Object.values(dataUsers)),
+            groups: build(allGroups || []),
+            roles: build(allRoles || []),
+            users: build(allUsers || []),
         };
-    }, [dataGroups, dataRoles, dataUsers]);
+    }, [allGroups, allRoles, allUsers]);
 
-    const [formState, setFormState] = useState(allItems);
-    const [inputs, setInputs] = useState({ groups: '', roles: '', users: '' });
+    useEffect(() => {
+        setFormState(allItems);
 
+        setFormState(prev => {
+            const updated = { ...prev };
+
+            for (const category of CATEGORY_KEYS) {
+                const activeIds = preferences[category] || [];
+
+                updated[category] = prev[category].map(item => ({
+                    ...item,
+                    active: activeIds.includes(item.id),
+                    wasActive: activeIds.includes(item.id),
+                    touched: false,
+                }));
+            }
+
+            return updated;
+        });
+    }, [allItems]);
+
+    // get user notifications preferences
+    useEffect(() => {
+        const fetchPrefs = async () => {
+            try {
+                const prefsCol = collection(db, 'users', String(loggedUserId), 'notification_preferences');
+                const prefsSnap = await getDocs(prefsCol);
+
+                const prefs = { groups: [], roles: [], users: [] };
+
+                prefsSnap.forEach(docSnap => {
+                    const key = docSnap.id;
+                    const data = docSnap.data();
+
+                    if (prefs.hasOwnProperty(key) && Array.isArray(data.ids)) {
+                        prefs[key] = data.ids;
+                    }
+                });
+
+                setPreferences(prefs);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        fetchPrefs();
+    }, [loggedUserId]);
 
     const toggleItem = (category, id, forceActive = null) => {
         setFormState(prev => ({
@@ -55,38 +133,50 @@ const Notifications = ({ loggedUserId, dataGroups, dataRoles, dataUsers, onSave,
         onCancel?.();
     };
 
-    const handleSave = () => {
-        // filters active subscription
+    const handleSave = async () => {
+        // filter only active ids
         const subscriptionUpdate = CATEGORY_KEYS.reduce((subs, cat) => {
-            subs[cat] = formState[cat].filter(item => item.active);
+            subs[cat] = formState[cat]
+                .filter(item => item.active)
+                .map(item => item.id);
             return subs;
         }, {});
 
-        // reset touched, and set wasActive with the last active status
-        setFormState(prev =>
-            CATEGORY_KEYS.reduce((acc, cat) => {
-                acc[cat] = prev[cat].map(i => ({
-                    ...i,
-                    wasActive: i.active,
-                    touched: false,
-                }));
-                return acc;
-            }, {}),
-        );
-        // send active subscription to parent
-        onSave?.({subscriptionUpdate});
+        try {
+            const userPrefsCol = collection(db, 'users', String(loggedUserId), 'notification_preferences');
+
+            // update each cat
+            for (const cat of CATEGORY_KEYS) {
+                const docRef = doc(userPrefsCol, cat);
+                await setDoc(docRef, { ids: subscriptionUpdate[cat] });
+            }
+
+            // update (wasActive / touched)
+            setFormState(prev =>
+                CATEGORY_KEYS.reduce((acc, cat) => {
+                    acc[cat] = prev[cat].map(i => ({
+                        ...i,
+                        wasActive: i.active,
+                        touched: false,
+                    }));
+                    return acc;
+                }, {})
+            );
+
+            onSave?.({ subscriptionUpdate });
+
+        } catch (err) {
+            console.log(err);
+        }
     };
 
-
-
-    const getSuggestions = (category, query) => {
-        if (!query) return [];
-        const q = query.toLowerCase();
+    const getSuggestions = (category, querySuggestion) => {
+        if (!querySuggestion || !formState[category]) return [];
+        const q = querySuggestion.toLowerCase();
         return formState[category].filter(
-            item => !item.active && item.name.toLowerCase().includes(q),
+            item => !item.active && item.name?.toLowerCase().includes(q)
         );
     };
-
 
     return (
         <ScrollView contentContainerStyle={SETTINGS.container}>

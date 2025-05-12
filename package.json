@@ -12,6 +12,7 @@
     "@expo-google-fonts/inter": "^0.3.0",
     "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "^14.0.2",
+    "@react-native-firebase/storage": "^22.1.0",
     "expo": "~52.0.43",
     "expo-font": "~13.0.4",
     "expo-image-picker": "~16.0.6",

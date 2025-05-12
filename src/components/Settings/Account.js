@@ -28,6 +28,7 @@ const Account = ({loggedUserId}) => {
                 // get user data and set to state variable
                 const userDataSnap = await getDoc(doc(db, 'users', String(loggedUserId)));
                 const userData = userDataSnap.data();
+                console.log(userData);
                 setUser(userData);
 
                 // get ids of user roles
@@ -59,6 +60,12 @@ const Account = ({loggedUserId}) => {
         };
         loadData();
     }, [loggedUserId]);
+
+    useEffect(() => {
+        if (user.photo_url) {
+            setPhotoUrl(user.photo_url);
+        }
+    }, [user.photo_url]);
 
     const addRole = () => {
         if (newRole.trim() && !roles.includes(newRole.trim())) {
@@ -178,7 +185,6 @@ const Account = ({loggedUserId}) => {
             }
         }
 
-
         setFeedbackMessage('Changes saved!');
         setTimeout(() => setFeedbackMessage(''), 3000);
 
@@ -233,7 +239,7 @@ const Account = ({loggedUserId}) => {
             </View>
             <View>
                 <AvatarPicker
-                    uri={photoUrl}          // current picture
+                    uri={photoUrl || null}          // current picture
                     onChange={setPhotoUrl}  // callback updates state
                     size={110}              // optional
                 />

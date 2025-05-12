@@ -7,7 +7,7 @@ import ChatWindow from "../components/Message/ChatWindow";
 import { COLORS } from "../styles/theme";
 
 
-const MessageScreen = ({loggedUserId, data, dataUsers}) => {
+const MessageScreen = ({loggedUserId}) => {
     const [selected, setSelected] = useState(null);
 
     const renderContent = () => {

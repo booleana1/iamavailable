@@ -36,7 +36,7 @@ const buildAvailability = async (aval) => {
 };
 
 
-export default function HomeScreen({loggedUserId}) {
+export default function HomeScreen({loggedUserId, setPhotoUrl}) {
     const [myAvailabilities, setMyAvailabilities] = useState({});
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
 

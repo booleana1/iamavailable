@@ -38,3 +38,4 @@ yarn-error.*
 *.tsbuildinfo
 
 /.idea/
+/src/data/initial_data.js

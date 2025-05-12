@@ -8,7 +8,7 @@ import {COLORS} from "../styles/theme";
 
 
 
-export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dataUsers, dataUserHasRole}) {
+export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dataUsers}) {
     const [selected, setSelected] = useState('Account');
 
     return (

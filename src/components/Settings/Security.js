@@ -1,41 +1,70 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View, ScrollView,} from 'react-native';
 import CancelSaveButtons from "../CancelSaveButtons";
 import InputField from "../InputField";
 import {SETTINGS} from "../../styles/settings";
-import { updatePassword } from "firebase/auth";
+import { signInWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "firebase/auth";
 import { auth } from '../../../firebase.config';
-
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const Security = ({loggedUserId}) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword]       = useState('');
+    const [feedbackMessage, setFeedbackMessage] = useState('');
 
     const handleCancel = () => {
         setCurrentPassword('');
         setNewPassword('');
-        alert('Changes discarded');
+
+        setFeedbackMessage('Changes discarded.');
+        setTimeout(() => setFeedbackMessage(''), 3000);
     };
+
+    const login = async () => {
+        try {
+            const userCred = await signInWithEmailAndPassword(auth, "giuliadkvieira@gmail.com", "123456");
+            const user = userCred.user;
+            console.log("Logged:", user);
+        } catch (err) {
+            console.log("Erro login:", err);
+        }
+    };
+/*useEffect(() => {
+        login();
+    }, []);*/
 
     const handleSave = async () => {
         const user = auth.currentUser;
 
         if (!user) {
-            alert("Usuário não autenticado.");
+            setFeedbackMessage("User not authenticated.");
             return;
         }
 
-        try {
-            await updatePassword(user, newPassword);
-            alert("Senha atualizada com sucesso.");
-        } catch (error) {
-            if (error.code === 'auth/requires-recent-login') {
-                alert("Por segurança, você precisa fazer login novamente.");
-            } else {
-                alert("Erro ao atualizar a senha: " + error.message);
-            }
+        if (!currentPassword || !newPassword) {
+            setFeedbackMessage("Please fill in both fields.");
+            return;
         }
+
+        const cred = EmailAuthProvider.credential("giuliadkvieira@gmail.com", currentPassword);
+
+        try {
+            // check current password
+            await reauthenticateWithCredential(user, cred);
+
+            await updatePassword(user, newPassword);
+            setFeedbackMessage("Password updated successfully.");
+        } catch (error) {
+            if (error.code === 'auth/invalid-credential') {
+                setFeedbackMessage("Current password is incorrect.");
+            }
+            else{
+                setFeedbackMessage("Error updating password: " + error.message);
+            }
+
+        }
+
+        setTimeout(() => setFeedbackMessage(''), 3000);
     };
 
     return (
@@ -61,7 +90,7 @@ const Security = ({loggedUserId}) => {
                 />
             </View>
 
-            <CancelSaveButtons handleCancel={handleCancel} handleSave={handleSave} />
+            <CancelSaveButtons handleCancel={handleCancel} handleSave={handleSave} feedbackMessage={feedbackMessage}/>
         </ScrollView>
     );
 };

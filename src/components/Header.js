@@ -1,7 +1,10 @@
 import {View, Text, StyleSheet, TextInput, Image, TouchableOpacity} from 'react-native';
-import {COLORS} from "../styles/theme";
+import { COLORS, SIDEPANEL, GLOBAL } from "../styles/theme";
 import {Ionicons} from "@expo/vector-icons";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
+import {doc,onSnapshot} from "firebase/firestore";
+import {app, db, auth} from '../../firebase.config'
+
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const PAGES = {
@@ -12,11 +15,28 @@ const PAGES = {
 };
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-export default function Header({onChange}) {
+export default function Header({onChange, loggedUserId}) {
     // TODO: change navigability
+    const [photoUrl, setPhotoUrl] = useState("");
 
     // this page/setPage is used to underline or not "Messages" and "Groups" on header
     const [page, setPage] = useState('');
+
+    useEffect(() => {
+        const userRef = doc(db, 'users', String(loggedUserId));
+        const unsubscribe = onSnapshot(userRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.photo_url) {
+                    setPhotoUrl(data.photo_url);
+                }
+            }
+        }, (err) => {
+            console.log( err);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const handlePageChange = (p) => {
         onChange(p);
@@ -61,8 +81,15 @@ export default function Header({onChange}) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => handlePageChange(PAGES.SETTINGS)}>
-                    <View style={styles.avatarWrapper}>
-                        <Ionicons name="person" size={24}/>
+                    <View style={GLOBAL.avatarWrapper}>
+                        {photoUrl && photoUrl.startsWith('data:image') ? (
+                                <Image
+                                    source={{ uri: photoUrl }}
+                                    style={GLOBAL.avatar}
+                                />
+                            ) :
+                        <Ionicons name="person" size={30} color="#fff" />
+                        }
                     </View>
                 </TouchableOpacity>
 
@@ -133,14 +160,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'white',
     },
-    avatarWrapper: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        borderWidth: 3,
-        borderColor: COLORS.border,
-        alignItems: "center",
-        justifyContent: "center",
-        marginRight: 12,
-    },
+
+
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, Text, TouchableOpacity, StyleSheet, View} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS } from '../styles/theme';
@@ -6,6 +6,11 @@ import { COLORS } from '../styles/theme';
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const AvatarPicker = ({ uri, onChange, size = 100 }) => {
     const [photoUri, setPhotoUri] = useState(uri);
+
+    useEffect(() => {
+        setPhotoUri(uri);
+    }, [uri]);
+
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -16,12 +21,14 @@ const AvatarPicker = ({ uri, onChange, size = 100 }) => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            quality: 0.7,
+            quality: 0.5,
+            base64: true
         });
         if (!result.canceled) {
-            const selectedUri = result.assets[0].uri;
-            setPhotoUri(selectedUri);
-            onChange?.(selectedUri);            // callback for parent
+            const base64 = result.assets[0].base64;
+            const imageData = `data:image/jpeg;base64,${base64}`;
+            setPhotoUri(imageData);
+            onChange?.(imageData);// callback for parent
         }
     };
 
@@ -32,14 +39,35 @@ const AvatarPicker = ({ uri, onChange, size = 100 }) => {
 
 
     return (
-        <TouchableOpacity onPress={pickImage} style={styles.wrapper}>
-            <Image
-                source={{ uri: photoUri }}
-                style={[
-                    styles.avatar,
-                    { width: size, height: size, borderRadius: size / 2 },
-                ]}
-            />
+        <View style={styles.wrapper}>
+            <TouchableOpacity onPress={pickImage}>
+                {photoUri && photoUri.startsWith("data:image") ? (
+                    <Image
+                        source={{ uri: photoUri }}
+                        style={[
+                            styles.avatar,
+                            { width: size, height: size, borderRadius: size / 2 },
+                        ]}
+                    />
+                ) : (
+                    <View
+                        style={[
+                            styles.avatar,
+                            {
+                                width: size,
+                                height: size,
+                                borderRadius: size / 2,
+                                backgroundColor: '#ccc',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            },
+                        ]}
+                    >
+                        <Text style={{ color: '#666' }}>No Photo</Text>
+                    </View>
+                )}
+            </TouchableOpacity>
+
             <View style={styles.actions}>
                 <TouchableOpacity onPress={pickImage}>
                     <Text style={styles.changeText}>Change</Text>
@@ -50,7 +78,7 @@ const AvatarPicker = ({ uri, onChange, size = 100 }) => {
                     </TouchableOpacity>
                 )}
             </View>
-        </TouchableOpacity>
+        </View>
     );
 };
 

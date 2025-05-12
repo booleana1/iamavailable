@@ -1,7 +1,7 @@
 import React, {useState, useMemo, useCallback, useEffect} from "react";
-import {View, TextInput, FlatList, TouchableOpacity, Text, StyleSheet,} from "react-native";
+import {View, TextInput, FlatList, TouchableOpacity, Text, StyleSheet,Image} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { SIDEPANEL} from "../../styles/sidepanel";
+import { COLORS, SIDEPANEL, GLOBAL } from "../../styles/theme";
 import {app, db, auth} from '../../../firebase.config'
 import {collection,  query, where, onSnapshot, doc, getDoc, Timestamp, orderBy} from "firebase/firestore";
 
@@ -66,8 +66,15 @@ const SidePanel = ({ selected, onChange, loggedUserId}) => {
                 onPress={() => handleSelect(item)}
                 activeOpacity={0.6}
             >
-                <View style={SIDEPANEL.avatarWrapper}>
-                    <Ionicons name="person" size={24} />
+                <View style={GLOBAL.avatarWrapperMsg}>
+                    {item.photo_url && item.photo_url.startsWith('data:image') ? (
+                        <Image
+                            source={{ uri: item.photo_url }}
+                            style={GLOBAL.avatarMsg}
+                        />
+                    ) : (
+                        <Ionicons name="person" size={24} color="#000" />
+                    )}
                 </View>
                 <Text style={SIDEPANEL.name}>{item.name}</Text>
             </TouchableOpacity>
