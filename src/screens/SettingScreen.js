@@ -21,9 +21,6 @@ export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dat
                     {selected === 'Account' && <Account loggedUserId={loggedUserId}/>}
                     {selected === 'Security' && <Security loggedUserId={loggedUserId}/>}
                     {selected === 'Notifications' && <Notifications loggedUserId={loggedUserId}
-                                                                    dataGroups={dataGroups}
-                                                                    dataRoles={dataRoles}
-                                                                    dataUsers={dataUsers}
                     />}
 
                 </View>

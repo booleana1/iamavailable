@@ -16,24 +16,16 @@ const getUserApprovedGroupIds = async (userId) => {
     return snap.docs.map(doc => doc.data().group_id);
 };
 
-const buildAvailability = async (aval) => {
-    const [userSnap, roleSnap, groupSnap] = await Promise.all([
-        getDoc(doc(db, 'users', String(aval.user_id))),
-        getDoc(doc(db, 'roles', String(aval.role_id))),
-        getDoc(doc(db, 'groups', String(aval.group_id))),
-    ]);
-
-    return {
-        id: aval.id,
-        userName: userSnap.data()?.name,
-        roleName: roleSnap.data()?.role_name,
-        groupName: groupSnap.data()?.name,
-        location: aval.location,
-        start: aval.start_date,
-        end: aval.end_date,
-        userId: userSnap.data()?.id,
-    };
-};
+const buildAvailability = (aval, usersMap, rolesMap, groupsMap) => ({
+    id: aval.id,
+    userName: usersMap[aval.user_id]?.name || '',
+    roleName: rolesMap[aval.role_id]?.role_name || '',
+    groupName: groupsMap[aval.group_id]?.name || '',
+    location: aval.location,
+    start: aval.start_date,
+    end: aval.end_date,
+    userId: aval.user_id,
+});
 
 
 export default function HomeScreen({loggedUserId, setPhotoUrl}) {
@@ -44,12 +36,15 @@ export default function HomeScreen({loggedUserId, setPhotoUrl}) {
 
         const loadData = async () => {
             try {
-                const groupIds = await getUserApprovedGroupIds(loggedUserId);
-
+                // get availabilities from user -> My Availabilities
                 const userSnap = await getDocs(
                     query(collection(db, 'availabilities'), where('user_id', '==', loggedUserId))
                 );
 
+                // get approved groups id -> Other Availabilities
+                const groupIds = await getUserApprovedGroupIds(loggedUserId);
+
+                // get availabilities from approved groups -> Other Availabilities
                 let groupSnap = { docs: [] };
                 if (groupIds.length > 0) {
                     groupSnap = await getDocs(
@@ -57,19 +52,37 @@ export default function HomeScreen({loggedUserId, setPhotoUrl}) {
                     );
                 }
 
+                // all the availabilities needed -> My and Other Availabilities
                 const allDocs = [...userSnap.docs, ...groupSnap.docs];
 
+                // get user, roles and groups snaps
+                const [usersSnap, rolesSnap, groupsSnap] = await Promise.all([
+                    getDocs(collection(db, 'users')),
+                    getDocs(collection(db, 'roles')),
+                    getDocs(collection(db, 'groups')),
+                ]);
+
+                // get user, roles, and groups data
+                const usersMap = Object.fromEntries(usersSnap.docs.map(d => [d.id, d.data()]));
+                const rolesMap = Object.fromEntries(rolesSnap.docs.map(d => [d.id, d.data()]));
+                const groupsMap = Object.fromEntries(groupsSnap.docs.map(d => [d.id, d.data()]));
+
+                // separate in my and other groups
                 const my = {};
                 const others = {};
 
                 await Promise.all(
                     allDocs.map(async (docSnap) => {
+                        // get single availability
                         const availabilities = { id: docSnap.id, ...docSnap.data() };
+                        // see if is already included
                         if ((availabilities.user_id === loggedUserId && my[availabilities.id]) ||
                             (groupIds.includes(availabilities.group_id) && others[availabilities.id])) {
                             return;
                         }
-                        const enriched = await buildAvailability(availabilities);
+                        // get data structures with all the needed data to show
+                        const enriched = buildAvailability(availabilities, usersMap, rolesMap, groupsMap);
+                        // distribute between my and other availabilities
                         if (availabilities.user_id === loggedUserId)
                             my[enriched.id] = enriched;
                         else if (groupIds.includes(availabilities.group_id))
@@ -80,7 +93,7 @@ export default function HomeScreen({loggedUserId, setPhotoUrl}) {
                 setMyAvailabilities(my);
                 setOtherAvailabilities(others);
             } catch (error) {
-                console.error('Error loading availabilities:', error);
+                console.error(error);
             }
         };
 
