@@ -1,133 +1,230 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
-
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { db } from '../../firebase.config';
+import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function Forms() {
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [photoBase64, setPhotoBase64] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [nextId, setNextId] = useState(1);
+
+  useEffect(() => {
+    const fetchMaxId = async () => {
+      try {
+        const q = query(collection(db, 'users'), orderBy('id', 'desc'), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const maxId = querySnapshot.docs[0].data().id;
+          setNextId(maxId + 1);
+        }
+      } catch (error) {
+        console.error('Error fetching max ID:', error);
+      }
+    };
+
+    fetchMaxId();
+  }, []);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      const base64Img = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setPhotoBase64(base64Img);
+    }
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      // Crear un nuevo usuario en la colección 'users'
+      await addDoc(collection(db, 'users'), {
+        id: nextId,
+        name: name,
+        hashtag: username,
+        email: email,
+        password_hash: password, // En una aplicación real, deberías hashear la contraseña
+        photo_url: photoBase64,
+        created_at: serverTimestamp(),
+      });
+      setFeedbackMessage('Account created successfully!');
+    } catch (error) {
+      console.error('Error creating account:', error);
+      setFeedbackMessage('Error creating account.');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setFeedbackMessage(''), 3000);
+    }
+  };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.form}>
-        <h1 style={styles.title}>Create an account</h1>
+    <View style={styles.container}>
+      <View style={styles.form}>
+        <Text style={styles.title}>Create an account</Text>
 
-        <div style={styles.addImage}>
-          <div style={styles.addImageIcon}>
-            <img src="path-to-your-icon.png" alt="Add image" style={styles.iconImage} />
-          </div>
-          <span style={styles.addImageText}>Add image</span>
-        </div>
+        <TouchableOpacity style={styles.addImage} onPress={pickImage}>
+          {photoBase64 ? (
+            <Image source={{ uri: photoBase64 }} style={styles.addImageIcon} />
+          ) : (
+            <View style={styles.addImageIcon}>
+              <Text>Add Image</Text>
+            </View>
+          )}
+          <Text style={styles.addImageText}>Add image</Text>
+        </TouchableOpacity>
 
-        <div style={styles.field}>
-          <label style={styles.label}>Email</label>
-          <input type="email" placeholder="Email" style={styles.input} />
-        </div>
+        <View style={styles.field}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            style={styles.input}
+            keyboardType="email-address"
+          />
+        </View>
 
-        <div style={styles.field}>
-          <label style={styles.label}>Name</label>
-          <input type="text" placeholder="Name" style={styles.input} />
-        </div>
+        <View style={styles.field}>
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+            style={styles.input}
+          />
+        </View>
 
-        <div style={styles.field}>
-          <label style={styles.label}>Username</label>
-          <input type="text" placeholder="Username" style={styles.input} />
-        </div>
+        <View style={styles.field}>
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+          />
+        </View>
 
-        <div style={styles.field}>
-          <label style={styles.label}>Password</label>
-          <input type="password" placeholder="Password" style={styles.input} />
-        </div>
+        <View style={styles.field}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            secureTextEntry
+          />
+        </View>
 
-        <button style={styles.doneButton}>Done</button>
+        <TouchableOpacity style={styles.doneButton} onPress={handleSubmit} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.doneButtonText}>Done</Text>
+          )}
+        </TouchableOpacity>
 
-        <p style={styles.footerText}>
-          Already have an account? <a href="#" style={styles.signIn}>Sign in</a>
-        </p>
-      </div>
-    </div>
+        <Text style={styles.footerText}>
+          Already have an account? <Text style={styles.signIn}>Sign in</Text>
+        </Text>
+
+        {feedbackMessage ? <Text style={styles.feedback}>{feedbackMessage}</Text> : null}
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    display: 'flex',
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100vh',
-
+    backgroundColor: '#f0f0f0',
   },
   form: {
-    width: '300px', // Ancho del formulario
-    padding: '20px',
+    width: 300,
+    padding: 20,
     backgroundColor: 'white',
   },
   title: {
-    fontSize: '30px',
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: '40px',
+    marginBottom: 40,
     textAlign: 'center',
   },
   addImage: {
-    display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: '20px',
+    marginBottom: 20,
   },
   addImageIcon: {
-    width: '100px',
-    height: '100px',
-    border: '2px dashed #ccc',
-    borderRadius: '50%',
-    display: 'flex',
+    width: 100,
+    height: 100,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white', 
-  },
-  iconImage: {
-    width: '54px', // Ajusta el tamaño del icono según sea necesario
-    height: '54px', // Ajusta el tamaño del icono según sea necesario
+    backgroundColor: 'white',
+    borderStyle: 'dashed',
   },
   addImageText: {
-    marginLeft: '10px',
-    fontSize: '16px',
+    marginTop: 10,
+    fontSize: 16,
     color: '#666',
-    cursor: 'pointer',
   },
   field: {
-    marginBottom: '24px',
+    marginBottom: 24,
   },
   label: {
-    fontSize: '20px',
-    marginBottom: '8px',
-    display: 'block',
+    fontSize: 20,
+    marginBottom: 8,
   },
   input: {
     width: '100%',
-    height: '50px',
-    borderRadius: '10px',
-    border: '1px solid #ccc',
-    paddingLeft: '12px',
-    fontSize: '16px',
+    height: 50,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingLeft: 12,
+    fontSize: 16,
   },
   doneButton: {
     backgroundColor: '#00d084',
-    width: 'calc(100% - 40px)',
-    height: '50px',
-    border: 'none',
-    borderRadius: '10px',
-    fontSize: '16px',
-    cursor: 'pointer',
-    marginTop: '20px',
-    marginLeft: '20px',
-    display: 'flex',
+    width: '100%',
+    height: 50,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 20,
+  },
+  doneButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   footerText: {
-    marginTop: '30px',
+    marginTop: 30,
     textAlign: 'center',
-    fontSize: '14px',
+    fontSize: 14,
   },
   signIn: {
     color: '#00d084',
     fontWeight: 'bold',
-    textDecoration: 'none',
+  },
+  feedback: {
+    marginTop: 10,
+    textAlign: 'center',
+    color: 'green',
   },
 });

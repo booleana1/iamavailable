@@ -1,13 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
-//import RegisterScreen from './src/screens/RegisterScreen';
-import GroupDetailsScreen from './src/screens/GroupDetailsScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
+//import GroupDetailsScreen from './src/screens/GroupDetailsScreen';
 
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <GroupDetailsScreen/>
+          <RegisterScreen/>
           <StatusBar style="auto" />
       </SafeAreaView>
   );
