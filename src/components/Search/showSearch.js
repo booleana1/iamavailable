@@ -207,7 +207,6 @@ const Datalist = () => {
               <Picker
                 selectedValue={selectedRoleName}
                 onValueChange={(itemValue) => setSelectedRoleName(itemValue)}
-                style={Platform.OS === 'android' ? styles.pickerAndroid : undefined}
               >
                 <Picker.Item label="All" value="All" />
                 {roles.map(role => (
@@ -249,7 +248,6 @@ const Datalist = () => {
               <Picker
                 selectedValue={availabilityType}
                 onValueChange={(val) => setAvailabilityType(val)}
-                style={Platform.OS === 'android' ? styles.pickerAndroid : undefined}
               >
                 <Picker.Item label="All" value="All" />
                 <Picker.Item label="Online" value="Online" />
@@ -262,7 +260,6 @@ const Datalist = () => {
               <Picker
                 selectedValue={availabilityDateFilter}
                 onValueChange={(val) => setAvailabilityDateFilter(val)}
-                style={Platform.OS === 'android' ? styles.pickerAndroid : undefined}
               >
                 <Picker.Item label="All" value="All" />
                 <Picker.Item label="Today" value="Today" />
@@ -336,9 +333,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 40,
     marginBottom: 10,
-  },
-  pickerAndroid: {
-    height: 50,
   },
   searchInput: {
     backgroundColor: '#eee',
