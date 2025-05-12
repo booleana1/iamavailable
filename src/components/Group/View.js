@@ -192,15 +192,11 @@ const GroupChatView = ({group, loggedUserId}) => {
                 <View style={styles.groupHeader}>
                     <Text style={styles.title}>{group.name}</Text>
 
-                    <IconPressButton
-                        styleTouchable={styles.iconHeader}
-                        onPress={() => {
-                            alert("Group members")
-                        }}
-                        icon={"people-outline"}
-                        size={30}
-                        color={COLORS.text}
-                    />
+                    <TouchableOpacity style={styles.iconHeader} onPress={() => {
+                        alert("Group members")
+                    }}>
+                        <Ionicons name={"people-outline"} size={30}/>
+                    </TouchableOpacity>
 
                 </View>
             }
@@ -290,6 +286,5 @@ const styles = StyleSheet.create({
     incoming:{
         backgroundColor: COLORS.primary,
     }
-
 
 });
