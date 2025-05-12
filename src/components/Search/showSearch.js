@@ -21,6 +21,8 @@ const Datalist = () => {
   const [minMembers, setMinMembers] = useState('');
   const [maxMembers, setMaxMembers] = useState('');
   const [autoAdmissionOnly, setAutoAdmissionOnly] = useState(false);
+  const [availabilityType, setAvailabilityType] = useState('All');
+  const [availabilityDateFilter, setAvailabilityDateFilter] = useState('All');
 
   const [groupUsers, setGroupUsers] = useState([]);
   const [users, setUsers] = useState([]);
@@ -94,11 +96,42 @@ const Datalist = () => {
     return filteredGroups;
   };
 
+  const isSameDay = (date1, date2) =>
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
+
+  const isSameWeek = (date1, date2) => {
+    const startOfWeek = new Date(date2);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    return date1 >= startOfWeek && date1 <= endOfWeek;
+  };
+
+  const isSameMonth = (date1, date2) =>
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth();
+
   const filteredGroupsArray = getFilteredGroups();
 
   const filteredAvailabilitiesArray = availabilities.filter(availability => {
     const user = getUserById(availability.user_id);
-    return user && user.name.toLowerCase().includes(searchText.toLowerCase());
+    if (!user || !user.name.toLowerCase().includes(searchText.toLowerCase())) return false;
+
+    const date = new Date(availability.start_date);
+    const now = new Date();
+
+    if (availabilityType === 'Online' && availability.is_geolocated) return false;
+    if (availabilityType === 'Presential' && !availability.is_geolocated) return false;
+
+    if (availabilityDateFilter === 'Today' && !isSameDay(date, now)) return false;
+    if (availabilityDateFilter === 'ThisWeek' && !isSameWeek(date, now)) return false;
+    if (availabilityDateFilter === 'ThisMonth' && !isSameMonth(date, now)) return false;
+
+    return true;
   });
 
   return (
@@ -182,8 +215,9 @@ const Datalist = () => {
                 ))}
               </Picker>
             </View>
+
             <Text style={styles.filterLabel}>GROUPS</Text>
-            <Text style={styles.filterLabel}>Members </Text>
+            <Text style={styles.filterLabel}>Members</Text>
             <View style={styles.memberRangeContainer}>
               <TextInput
                 style={styles.memberInput}
@@ -207,6 +241,34 @@ const Datalist = () => {
                 value={autoAdmissionOnly}
                 onValueChange={setAutoAdmissionOnly}
               />
+            </View>
+
+            <Text style={styles.filterLabel}>AVAILABILITIES</Text>
+            <Text style={styles.filterLabel}>Type</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={availabilityType}
+                onValueChange={(val) => setAvailabilityType(val)}
+                style={Platform.OS === 'android' ? styles.pickerAndroid : undefined}
+              >
+                <Picker.Item label="All" value="All" />
+                <Picker.Item label="Online" value="Online" />
+                <Picker.Item label="Presential" value="Presential" />
+              </Picker>
+            </View>
+
+            <Text style={styles.filterLabel}>Date</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={availabilityDateFilter}
+                onValueChange={(val) => setAvailabilityDateFilter(val)}
+                style={Platform.OS === 'android' ? styles.pickerAndroid : undefined}
+              >
+                <Picker.Item label="All" value="All" />
+                <Picker.Item label="Today" value="Today" />
+                <Picker.Item label="This Week" value="ThisWeek" />
+                <Picker.Item label="This Month" value="ThisMonth" />
+              </Picker>
             </View>
           </View>
         )}
@@ -268,6 +330,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 10,
+    marginBottom: 10,
   },
   pickerWrapper: {
     width: '100%',
