@@ -51,14 +51,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
-    backgroundColor: '#f5f5f5',
+
   },
   form: {
     width: '300px', // Ancho del formulario
     padding: '20px',
     backgroundColor: 'white',
-    borderRadius: '10px',
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   title: {
     fontSize: '30px',

@@ -9,7 +9,7 @@ export default function GroupDetailsScreen() {
     return (
         <View style={styles.container}>
             <Header/>
-            <GroupInfo/>
+            <GroupInfo loggedUserId={1}/>
             <DoneButton style={{bottom:80, right:120}}/>
 
         </View>

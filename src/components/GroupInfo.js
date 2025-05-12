@@ -1,30 +1,72 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Sidebar from './GroupSidebar';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../firebase.config';
+import { COLORS } from '../styles/theme';
 
+export default function GroupInfo({ loggedUserId }) {
+  const [group, setGroup] = useState(null);
+  const [groupUsers, setGroupUsers] = useState([]);
+  const [myGroups, setMyGroups] = useState([]);
+  const [otherGroups, setOtherGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function GroupInfo() {
-  // Datos de ejemplo para los grupos y usuarios
-  const myGroups = [
-    { name: 'MyGroup1' },
-    { name: 'MyGroup2' },
-  ];
-  const otherGroups = [
-    { name: 'OtherGroup1' },
-    { name: 'OtherGroup2' },
-  ];
-  const users = [
-    { name: 'Student 1' },
-    { name: 'Student 2' },
-    { name: 'Student 3' },
-    { name: 'Student 4' },
-  ];
+  useEffect(() => {
+    const loadGroupInfo = async () => {
+      try {
+        // Obtener grupos creados por el usuario
+        const myGroupsQuery = query(collection(db, 'groups'), where('user_id', '==', loggedUserId));
+        const myGroupsSnap = await getDocs(myGroupsQuery);
+        const myGroupsData = myGroupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setMyGroups(myGroupsData);
 
-  // Renderizar la tabla de usuarios
+        // Obtener grupos a los que pertenece el usuario
+        const groupUsersQuery = query(collection(db, 'group_users'), where('user_id', '==', loggedUserId), where('status', '==', 'approved'));
+        const groupUsersSnap = await getDocs(groupUsersQuery);
+        const groupIds = groupUsersSnap.docs.map(doc => doc.data().group_id);
+
+        let otherGroupsData = [];
+        if (groupIds.length > 0) {
+          const groupsDataQuery = query(collection(db, 'groups'), where('id', 'in', groupIds));
+          const groupsDataSnap = await getDocs(groupsDataQuery);
+          otherGroupsData = groupsDataSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        }
+        setOtherGroups(otherGroupsData);
+
+        // Obtener información del grupo actual (puedes ajustar esto según el grupo seleccionado)
+        if (myGroupsData.length > 0) {
+          setGroup(myGroupsData[0]);
+          const groupId = myGroupsData[0].id;
+
+          // Obtener usuarios del grupo
+          const usersRef = collection(db, 'group_users');
+          const usersQuery = query(usersRef, where('group_id', '==', groupId), where('status', '==', 'approved'));
+          const usersSnap = await getDocs(usersQuery);
+          const userIds = usersSnap.docs.map(doc => doc.data().user_id);
+
+          let userNames = [];
+          if (userIds.length > 0) {
+            const usersDataQuery = query(collection(db, 'users'), where('id', 'in', userIds));
+            const usersDataSnap = await getDocs(usersDataQuery);
+            userNames = usersDataSnap.docs.map(doc => ({ name: doc.data().name }));
+          }
+          setGroupUsers(userNames);
+        }
+      } catch (err) {
+        console.error('Error loading group info:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGroupInfo();
+  }, [loggedUserId]);
+
   const renderUsersTable = () => (
     <View style={styles.usersTable}>
       <Text style={styles.tableTitle}>Users</Text>
-      {users.map((user, index) => (
+      {groupUsers.map((user, index) => (
         <View key={index} style={styles.userItem}>
           <Text style={styles.userName}>{user.name}</Text>
         </View>
@@ -32,56 +74,61 @@ export default function GroupInfo() {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (!group) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.value}>Group not found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Sidebar fijo a la izquierda */}
       <Sidebar myGroups={myGroups} otherGroups={otherGroups} />
 
-      {/* Contenido principal */}
       <View style={styles.mainContent}>
-        {/* Fila superior: GROUP DETAILS y Users */}
         <View style={styles.topRow}>
-          {/* Título "GROUP DETAILS" */}
           <Text style={styles.title}>GROUP DETAILS</Text>
-
-          {/* Tabla de usuarios */}
           {renderUsersTable()}
         </View>
 
-        {/* Contenedor para las filas de detalles */}
         <View style={styles.detailsContainer}>
-          {/* Fila para Name y Hashtag juntos */}
           <View style={styles.row}>
             <View style={styles.rowItem}>
               <Text style={styles.label}>Name</Text>
-              <Text style={styles.text}>GROUP NAME</Text>
+              <Text style={styles.text}>{group.name}</Text>
             </View>
             <View style={styles.rowItem}>
               <Text style={styles.label}>Hashtag</Text>
-              <Text style={styles.text}>#UniqueHashtag</Text>
+              <Text style={styles.text}>#{group.hashtag}</Text>
             </View>
           </View>
 
-          {/* Fila para Description */}
           <View style={styles.row}>
             <View style={styles.rowItemFull}>
               <Text style={styles.label}>Description</Text>
               <Text style={styles.text}>
-                This is the group description.{"\n"}
-                Here the professor can say the group is about...
+                {group.description || 'No description available'}
               </Text>
             </View>
           </View>
 
-          {/* Fila para Type y Admission juntos */}
           <View style={styles.row}>
             <View style={styles.rowItem}>
               <Text style={styles.label}>Type</Text>
-              <Text style={styles.text}>Public</Text>
+              <Text style={styles.text}>{group.is_public ? 'Public' : 'Private'}</Text>
             </View>
             <View style={styles.rowItem}>
               <Text style={styles.label}>Admission</Text>
-              <Text style={styles.text}>Self-Admission</Text>
+              <Text style={styles.text}>{group.auto_admission ? 'Auto-Admission' : 'Manual-Admission'}</Text>
             </View>
           </View>
         </View>
@@ -93,36 +140,36 @@ export default function GroupInfo() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row', // Layout en fila para el sidebar y el contenido principal
+    flexDirection: 'row',
     backgroundColor: '#f0f0f0',
   },
   mainContent: {
-    flex: 1, // Ocupa el espacio restante después del sidebar
+    flex: 1,
     padding: 20,
     backgroundColor: '#fff',
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start', // Alinear al inicio verticalmente
-    marginBottom: 0, // Espacio debajo de GROUP DETAILS
+    alignItems: 'flex-start',
+    marginBottom: 0,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10, // Espacio debajo del título
+    marginBottom: 10,
   },
   detailsContainer: {
-    marginTop: -100, // Subir las filas hacia arriba
+    marginTop: 20, // Ajuste para bajar los elementos
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'flex-start', // Alinear elementos a la izquierda
-    marginBottom: 10, // Espacio entre filas
+    justifyContent: 'flex-start',
+    marginBottom: 10,
   },
   rowItem: {
-    width: '45%', // Ajustar ancho para que quepan juntos
-    marginRight: 20, // Espacio entre elementos
+    width: '45%',
+    marginRight: 20,
   },
   rowItemFull: {
     width: '100%',
@@ -137,8 +184,8 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   usersTable: {
-    width: '25%', // Ancho fijo para la tabla de usuarios
-    marginLeft: 30, // Mover ligeramente a la derecha
+    width: '25%',
+    marginLeft: 30,
   },
   tableTitle: {
     fontSize: 18,
@@ -153,4 +200,3 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
-
