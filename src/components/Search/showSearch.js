@@ -101,16 +101,6 @@ const Datalist = () => {
     date1.getMonth() === date2.getMonth() &&
     date1.getDate() === date2.getDate();
 
-  const isSameWeek = (date1, date2) => {
-    const startOfWeek = new Date(date2);
-    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-
-    return date1 >= startOfWeek && date1 <= endOfWeek;
-  };
-
   const isSameMonth = (date1, date2) =>
     date1.getFullYear() === date2.getFullYear() &&
     date1.getMonth() === date2.getMonth();
@@ -263,7 +253,6 @@ const Datalist = () => {
               >
                 <Picker.Item label="All" value="All" />
                 <Picker.Item label="Today" value="Today" />
-                <Picker.Item label="This Week" value="ThisWeek" />
                 <Picker.Item label="This Month" value="ThisMonth" />
               </Picker>
             </View>
