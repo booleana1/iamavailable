@@ -10,19 +10,26 @@ const markerIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-const LocationMarker = () => {
+function LocationMarker({ onSelect }) {
   const [position, setPosition] = useState(null);
 
   useMapEvents({
     click(e) {
-      setPosition(e.latlng);
+      const coords = e.latlng;
+      setPosition(coords);
+      onSelect(coords);
     },
   });
 
   return position ? <Marker position={position} icon={markerIcon} /> : null;
-};
+}
 
-export default function LocationMap() {
+export default function LocationMap({ onLatitudeChange, onLongitudeChange }) {
+  const handleSelect = ({ lat, lng }) => {
+    onLatitudeChange(lat);
+    onLongitudeChange(lng);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.Title}>Location</Text>
@@ -33,7 +40,7 @@ export default function LocationMap() {
         style={styles.map}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <LocationMarker />
+        <LocationMarker onSelect={handleSelect} />
       </MapContainer>
     </View>
   );
@@ -41,22 +48,20 @@ export default function LocationMap() {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    right: 150,
-    bottom: 200,
-    width: '40%',
-    height: '50%',
+    marginTop: 40,
+    width: '100%',
+    height: 300,
     alignItems: 'center',
     justifyContent: 'center',
   },
   map: {
-    marginLeft: '50%',
-    width: '60%',
+    width: '90%',
     height: '100%',
     borderRadius: 8,
     overflow: 'hidden',
   },
   Title: {
     fontSize: 20,
+    marginBottom: 10,
   },
 });

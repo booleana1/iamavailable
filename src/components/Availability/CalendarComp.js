@@ -1,27 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, Text, TextInput } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import { FONTS, COLORS } from '../../styles/theme'; 
+import { FONTS, COLORS } from '../../styles/theme';
 
-export default function CalendarComp() {
-  const [selectedDate, setSelectedDate] = useState(null);
-
+export default function CalendarComp({ date, setDate, hour, setHour }) {
   return (
     <View style={styles.container}>
       <Calendar
-        onDayPress={(day) => {
-          setSelectedDate(day.dateString);
-        }}
+        onDayPress={(day) => setDate(day.dateString)}
         markedDates={{
-          [selectedDate]: { selected: true, marked: true, selectedColor: 'blue' },
+          [date]: { selected: true, marked: true, selectedColor: 'blue' },
         }}
         style={styles.calendar}
       />
-
       <View style={styles.field}>
         <Text style={styles.label}>Hour</Text>
-        <TextInput placeholder="e.g. 15:30" style={styles.input}/>
-
+        <TextInput value={hour} onChangeText={setHour} placeholder="e.g. 15:30" style={styles.input} />
       </View>
     </View>
   );
@@ -29,7 +23,6 @@ export default function CalendarComp() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -38,17 +31,17 @@ const styles = StyleSheet.create({
     width: 400,
     borderRadius: 10,
     elevation: 2,
-    marginTop: '25%',
+    marginTop: '5%',
   },
   field: {
-    marginTop:'1%',
+    marginTop: '1%',
     marginBottom: 24,
-    marginRight:'7%',
+    marginRight: '7%',
   },
   label: {
     fontSize: 20,
     fontFamily: FONTS.regular,
-    marginLeft:'12.5%',
+    marginLeft: '12.5%',
     marginBottom: 8,
     textAlign: 'left',
   },
@@ -59,6 +52,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.gray,
     paddingLeft: 12,
-    marginLeft:'11%',
+    marginLeft: '11%',
   },
 });

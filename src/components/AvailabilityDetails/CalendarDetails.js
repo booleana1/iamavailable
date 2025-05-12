@@ -1,19 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FONTS, COLORS } from '../../styles/theme';
-import initialData from '../../data/initial_data';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase.config';
 
 export default function CalendarDetails({ availabilityId }) {
-  const availability = initialData.availabilities[availabilityId];
+  const [availability, setAvailability] = useState(null);
+
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const availabilityDoc = await getDoc(doc(db, 'availabilities', availabilityId));
+        const availabilityData = availabilityDoc.data();
+        if (!availabilityData) return;
+        setAvailability(availabilityData);
+      } catch (error) {
+        console.error("Error loading availability:", error);
+      }
+    };
+
+    fetchAvailability();
+  }, [availabilityId]);
 
   if (!availability || !availability.start_date) {
     return <Text style={styles.errorText}>Availability Not Found.</Text>;
   }
 
   const dateTime = new Date(availability.start_date);
-  const formattedDate = dateTime.toISOString().split('T')[0]; 
-  const formattedTime = dateTime.toTimeString().slice(0, 5);  
+  const formattedDate = dateTime.toISOString().split('T')[0];
+  const formattedTime = dateTime.toTimeString().slice(0, 5);
 
   const markedDate = {
     [formattedDate]: {
@@ -26,7 +42,6 @@ export default function CalendarDetails({ availabilityId }) {
 
   return (
     <View style={styles.container}>
-
       <Calendar
         current={formattedDate}
         markedDates={markedDate}
@@ -58,7 +73,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    marginTop:'4.5%',
+    marginTop: '4.5%',
     backgroundColor: '#fff',
     alignItems: 'center',
   },
@@ -71,7 +86,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '20%',
+    width: '80%',
     gap: 20,
   },
   field: {

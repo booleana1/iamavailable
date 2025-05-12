@@ -1,18 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import initialData from '../../data/initial_data';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase.config';
 import { COLORS, FONTS } from '../../styles/theme';
 
 export default function AvailabilityDetails({ availabilityId }) {
-  const availability = initialData.availabilities[availabilityId];
+  const [availability, setAvailability] = useState(null);
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [group, setGroup] = useState(null);
 
-  if (!availability) {
-    return <Text>Availability Not Found.</Text>;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const availabilityDoc = await getDoc(doc(db, 'availabilities', availabilityId));
+        const availabilityData = availabilityDoc.data();
+        if (!availabilityData) return;
+
+        setAvailability(availabilityData);
+
+        const [userDoc, roleDoc, groupDoc] = await Promise.all([
+          getDoc(doc(db, 'users', String(availabilityData.user_id))),
+          getDoc(doc(db, 'roles', String(availabilityData.role_id))),
+          getDoc(doc(db, 'groups', String(availabilityData.group_id)))
+        ]);
+
+        setUser(userDoc.data());
+        setRole(roleDoc.data());
+        setGroup(groupDoc.data());
+      } catch (error) {
+        console.error("Error loading availability details:", error);
+      }
+    };
+
+    fetchData();
+  }, [availabilityId]);
+
+  if (!availability || !user || !role || !group) {
+    return <Text>Loading...</Text>;
   }
-
-  const user = initialData.users[availability.user_id];
-  const role = initialData.roles[availability.role_id];
-  const group = initialData.groups[availability.group_id];
 
   return (
     <View style={styles.container}>
@@ -26,17 +52,17 @@ export default function AvailabilityDetails({ availabilityId }) {
 
         <View style={styles.field}>
           <Text style={styles.label}>Role</Text>
-          <Text style={styles.value}>{role?.role_name || "Unkown"}</Text>
+          <Text style={styles.value}>{role.role_name || "Unknown"}</Text>
         </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Group</Text>
-          <Text style={styles.value}>{group?.name || "Unkonwn"}</Text>
+          <Text style={styles.value}>{group.name || "Unknown"}</Text>
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>Link </Text>
-          <Text style={styles.value}>{availability.location ?? "Geolocated"}</Text>
+          <Text style={styles.label}>Location</Text>
+          <Text style={styles.value}>{availability.location || "Geolocated"}</Text>
         </View>
       </View>
     </View>
@@ -45,15 +71,10 @@ export default function AvailabilityDetails({ availabilityId }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    position: 'absolute',
-    left: 150,
-    top: 150,
+    padding: 20,
     backgroundColor: COLORS.background,
   },
   card: {
-    width: '100%',
     padding: 20,
     backgroundColor: 'white',
   },
@@ -69,17 +90,10 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 20,
     fontFamily: FONTS.regular,
-    marginLeft: '12.5%',
     marginBottom: 8,
-    textAlign: 'left',
   },
   value: {
-    width: '75%',
-    height: 50,
-  
-    paddingLeft: 12,
-    marginLeft: '12.5%',
-    paddingTop: 12,
+    fontSize: 18,
     fontFamily: FONTS.regular,
     color: '#000',
   },

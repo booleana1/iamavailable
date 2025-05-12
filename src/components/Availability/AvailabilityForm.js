@@ -1,76 +1,195 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { View, Text, TextInput, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { db } from '../../../firebase.config';
 import { COLORS, FONTS } from '../../styles/theme';
+import CalendarComp from './CalendarComp';
+import LocationMap from './MeetingMap';
+import DoneButton from '../DoneButton';
 
 export default function Forms() {
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');  // Role name, not id
+  const [group, setGroup] = useState(''); // Group hashtag, not group_id
+  const [link, setLink] = useState('');
+
+  const [date, setDate] = useState(null);
+  const [hour, setHour] = useState('');
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
+
+  // Function to get roleId from role name
+  const getRoleIdFromName = async (roleName) => {
+    const rolesRef = collection(db, 'roles');
+    const querySnapshot = await getDocs(rolesRef);
+    let roleId = null;
+
+    querySnapshot.forEach((doc) => {
+      if (doc.data().role_name.toLowerCase() === roleName.toLowerCase()) {
+        roleId = doc.id; // Assuming the document ID is the role_id
+      }
+    });
+
+    return roleId;
+  };
+
+  // Function to get groupId from hashtag
+  const getGroupIdFromHashtag = async (hashtag) => {
+    const groupsRef = collection(db, 'groups'); // Assuming 'groups' is the collection where groups are stored
+    const querySnapshot = await getDocs(groupsRef);
+    let groupId = null;
+
+    querySnapshot.forEach((doc) => {
+      if (doc.data().hashtag.toLowerCase() === hashtag.toLowerCase()) {
+        groupId = doc.id; // Assuming the document ID is the group_id
+      }
+    });
+
+    return groupId;
+  };
+
+  const handleSubmit = async () => {
+    if (!name || !role || !group || !date || !hour) {
+      Alert.alert('Missing fields', 'Please complete all required fields.');
+      return;
+    }
+
+    // Get the role_id from the role name
+    const roleId = await getRoleIdFromName(role);
+    if (!roleId) {
+      Alert.alert('Invalid Role', 'The role name entered is invalid.');
+      return;
+    }
+
+    // Get the group_id from the group hashtag
+    const groupId = await getGroupIdFromHashtag(group);
+    if (!groupId) {
+      Alert.alert('Invalid Group', 'The group hashtag entered is invalid.');
+      return;
+    }
+
+    const availability = {
+      name,
+      role_id: roleId, // Use role_id instead of role
+      group_id: groupId, // Use group_id instead of group
+      location: link || '',
+      start_date: `${date}T${hour}`,
+      end_date: `${date}T${hour}`, // Puedes ajustar esto según lo necesites
+      periodicity: 'unique',
+      is_geolocated: latitude !== null && longitude !== null,
+      latitude: latitude ?? null,
+      longitude: longitude ?? null,
+      radius: null,
+      user_id: 1,
+    };
+
+    try {
+      const newId = `${Date.now()}`;
+      await setDoc(doc(db, 'availabilities', newId), availability);
+      Alert.alert('Success', 'Availability created successfully!');
+    } catch (error) {
+      console.error('Error saving availability:', error);
+      Alert.alert('Error', 'Failed to save availability');
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.form}>
-        <Text style={styles.title}>Create a new Availability</Text>
+      <Text style={styles.title}>Create a new Availability</Text>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Name</Text>
-          <TextInput placeholder="Name" style={styles.input} />
+      <View style={styles.row}>
+        {/* Form */}
+        <View style={styles.form}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Name</Text>
+            <TextInput value={name} onChangeText={setName} placeholder="Name" style={styles.input} />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Role</Text>
+            <TextInput value={role} onChangeText={setRole} placeholder="Role Name" style={styles.input} />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Group Hashtag</Text>
+            <TextInput value={group} onChangeText={setGroup} placeholder="Group Hashtag" style={styles.input} />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Link (if online)</Text>
+            <TextInput value={link} onChangeText={setLink} placeholder="Optional link" style={styles.input} />
+          </View>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Role</Text>
-          <TextInput placeholder="Role" style={styles.input} />
+        {/* Calendar */}
+        <View style={styles.calendar}>
+          <CalendarComp date={date} setDate={setDate} hour={hour} setHour={setHour} />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Group</Text>
-          <TextInput placeholder="Group" style={styles.input} />
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Link (if online)</Text>
-          <TextInput placeholder="Link" style={styles.input} />
+        {/* Map */}
+        <View style={styles.map}>
+          <LocationMap onLatitudeChange={setLatitude} onLongitudeChange={setLongitude} />
         </View>
       </View>
+
+      <DoneButton style={styles.doneButton} onPress={handleSubmit} />
     </View>
   );
-};
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    position: 'absolute',
-    left: 150,
-    top: 100,
+    paddingTop: 40,
+    paddingHorizontal: 20,
     backgroundColor: COLORS.background,
   },
-  form: {
-    width: '100%',
-    padding: 20,
-    backgroundColor: 'white',
-  },
   title: {
-    fontSize: 30,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    width: '100%',
+    gap: 30,
+  },
+  form: {
+    flex: 1,
+    padding: 10,
+  },
+  calendar: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  map: {
+    flex: 1.2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   field: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   label: {
-    fontSize: 20,
-    fontFamily: FONTS.regular,
-    marginLeft: '12.5%',
-    marginBottom: 8,
-    textAlign: 'left',
+    fontSize: 16,
+    fontFamily: FONTS.medium,
+    marginBottom: 6,
   },
   input: {
-    width: '75%',
-    height: 50,
-    borderRadius: 10,
-    borderWidth: 1,
+    height: 40,
     borderColor: COLORS.gray,
-    paddingLeft: 12,
-    marginLeft: '12.5%',
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 10,
     fontFamily: FONTS.regular,
   },
-
+  doneButton: {
+    marginTop: 10,
+    alignSelf: 'flex-end',
+    width: 120,
+  },
 });

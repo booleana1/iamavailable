@@ -10,8 +10,6 @@ export default function AvailabilityDetailsScreen({availabilityId}) {
     return (
         <View style={styles.container}>
             <Header/>
-            <CalendarDetails availabilityId={availabilityId}/>
-            <LocationDetails availabilityId={availabilityId}/>
             <AvailabilityDetails availabilityId={availabilityId}/>
             <Sidebar/>
         </View>

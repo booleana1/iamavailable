@@ -15,13 +15,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
-    position: 'absolute', 
-    width:'8%',
+    width: '20%',
+    alignSelf: 'center',
   },
   text: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    textAlign:'center',
+    textAlign: 'center',
   },
 });

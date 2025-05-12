@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import initialData from '../../data/initial_data';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../../firebase.config';
 
 // Icono para el marcador
 const markerIcon = new L.Icon({
@@ -13,11 +14,29 @@ const markerIcon = new L.Icon({
 });
 
 export default function LocationDetails({ availabilityId }) {
-  const availability = initialData.availabilities[availabilityId];
-  const hasCoords = availability?.latitude !== null && availability?.longitude !== null;
+  const [availability, setAvailability] = useState(null);
 
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const availabilityDoc = await getDoc(doc(db, 'availabilities', availabilityId));
+        const availabilityData = availabilityDoc.data();
+        if (!availabilityData) return;
+        setAvailability(availabilityData);
+      } catch (error) {
+        console.error("Error loading availability:", error);
+      }
+    };
+
+    fetchAvailability();
+  }, [availabilityId]);
+
+  if (!availability) {
+    return <Text style={styles.errorText}>Loading...</Text>;
+  }
+
+  const hasCoords = availability.latitude !== null && availability.longitude !== null;
   const defaultCenter = [41.79648, -6.76942];
-
   const location = hasCoords
     ? [availability.latitude, availability.longitude]
     : defaultCenter;
@@ -34,7 +53,6 @@ export default function LocationDetails({ availabilityId }) {
         style={styles.map}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        
         {hasCoords && <Marker position={location} icon={markerIcon} />}
       </MapContainer>
 
@@ -45,31 +63,36 @@ export default function LocationDetails({ availabilityId }) {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',      
-    top: '25%',      
-    alignItems:'center',         
-    right: 0,                 
-    width: '40%',             
-    height: '50%',            
-    backgroundColor: 'white', 
-    borderRadius: 8,          
-    zIndex: 10,               
+    position: 'absolute',
+    top: '25%',
+    alignItems: 'center',
+    right: 0,
+    width: '40%',
+    height: '50%',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    zIndex: 10,
   },
   map: {
-    width: '50%',            
-    height: '70%',           
-    borderRadius: 8,         
-    marginTop:'10%', 
+    width: '100%',
+    height: '70%',
+    borderRadius: 8,
+    marginTop: '10%',
   },
   title: {
     fontSize: 24,
     marginBottom: 10,
-    textAlign: 'center',      
+    textAlign: 'center',
   },
   note: {
     marginTop: 10,
     fontSize: 14,
     color: 'gray',
-    textAlign: 'center',      
+    textAlign: 'center',
+  },
+  errorText: {
+    marginTop: 40,
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
