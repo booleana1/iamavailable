@@ -1,25 +1,72 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
-import initialData from '../../data/initial_data';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../../firebase.config';
 import { COLORS } from '../../styles/theme';
 
-export default function AccountInfo({loggedUserId}) {
+export default function AccountInfo({ loggedUserId }) {
+  const [user, setUser] = useState(null);
+  const [userRoles, setUserRoles] = useState([]);
+  const [userGroups, setUserGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const user = initialData.users[loggedUserId];
+  useEffect(() => {
+    const loadUserInfo = async () => {
+      try {
+        // Get user info
+        const userSnap = await getDoc(doc(db, 'users', String(loggedUserId)));
+        if (userSnap.exists()) {
+          setUser(userSnap.data());
+        } else {
+          setUser(null);
+        }
 
-  if(!user){
-    return(
+        // Get roles
+        const rolesRef = collection(db, 'user_has_role');
+        const rolesQuery = query(rolesRef, where('user_id', '==', loggedUserId), where('active', '==', true));
+        const rolesSnap = await getDocs(rolesQuery);
+        const roleIds = rolesSnap.docs.map(doc => doc.data().role_id);
+
+        let roleNames = [];
+        if (roleIds.length > 0) {
+          const rolesDataQuery = query(collection(db, 'roles'), where('__name__', 'in', roleIds));
+          const rolesDataSnap = await getDocs(rolesDataQuery);
+          roleNames = rolesDataSnap.docs.map(doc => doc.data().role_name);
+        }
+
+        setUserRoles(roleNames);
+
+        // Get groups
+        const groupsQuery = query(collection(db, 'groups'), where('user_id', '==', loggedUserId));
+        const groupsSnap = await getDocs(groupsQuery);
+        const groups = groupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        setUserGroups(groups);
+      } catch (err) {
+        console.error('Error loading user info:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserInfo();
+  }, [loggedUserId]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
       <View style={styles.container}>
         <Text style={styles.value}>User not found</Text>
       </View>
-    )
+    );
   }
-
-  const userRoles = Object.values(initialData.roles)
-    .filter(role => role.user_id === loggedUserId)
-    .map(role => role.role_name);
-
-  const userGroups = Object.values(initialData.groups)
-    .filter(group => group.user_id === loggedUserId);
 
   return (
     <View style={styles.container}>
@@ -55,9 +102,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FFF',
     flex: 1,
-    paddingLeft:'17.5%',
-    paddingRight: '50%'
-    
+    paddingLeft: '17.5%',
+    paddingRight: '50%',
   },
   title: {
     fontSize: 22,
@@ -93,8 +139,8 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   groupText: {
-    margin:0,
-    paddingRight:25,
+    margin: 0,
+    paddingRight: 25,
     fontSize: 14,
     color: COLORS.text,
   },

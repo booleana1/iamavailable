@@ -8,7 +8,7 @@ import SearchScreen from './src/screens/SearchScreen';
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <CreateAvailability/>
+          <ProfileScreen/>
           <StatusBar style="auto" />
       </SafeAreaView>
   );
