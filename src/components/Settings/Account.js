@@ -28,7 +28,6 @@ const Account = ({loggedUserId}) => {
                 // get user data and set to state variable
                 const userDataSnap = await getDoc(doc(db, 'users', String(loggedUserId)));
                 const userData = userDataSnap.data();
-                console.log(userData);
                 setUser(userData);
 
                 // get ids of user roles

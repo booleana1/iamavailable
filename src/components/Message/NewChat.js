@@ -19,7 +19,9 @@ const NewChat = ({ onStart, loggedUserId }) => {
         (async () => {
             try {
                 const snap = await getDocs(collection(db, 'users'));
-                const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                const list = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .filter(u => u.id && u.name);
                 setAllUsers(list);
             } catch (e) {
                 console.error( e);
@@ -31,7 +33,7 @@ const NewChat = ({ onStart, loggedUserId }) => {
         const q = queryText.trim().toLowerCase();
         if (!q) return [];
         return allUsers
-            .filter(u => u.name.toLowerCase().includes(q))
+            .filter(u => u.name && u.name.toLowerCase().includes(q))
             .slice(0, 5);
     }, [queryText, allUsers]);
 
@@ -59,7 +61,7 @@ const NewChat = ({ onStart, loggedUserId }) => {
             if (snap.empty) {
                 chatDoc = {
                     pairId,
-                    participants: [loggedUserId, otherId],
+                    participants: [String(loggedUserId), String(otherId)],
                     createdAt: now,
                     updatedAt: now
                 };

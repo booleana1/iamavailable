@@ -19,14 +19,14 @@ const SidePanel = ({ selected, onChange, loggedUserId}) => {
 
         const q = query(
             collection(db, 'chats'),
-            where('participants', 'array-contains', loggedUserId)
+            where('participants', 'array-contains', String(loggedUserId))
         );
 
         const unsubscribe = onSnapshot(q, async snap => {
             // get the other participant id in 'chats'
             const rows = snap.docs.map(d => {
                 const { participants, updatedAt } = d.data();
-                const otherId = participants.find(uid => uid !== loggedUserId);
+                const otherId = participants.find(uid => uid !== String(loggedUserId));
                 return otherId ? { chatId: d.id, userId: otherId, updatedAt } : null;
             }).filter(Boolean)
                 .sort((a, b) => b.updatedAt - a.updatedAt);

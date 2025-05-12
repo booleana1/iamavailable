@@ -7,7 +7,6 @@ const SidePanel = ({selected, onChange}) => {
     const OPTIONS = ['Account', 'Security', 'Notifications'];
 
     const handleSelect = useCallback(option => {
-        console.log('Clicked:', option);
         onChange(option);
     }, [onChange]);
 

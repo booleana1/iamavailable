@@ -24,7 +24,8 @@ const ChatWindow = ({chat, loggedUserId}) => {
         const unsubscribe = onSnapshot(msgQuery, (snapshot) => {
             const msgData = snapshot.docs
                 .map(doc => ({ id: doc.id, ...doc.data() }))
-                .sort((a, b) => a.created_at - b.created_at);
+                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+            ;
 
             setMessages(msgData);
         });
