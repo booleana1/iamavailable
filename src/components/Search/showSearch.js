@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
-  Switch,
-} from 'react-native';
+import {View,Text,TextInput,ScrollView,StyleSheet,TouchableOpacity,Switch,} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { collection, getDocs } from 'firebase/firestore';

@@ -9,7 +9,9 @@ import AvailabilityDetailsScreen from './src/screens/AvailabilityDetailsScreen';
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <SearchScreen/>
+          <ProfileScreen/>
+          {/*<SearchScreen/>*/}
+          {/*<CreateAvailability>*/}
           <StatusBar style="auto" />
       </SafeAreaView>
   );

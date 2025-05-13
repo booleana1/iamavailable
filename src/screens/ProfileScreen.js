@@ -9,7 +9,7 @@ export default function ProfileScreen() {
     return (
         <View style={styles.container}>
             <Header/>
-            <UserInfo loggedUserId={5}/>
+            <UserInfo loggedUserId={1}/>
             <Sidebar/>
         </View>
     );

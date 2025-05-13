@@ -9,10 +9,10 @@ import DoneButton from '../DoneButton';
 
 export default function Forms() {
   const [name, setName] = useState('');
-  const [role, setRole] = useState('');  // Role name, not id
-  const [group, setGroup] = useState(''); // Group hashtag, not group_id
+  const [role, setRole] = useState('');  
+  const [group, setGroup] = useState(''); 
   const [link, setLink] = useState('');
-  const [periodicity, setPeriodicity] = useState('unique'); // Default periodicity
+  const [periodicity, setPeriodicity] = useState('unique'); 
 
   const [date, setDate] = useState(null);
   const [hour, setHour] = useState('');
@@ -27,7 +27,7 @@ export default function Forms() {
 
     querySnapshot.forEach((doc) => {
       if (doc.data().role_name.toLowerCase() === roleName.toLowerCase()) {
-        roleId = doc.id; // Assuming the document ID is the role_id
+        roleId = doc.id; 
       }
     });
 
@@ -42,7 +42,7 @@ export default function Forms() {
 
     querySnapshot.forEach((doc) => {
       if (doc.data().hashtag.toLowerCase() === hashtag.toLowerCase()) {
-        groupId = doc.id; // Assuming the document ID is the group_id
+        groupId = doc.id; 
       }
     });
 
@@ -52,32 +52,32 @@ export default function Forms() {
 
   const handleSubmit = async () => {
     if (!name || !role || !group || !date || !hour) {
-      Alert.alert('Missing fields', 'Please complete all required fields.');
+      alert('Please complete all required fields.');
       return;
     }
 
     // Get the role_id from the role name
     const roleId = await getRoleIdFromName(role);
     if (!roleId) {
-      Alert.alert('Invalid Role', 'The role name entered is invalid.');
+      alert('The role name entered is invalid.');
       return;
     }
 
     // Get the group_id from the group hashtag
     const groupId = await getGroupIdFromHashtag(group);
     if (!groupId) {
-      Alert.alert('Invalid Group', 'The group hashtag entered is invalid.');
+      alert('The group hashtag entered is invalid.');
       return;
     }
 
     const availability = {
       name,
-      role_id: roleId, // Use role_id instead of role
-      group_id: groupId, // Use group_id instead of group
+      role_id: roleId, 
+      group_id: groupId, 
       location: link || '',
       start_date: `${date}T${hour}`,
       end_date: `${date}T${hour}`,
-      periodicity,  // Add the selected periodicity
+      periodicity, 
       is_geolocated: latitude !== null && longitude !== null,
       latitude: latitude ?? null,
       longitude: longitude ?? null,
@@ -91,10 +91,10 @@ export default function Forms() {
     try {
       const newId = `${cleanString(name)}_${cleanString(group)}_${Date.now()}`;
       await setDoc(doc(db, 'availabilities', newId), availability);
-      Alert.alert('Success', 'Availability created successfully!');
+      alert('Availability created successfully!');
     } catch (error) {
       console.error('Error saving availability:', error);
-      Alert.alert('Error', 'Failed to save availability');
+      alert('Failed to save availability');
     }
   };
 
