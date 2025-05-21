@@ -2,6 +2,9 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
 import RegisterScreen from './src/screens/RegisterScreen';
+//import LoginScreen from './src/screens/LoginScreen';
+//import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
+import RecoverPasswordScreen from './src/screens/RecoverPasswordScreen';
 //import GroupDetailsScreen from './src/screens/GroupDetailsScreen';
 
 export default function App() {
