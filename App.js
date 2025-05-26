@@ -1,16 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { Text, View } from 'react-native';
-import RegisterScreen from './src/screens/RegisterScreen';
+//import RegisterScreen from './src/screens/RegisterScreen';
 //import LoginScreen from './src/screens/LoginScreen';
 //import ForgotPasswordScreen from './src/screens/ForgotPasswordScreen';
-import RecoverPasswordScreen from './src/screens/RecoverPasswordScreen';
+//import RecoverPasswordScreen from './src/screens/RecoverPasswordScreen';
 //import GroupDetailsScreen from './src/screens/GroupDetailsScreen';
+import GroupManagementScreen from './src/screens/GroupManagementScreen';
+//import CreateGroupsScreen from './src/screens/CreateGroupsScreen';
+
 
 export default function App() {
   return (
       <SafeAreaView style={styles.containerSafeArea} edges={['top']}>
-          <RegisterScreen/>
+          <GroupManagementScreen/>
           <StatusBar style="auto" />
       </SafeAreaView>
   );

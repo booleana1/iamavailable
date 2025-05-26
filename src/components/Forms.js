@@ -55,7 +55,7 @@ export default function Forms() {
         name: name,
         hashtag: username,
         email: email,
-        password_hash: password, // En una aplicación real, deberías hashear la contraseña
+        password_hash: password, 
         photo_url: photoBase64,
         created_at: serverTimestamp(),
       });
