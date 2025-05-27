@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, TextInput } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { FONTS, COLORS } from '../../styles/theme';
 
-export default function CalendarComp({ date, setDate, hour, setHour }) {
+export default function CalendarComp({ date, setDate, hour, setHour, endHour, setEndHour }) {
   return (
     <View style={styles.container}>
       <Calendar
@@ -13,9 +13,27 @@ export default function CalendarComp({ date, setDate, hour, setHour }) {
         }}
         style={styles.calendar}
       />
-      <View style={styles.field}>
-        <Text style={styles.label}>Hour</Text>
-        <TextInput value={hour} onChangeText={setHour} placeholder="e.g. 15:30" style={styles.input} />
+
+      <View style={styles.hourRow}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Start Hour</Text>
+          <TextInput
+            value={hour}
+            onChangeText={setHour}
+            placeholder="e.g. 14:00"
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>End Hour</Text>
+          <TextInput
+            value={endHour}
+            onChangeText={setEndHour}
+            placeholder="e.g. 16:00"
+            style={styles.input}
+          />
+        </View>
       </View>
     </View>
   );
@@ -33,25 +51,28 @@ const styles = StyleSheet.create({
     elevation: 2,
     marginTop: '5%',
   },
+  hourRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
   field: {
-    marginTop: '1%',
-    marginBottom: 24,
-    marginRight: '7%',
+    flex: 1,
+    marginHorizontal: 5,
   },
   label: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: FONTS.regular,
-    marginLeft: '12.5%',
     marginBottom: 8,
-    textAlign: 'left',
   },
   input: {
-    width: '75%',
-    height: 50,
-    borderRadius: 10,
+    height: 40,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.gray,
-    paddingLeft: 12,
-    marginLeft: '11%',
+    paddingHorizontal: 12,
+    fontSize: 16,
   },
 });

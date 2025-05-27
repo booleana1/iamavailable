@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, Picker } from 'react-native';  // Asegúrate de importar Picker
+import { View, Text, TextInput, StyleSheet, Alert, Picker } from 'react-native';
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase.config';
 import { COLORS, FONTS } from '../../styles/theme';
@@ -9,46 +9,40 @@ import DoneButton from '../DoneButton';
 
 export default function Forms() {
   const [name, setName] = useState('');
-  const [role, setRole] = useState('');  
-  const [group, setGroup] = useState(''); 
+  const [role, setRole] = useState('');
+  const [group, setGroup] = useState('');
   const [link, setLink] = useState('');
-  const [periodicity, setPeriodicity] = useState('unique'); 
+  const [periodicity, setPeriodicity] = useState('unique');
 
   const [date, setDate] = useState(null);
   const [hour, setHour] = useState('');
+  const [endHour, setEndHour] = useState('');
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
 
-  // Function to get roleId from role name
   const getRoleIdFromName = async (roleName) => {
     const rolesRef = collection(db, 'roles');
     const querySnapshot = await getDocs(rolesRef);
     let roleId = null;
-
     querySnapshot.forEach((doc) => {
       if (doc.data().role_name.toLowerCase() === roleName.toLowerCase()) {
-        roleId = doc.id; 
+        roleId = doc.id;
       }
     });
-
     return roleId;
   };
 
-  // Function to get groupId from hashtag
   const getGroupIdFromHashtag = async (hashtag) => {
     const groupsRef = collection(db, 'groups');
     const querySnapshot = await getDocs(groupsRef);
     let groupId = null;
-
     querySnapshot.forEach((doc) => {
       if (doc.data().hashtag.toLowerCase() === hashtag.toLowerCase()) {
-        groupId = doc.id; 
+        groupId = doc.id;
       }
     });
-
     return groupId;
   };
-  
 
   const handleSubmit = async () => {
     if (!name || !role || !group || !date || !hour) {
@@ -56,37 +50,59 @@ export default function Forms() {
       return;
     }
 
-    // Get the role_id from the role name
     const roleId = await getRoleIdFromName(role);
     if (!roleId) {
       alert('The role name entered is invalid.');
       return;
     }
 
-    // Get the group_id from the group hashtag
     const groupId = await getGroupIdFromHashtag(group);
     if (!groupId) {
       alert('The group hashtag entered is invalid.');
       return;
     }
 
+    const userId = 1;
+    const startDateTime = new Date(`${date}T${hour}`);
+    const endDateTime = new Date(`${date}T${endHour || hour}`);
+
+    if (endDateTime <= startDateTime) {
+      alert('End time must be after start time.');
+      return;
+    }
+
+    const availabilitiesRef = collection(db, 'availabilities');
+    const snapshot = await getDocs(availabilitiesRef);
+
+    const conflict = snapshot.docs.some(doc => {
+      const data = doc.data();
+      if (data.user_id !== userId) return false;
+      const existingStart = new Date(data.start_date);
+      return existingStart.getTime() === startDateTime.getTime();
+    });
+
+    if (conflict) {
+      alert('You already have an availability at that date and time.');
+      return;
+    }
+
     const availability = {
       name,
-      role_id: roleId, 
-      group_id: groupId, 
+      role_id: roleId,
+      group_id: groupId,
       location: link || '',
-      start_date: `${date}T${hour}`,
-      end_date: `${date}T${hour}`,
-      periodicity, 
+      start_date: startDateTime.toISOString(),
+      end_date: endDateTime.toISOString(),
+      periodicity,
       is_geolocated: latitude !== null && longitude !== null,
       latitude: latitude ?? null,
       longitude: longitude ?? null,
       radius: null,
-      user_id: 1,
+      user_id: userId,
     };
 
     const cleanString = (str) =>
-    str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
+      str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
 
     try {
       const newId = `${cleanString(name)}_${cleanString(group)}_${Date.now()}`;
@@ -103,7 +119,6 @@ export default function Forms() {
       <Text style={styles.title}>Create a new Availability</Text>
 
       <View style={styles.row}>
-        {/* Form */}
         <View style={styles.form}>
           <View style={styles.field}>
             <Text style={styles.label}>Name</Text>
@@ -139,12 +154,17 @@ export default function Forms() {
           </View>
         </View>
 
-        {/* Calendar */}
         <View style={styles.calendar}>
-          <CalendarComp date={date} setDate={setDate} hour={hour} setHour={setHour} />
+          <CalendarComp
+            date={date}
+            setDate={setDate}
+            hour={hour}
+            setHour={setHour}
+            endHour={endHour}
+            setEndHour={setEndHour}
+          />
         </View>
 
-        {/* Map */}
         <View style={styles.map}>
           <LocationMap onLatitudeChange={setLatitude} onLongitudeChange={setLongitude} />
         </View>
