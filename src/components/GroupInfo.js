@@ -15,17 +15,17 @@ export default function GroupInfo({ loggedUserId }) {
   useEffect(() => {
     const loadGroupInfo = async () => {
       try {
-        // Obtener grupos creados por el usuario
+        // Busca en la colección groups aquellos donde el campo user_id coincide con el usuario.
         const myGroupsQuery = query(collection(db, 'groups'), where('user_id', '==', loggedUserId));
         const myGroupsSnap = await getDocs(myGroupsQuery);
         const myGroupsData = myGroupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setMyGroups(myGroupsData);
 
-        // Obtener grupos a los que pertenece el usuario
+        // Busca en group_users donde el usuario está aprobado.
         const groupUsersQuery = query(collection(db, 'group_users'), where('user_id', '==', loggedUserId), where('status', '==', 'approved'));
         const groupUsersSnap = await getDocs(groupUsersQuery);
         const groupIds = groupUsersSnap.docs.map(doc => doc.data().group_id);
-
+        //Obtiene los detalles completos de los grupos en los que participa (que no ha creado).
         let otherGroupsData = [];
         if (groupIds.length > 0) {
           const groupsDataQuery = query(collection(db, 'groups'), where('id', 'in', groupIds));
@@ -34,7 +34,7 @@ export default function GroupInfo({ loggedUserId }) {
         }
         setOtherGroups(otherGroupsData);
 
-        // Obtener información del grupo actual (puedes ajustar esto según el grupo seleccionado)
+        // Obtener información del grupo actual 
         if (myGroupsData.length > 0) {
           setGroup(myGroupsData[0]);
           const groupId = myGroupsData[0].id;
