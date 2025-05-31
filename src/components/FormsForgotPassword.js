@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function FormsForgotPassword({ navigation }) {
   const [email, setEmail] = useState('');
@@ -12,9 +12,17 @@ export default function FormsForgotPassword({ navigation }) {
     setMessage('');
 
     try {
-      const auth = getAuth();
-      await sendPasswordResetEmail(auth, email);
-      setMessage('Verification code sent! Please check your email.');
+      const db = getFirestore();
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setMessage('Verification code sent! Please check your email.');
+        navigation.navigate('RecoverPassword', { email });
+      } else {
+        setMessage('Email not found. Please enter a registered email.');
+      }
     } catch (error) {
       setMessage(error.message);
     } finally {
@@ -43,14 +51,10 @@ export default function FormsForgotPassword({ navigation }) {
         </Text>
 
         <TouchableOpacity style={styles.doneButton} onPress={handleRecoverPassword} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.doneButtonText}>Done</Text>
-          )}
+          {loading ? <ActivityIndicator color="white" /> : <Text style={styles.doneButtonText}>Done</Text>}
         </TouchableOpacity>
 
-        <Text style={styles.footerText} onPress={() => navigation.goBack()}>
+        <Text style={styles.footerText} onPress={() => navigation.navigate('Login')}>
           Go back
         </Text>
 

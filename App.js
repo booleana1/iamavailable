@@ -11,13 +11,14 @@ import GroupDontBelongScreen from './src/screens/GroupDontBelongScreen';
 import GroupManagementScreen from './src/screens/GroupManagementScreen';
 import UserRoleManagementScreen from './src/screens/UserRoleManagementScreen';
 import CreateGroupsScreen from './src/screens/CreateGroupsScreen';
+import AddUserScreen from './src/screens/AddUserScreen';
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Register">
+      <Stack.Navigator initialRouteName="RecoverPassword">
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="GroupManagement" component={GroupManagementScreen} />
         <Stack.Screen name="UserRoleManagement" component={UserRoleManagementScreen} />
         <Stack.Screen name="CreateGroups" component={CreateGroupsScreen} />
+        <Stack.Screen name="AddUser" component={AddUserScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

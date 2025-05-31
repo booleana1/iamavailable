@@ -11,7 +11,7 @@ import {
   doc
 } from 'firebase/firestore';
 
-export default function GroupManagement({ loggedUserId }) {
+export default function GroupManagement({ loggedUserId, navigation }) {
   const [name, setName] = useState('');
   const [hashtag, setHashtag] = useState('');
   const [description, setDescription] = useState('');
@@ -59,11 +59,11 @@ export default function GroupManagement({ loggedUserId }) {
     const loadUsers = async (groupId) => {
       const approvedQuery = query(collection(db, 'group_users'), where('group_id', '==', groupId), where('status', '==', 'approved'));
       const approvedSnap = await getDocs(approvedQuery);
-      setApprovedUsers(approvedSnap.docs.map(doc => doc.data().user_id));
+      setApprovedUsers(approvedSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
       const pendingQuery = query(collection(db, 'group_users'), where('group_id', '==', groupId), where('status', '==', 'pending'));
       const pendingSnap = await getDocs(pendingQuery);
-      setPendingUsers(pendingSnap.docs.map(doc => doc.data().user_id));
+      setPendingUsers(pendingSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     };
 
     loadGroups();
@@ -163,14 +163,26 @@ export default function GroupManagement({ loggedUserId }) {
 
           <View style={styles.rightSection}>
             <View style={styles.usersTable}>
-              <Text style={styles.tableTitle}>Users</Text>
+              <View style={styles.userHeader}>
+                <Text style={styles.tableTitle}>Users</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('AddUser')}>
+                  <Text style={styles.plusSign}>+</Text>
+                </TouchableOpacity>
+              </View>
               {approvedUsers.length === 0 ? (
                 <Text style={styles.noDataText}>No approved users</Text>
               ) : (
                 <FlatList
                   data={approvedUsers}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => <Text style={styles.userItem}>User ID: {item}</Text>}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.userItem}>
+                      <Text style={styles.userText}>User ID: {item.user_id}</Text>
+                      <TouchableOpacity style={styles.plusButton} onPress={() => navigation.navigate('UserRoleManagement')}>
+                        <Text style={styles.plusSign}>+</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 />
               )}
             </View>
@@ -182,8 +194,15 @@ export default function GroupManagement({ loggedUserId }) {
               ) : (
                 <FlatList
                   data={pendingUsers}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => <Text style={styles.userItem}>User ID: {item}</Text>}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.userItem}>
+                      <Text style={styles.userText}>User ID: {item.user_id}</Text>
+                      <TouchableOpacity style={styles.plusButton} onPress={() => navigation.navigate('UserRoleManagement')}>
+                        <Text style={styles.plusSign}>+</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 />
               )}
             </View>
@@ -289,9 +308,28 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
+  userHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   userItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  plusButton: {
+    marginLeft: 5,
+  },
+  plusSign: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  userText: {
     fontSize: 16,
-    paddingVertical: 2,
   },
   noDataText: {
     fontSize: 16,

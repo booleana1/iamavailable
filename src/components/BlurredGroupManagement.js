@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, Text } from 'react-native';
-import GroupManagement from './GroupManagement'; // Asegúrate de que la ruta sea correcta
 
-export default function BlurredGroupManagement({ loggedUserId }) {
+export default function BlurredGroupManagement({ navigation, route }) {
+  const { loggedUserId } = route.params;
   const [isModalVisible, setIsModalVisible] = useState(true);
+
+  const handleDone = () => {
+    setIsModalVisible(false);
+    navigation.navigate('GroupManagement', { loggedUserId });
+  };
 
   return (
     <View style={styles.container}>
-      <GroupManagement loggedUserId={loggedUserId} />
-
       <Modal
         animationType="slide"
         transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => {
-          setIsModalVisible(!isModalVisible);
-        }}
+        onRequestClose={() => setIsModalVisible(false)}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
@@ -29,10 +30,7 @@ export default function BlurredGroupManagement({ loggedUserId }) {
                 <Text>Researcher</Text>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.doneButton}
-              onPress={() => setIsModalVisible(!isModalVisible)}
-            >
+            <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>
           </View>
@@ -51,7 +49,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo semi-transparente para el efecto de desenfoque
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     margin: 20,

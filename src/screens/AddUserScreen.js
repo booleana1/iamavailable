@@ -1,16 +1,14 @@
 import { View, StyleSheet } from 'react-native';
 import Header from '../components/Header';
-import GroupManagement from '../components/GroupManagement';
-import DoneButton from '../components/DoneButton';
+import BlurredAddUser from '../components/BlurredAddUser';
 import { COLORS } from '../styles/theme';
 
 
-export default function GroupManagementScreen({ navigation }) {
+export default function AddUserScreen() {
     return (
         <View style={styles.container}>
             <Header/>
-            <GroupManagement loggedUserId={1} navigation={navigation}/>
-            <DoneButton style={{bottom:80, right:120}}/>
+            <BlurredAddUser loggedUserId={1}/>
 
         </View>
     );
