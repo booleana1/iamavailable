@@ -4,7 +4,7 @@ import { db } from '../../firebase.config';
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import * as ImagePicker from 'expo-image-picker';
 
-export default function Forms() {
+export default function Forms({ navigation }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -49,13 +49,12 @@ export default function Forms() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Crear un nuevo usuario en la colección 'users'
       await addDoc(collection(db, 'users'), {
         id: nextId,
         name: name,
         hashtag: username,
         email: email,
-        password_hash: password, 
+        password_hash: password,
         photo_url: photoBase64,
         created_at: serverTimestamp(),
       });
@@ -136,7 +135,10 @@ export default function Forms() {
         </TouchableOpacity>
 
         <Text style={styles.footerText}>
-          Already have an account? <Text style={styles.signIn}>Sign in</Text>
+          Already have an account?{' '}
+          <Text style={styles.signIn} onPress={() => navigation.navigate('Login')}>
+            Sign in
+          </Text>
         </Text>
 
         {feedbackMessage ? <Text style={styles.feedback}>{feedbackMessage}</Text> : null}

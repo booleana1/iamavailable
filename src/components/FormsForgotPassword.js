@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 
-export default function FormsForgotPassword() {
+export default function FormsForgotPassword({ navigation }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -50,7 +50,7 @@ export default function FormsForgotPassword() {
           )}
         </TouchableOpacity>
 
-        <Text style={styles.footerText}>
+        <Text style={styles.footerText} onPress={() => navigation.goBack()}>
           Go back
         </Text>
 

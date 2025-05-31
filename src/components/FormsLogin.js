@@ -1,35 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { db } from '../../firebase.config'; // Asegúrate de que la ruta sea correcta
+import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
 
-export default function FormsLogin() {
+export default function FormsLogin({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = async () => {
-    setLoading(true);
-    setErrorMessage('');
-
-    try {
-      const auth = getAuth();
-      // Asumiendo que el username es el email en este ejemplo
-      await signInWithEmailAndPassword(auth, username, password);
-      // Si el inicio de sesión es exitoso, puedes navegar a otra pantalla aquí
-      console.log('Logged in successfully!');
-    } catch (error) {
-      setErrorMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleLogin = () => {
+    // Aquí puedes manejar la lógica de autenticación con username y password
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Welcome back</Text>
+        <Text style={styles.title}>Login</Text>
 
         <View style={styles.field}>
           <Text style={styles.label}>Username</Text>
@@ -52,19 +35,20 @@ export default function FormsLogin() {
           />
         </View>
 
-        <TouchableOpacity style={styles.doneButton} onPress={handleLogin} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.doneButtonText}>Done</Text>
-          )}
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
         <Text style={styles.footerText}>
-          Don't have an account? <Text style={styles.signUp}>Sign up</Text>
+          Don't have an account?
+          <Text style={styles.signUp} onPress={() => navigation.navigate('Register')}>
+            Sign up
+          </Text>
         </Text>
 
-        {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
+        <Text style={styles.forgotPasswordText} onPress={() => navigation.navigate('ForgotPassword')}>
+          Forgot your password?
+        </Text>
       </View>
     </View>
   );
@@ -81,45 +65,39 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 20,
     backgroundColor: 'white',
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 40,
     textAlign: 'center',
   },
   field: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   label: {
-    fontSize: 16,
+    fontSize: 20,
     marginBottom: 8,
   },
   input: {
     width: '100%',
-    height: 40,
-    borderRadius: 5,
+    height: 50,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ccc',
-    paddingLeft: 10,
+    paddingLeft: 12,
     fontSize: 16,
   },
-  doneButton: {
+  loginButton: {
     backgroundColor: '#00d084',
     width: '100%',
-    height: 40,
-    borderRadius: 5,
+    height: 50,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
   },
-  doneButtonText: {
+  loginButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
@@ -133,9 +111,10 @@ const styles = StyleSheet.create({
     color: '#00d084',
     fontWeight: 'bold',
   },
-  error: {
+  forgotPasswordText: {
     marginTop: 10,
     textAlign: 'center',
-    color: 'red',
+    color: 'black',
+    fontWeight: 'normal',
   },
 });

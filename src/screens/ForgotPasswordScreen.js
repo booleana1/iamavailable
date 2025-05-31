@@ -2,12 +2,10 @@ import { View, StyleSheet } from 'react-native';
 import FormsForgotPassword from '../components/FormsForgotPassword';
 import { COLORS } from '../styles/theme';
 
-
-
-export default function LoginScreen() {
+export default function ForgotPasswordScreen({ navigation }) {
     return (
         <View style={styles.container}>
-            <FormsForgotPassword/>
+            <FormsForgotPassword navigation={navigation} />
         </View>
     );
 }
