@@ -1,9 +1,31 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Modal } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, Modal, Alert } from 'react-native';
+import { db } from '../../firebase.config';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-export default function BlurredAddUser({ loggedUserId, navigation }) {
+export default function BlurredAddUser({ navigation, loggedUserId }) {
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [username, setUsername] = useState('');
+
+  const handleAddUser = async () => {
+    if (!username.trim()) {
+      Alert.alert('Error', 'Username cannot be empty');
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, 'users'), {
+        name: username,
+        created_at: serverTimestamp(),
+        // Añade otros campos necesarios aquí
+      });
+      console.log('User added successfully!');
+      navigation.navigate('GroupManagement', { loggedUserId });
+    } catch (error) {
+      console.error('Error adding user:', error);
+      Alert.alert('Error', 'Failed to add user');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -13,6 +35,7 @@ export default function BlurredAddUser({ loggedUserId, navigation }) {
         visible={isModalVisible}
         onRequestClose={() => {
           setIsModalVisible(false);
+          navigation.navigate('GroupManagement', { loggedUserId });
         }}
       >
         <View style={styles.centeredView}>
@@ -26,10 +49,7 @@ export default function BlurredAddUser({ loggedUserId, navigation }) {
             />
             <TouchableOpacity
               style={styles.addButton}
-              onPress={() => {
-                console.log(`Add user: ${username}`);
-                setIsModalVisible(false);
-              }}
+              onPress={handleAddUser}
             >
               <Text style={styles.addButtonText}>Add User</Text>
             </TouchableOpacity>
@@ -48,11 +68,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fondo oscuro desenfocado
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     width: 300,
-    backgroundColor: '#0099ff', // Azul de fondo
+    backgroundColor: '#0099ff',
     borderRadius: 20,
     padding: 30,
     alignItems: 'center',
@@ -65,14 +85,14 @@ const styles = StyleSheet.create({
   input: {
     width: 200,
     height: 40,
-    backgroundColor: '#d9d9d9', // Gris claro
+    backgroundColor: '#d9d9d9',
     borderRadius: 20,
     paddingHorizontal: 15,
     marginBottom: 20,
     fontSize: 16,
   },
   addButton: {
-    backgroundColor: '#d9d9d9', // Botón gris
+    backgroundColor: '#d9d9d9',
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10,

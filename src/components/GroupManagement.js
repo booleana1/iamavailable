@@ -59,30 +59,62 @@ export default function GroupManagement({ loggedUserId, navigation }) {
     const loadUsers = async (groupId) => {
       const approvedQuery = query(collection(db, 'group_users'), where('group_id', '==', groupId), where('status', '==', 'approved'));
       const approvedSnap = await getDocs(approvedQuery);
-      setApprovedUsers(approvedSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const approvedUserIds = approvedSnap.docs.map(doc => doc.data().user_id);
 
       const pendingQuery = query(collection(db, 'group_users'), where('group_id', '==', groupId), where('status', '==', 'pending'));
       const pendingSnap = await getDocs(pendingQuery);
-      setPendingUsers(pendingSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const pendingUserIds = pendingSnap.docs.map(doc => doc.data().user_id);
+
+      const userNames = await fetchUserNames([...approvedUserIds, ...pendingUserIds]);
+
+      const approvedUsersData = approvedSnap.docs.map(doc => {
+        const userData = doc.data();
+        return { id: doc.id, ...userData, name: userNames[userData.user_id] };
+      });
+
+      const pendingUsersData = pendingSnap.docs.map(doc => {
+        const userData = doc.data();
+        return { id: doc.id, ...userData, name: userNames[userData.user_id] };
+      });
+
+      setApprovedUsers(approvedUsersData);
+      setPendingUsers(pendingUsersData);
+    };
+
+    const fetchUserNames = async (userIds) => {
+      const userNames = {};
+      for (const userId of userIds) {
+        const userQuery = query(collection(db, 'users'), where('id', '==', userId));
+        const userSnap = await getDocs(userQuery);
+        if (!userSnap.empty) {
+          userSnap.forEach(doc => {
+            userNames[userId] = doc.data().name;
+          });
+        }
+      }
+      return userNames;
     };
 
     loadGroups();
   }, [loggedUserId]);
 
   const handleSubmit = async () => {
+    if (!selectedGroupId) {
+      console.error('No group selected');
+      return;
+    }
+
     setLoading(true);
     try {
-      if (selectedGroupId) {
-        const groupRef = doc(db, 'groups', selectedGroupId);
-        await updateDoc(groupRef, {
-          name: name,
-          hashtag: hashtag,
-          description: description,
-          is_public: isPublic,
-          auto_admission: autoAdmission,
-        });
-        setFeedbackMessage('Group updated successfully!');
-      }
+      const groupRef = doc(db, 'groups', selectedGroupId);
+      await updateDoc(groupRef, {
+        name: name,
+        hashtag: hashtag,
+        description: description,
+        is_public: isPublic,
+        auto_admission: autoAdmission,
+      });
+      setFeedbackMessage('Group updated successfully!');
     } catch (error) {
       console.error('Error updating group:', error);
       setFeedbackMessage('Error updating group.');
@@ -177,8 +209,8 @@ export default function GroupManagement({ loggedUserId, navigation }) {
                   keyExtractor={(item) => item.id}
                   renderItem={({ item }) => (
                     <View style={styles.userItem}>
-                      <Text style={styles.userText}>User ID: {item.user_id}</Text>
-                      <TouchableOpacity style={styles.plusButton} onPress={() => navigation.navigate('UserRoleManagement')}>
+                      <Text style={styles.userText}>{item.name}</Text>
+                      <TouchableOpacity style={styles.plusButton} onPress={() => navigation.navigate('UserRoleManagement', { userId: item.user_id, loggedUserId })}>
                         <Text style={styles.plusSign}>+</Text>
                       </TouchableOpacity>
                     </View>
@@ -197,8 +229,8 @@ export default function GroupManagement({ loggedUserId, navigation }) {
                   keyExtractor={(item) => item.id}
                   renderItem={({ item }) => (
                     <View style={styles.userItem}>
-                      <Text style={styles.userText}>User ID: {item.user_id}</Text>
-                      <TouchableOpacity style={styles.plusButton} onPress={() => navigation.navigate('UserRoleManagement')}>
+                      <Text style={styles.userText}>{item.name}</Text>
+                      <TouchableOpacity style={styles.plusButton} onPress={() => navigation.navigate('UserRoleManagement', { userId: item.user_id, loggedUserId })}>
                         <Text style={styles.plusSign}>+</Text>
                       </TouchableOpacity>
                     </View>

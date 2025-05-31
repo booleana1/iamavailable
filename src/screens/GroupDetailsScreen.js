@@ -4,14 +4,12 @@ import GroupInfo from '../components/GroupInfo';
 import DoneButton from '../components/DoneButton';
 import { COLORS } from '../styles/theme';
 
-
-export default function GroupDetailsScreen() {
+export default function GroupDetailsScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             <Header/>
-            <GroupInfo loggedUserId={1}/>
+            <GroupInfo route={route} loggedUserId={1} />
             <DoneButton style={{bottom:80, right:120}}/>
-
         </View>
     );
 }

@@ -1,14 +1,45 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Modal, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Modal, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import { db } from '../../firebase.config';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function BlurredGroupManagement({ navigation, route }) {
-  const { loggedUserId } = route.params;
+  const { loggedUserId, userId } = route.params;
   const [isModalVisible, setIsModalVisible] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', userId.toString()));
+        if (userDoc.exists) {
+          setUser(userDoc.data());
+        } else {
+          console.log('No such user!');
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+  }, [userId]);
 
   const handleDone = () => {
     setIsModalVisible(false);
     navigation.navigate('GroupManagement', { loggedUserId });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -20,16 +51,22 @@ export default function BlurredGroupManagement({ navigation, route }) {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Student 1</Text>
-            <View style={styles.rolesContainer}>
-              <Text style={styles.roleText}>Roles:</Text>
-              <View style={styles.roleOption}>
-                <Text>Student</Text>
-              </View>
-              <View style={styles.roleOption}>
-                <Text>Researcher</Text>
-              </View>
-            </View>
+            {user ? (
+              <>
+                <Text style={styles.modalText}>{user.name}</Text>
+                <View style={styles.rolesContainer}>
+                  <Text style={styles.roleText}>Roles:</Text>
+                  <View style={styles.roleOption}>
+                    <Text>Student</Text>
+                  </View>
+                  <View style={styles.roleOption}>
+                    <Text>Researcher</Text>
+                  </View>
+                </View>
+              </>
+            ) : (
+              <Text>User not found</Text>
+            )}
             <TouchableOpacity style={styles.doneButton} onPress={handleDone}>
               <Text style={styles.doneButtonText}>Done</Text>
             </TouchableOpacity>

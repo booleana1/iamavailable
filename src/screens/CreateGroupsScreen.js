@@ -3,13 +3,11 @@ import Header from '../components/Header';
 import FormsCreateGroupsScreen from '../components/FormsCreateGroupsScreen';
 import { COLORS } from '../styles/theme';
 
-
-
-export default function CreateGroupsScreen() {
+export default function CreateGroupsScreen({ navigation }) {
     return (
         <View style={styles.container}>
             <Header/>
-            <FormsCreateGroupsScreen/>
+            <FormsCreateGroupsScreen navigation={navigation} />
         </View>
     );
 }

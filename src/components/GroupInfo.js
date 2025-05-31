@@ -5,7 +5,8 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { db } from '../../firebase.config';
 import { COLORS } from '../styles/theme';
 
-export default function GroupInfo({ loggedUserId }) {
+export default function GroupInfo({ route, loggedUserId }) {
+  const { groupId } = route.params;
   const [group, setGroup] = useState(null);
   const [groupUsers, setGroupUsers] = useState([]);
   const [myGroups, setMyGroups] = useState([]);
@@ -15,17 +16,15 @@ export default function GroupInfo({ loggedUserId }) {
   useEffect(() => {
     const loadGroupInfo = async () => {
       try {
-        // Busca en la colección groups aquellos donde el campo user_id coincide con el usuario.
         const myGroupsQuery = query(collection(db, 'groups'), where('user_id', '==', loggedUserId));
         const myGroupsSnap = await getDocs(myGroupsQuery);
         const myGroupsData = myGroupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setMyGroups(myGroupsData);
 
-        // Busca en group_users donde el usuario está aprobado.
         const groupUsersQuery = query(collection(db, 'group_users'), where('user_id', '==', loggedUserId), where('status', '==', 'approved'));
         const groupUsersSnap = await getDocs(groupUsersQuery);
         const groupIds = groupUsersSnap.docs.map(doc => doc.data().group_id);
-        //Obtiene los detalles completos de los grupos en los que participa (que no ha creado).
+
         let otherGroupsData = [];
         if (groupIds.length > 0) {
           const groupsDataQuery = query(collection(db, 'groups'), where('id', 'in', groupIds));
@@ -34,12 +33,10 @@ export default function GroupInfo({ loggedUserId }) {
         }
         setOtherGroups(otherGroupsData);
 
-        // Obtener información del grupo actual 
-        if (myGroupsData.length > 0) {
-          setGroup(myGroupsData[0]);
-          const groupId = myGroupsData[0].id;
+        const groupDoc = await getDoc(doc(db, 'groups', groupId));
+        if (groupDoc.exists) {
+          setGroup(groupDoc.data());
 
-          // Obtener usuarios del grupo
           const usersRef = collection(db, 'group_users');
           const usersQuery = query(usersRef, where('group_id', '==', groupId), where('status', '==', 'approved'));
           const usersSnap = await getDocs(usersQuery);
@@ -52,6 +49,8 @@ export default function GroupInfo({ loggedUserId }) {
             userNames = usersDataSnap.docs.map(doc => ({ name: doc.data().name }));
           }
           setGroupUsers(userNames);
+        } else {
+          console.log('No such group!');
         }
       } catch (err) {
         console.error('Error loading group info:', err);
@@ -61,7 +60,7 @@ export default function GroupInfo({ loggedUserId }) {
     };
 
     loadGroupInfo();
-  }, [loggedUserId]);
+  }, [loggedUserId, groupId]);
 
   const renderUsersTable = () => (
     <View style={styles.usersTable}>
@@ -160,7 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   detailsContainer: {
-    marginTop: 20, // Ajuste para bajar los elementos
+    marginTop: 20,
   },
   row: {
     flexDirection: 'row',

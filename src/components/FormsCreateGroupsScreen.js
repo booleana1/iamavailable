@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator,
 import { db } from '../../firebase.config';
 import { collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs } from 'firebase/firestore';
 
-export default function FormsCreateGroupsScreen() {
+export default function FormsCreateGroupsScreen({ navigation }) {
   const [name, setName] = useState('');
   const [hashtag, setHashtag] = useState('');
   const [description, setDescription] = useState('');
@@ -33,8 +33,7 @@ export default function FormsCreateGroupsScreen() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'groups'), {
-        id: nextId,
+      const docRef = await addDoc(collection(db, 'groups'), {
         name: name,
         hashtag: hashtag,
         description: description,
@@ -42,9 +41,10 @@ export default function FormsCreateGroupsScreen() {
         auto_admission: autoAdmission,
         created_at: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        user_id: 1, // Asegúrate de reemplazar esto con el ID del usuario actual
+        user_id: 1,
       });
       setFeedbackMessage('Group created successfully!');
+      navigation.navigate('GroupDetails', { groupId: docRef.id });
     } catch (error) {
       console.error('Error creating group:', error);
       setFeedbackMessage('Error creating group.');
