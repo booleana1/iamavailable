@@ -3,7 +3,9 @@
 # dependencies
 node_modules/
 
+
 # Expo
+
 .expo/
 dist/
 web-build/
@@ -34,3 +36,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+/.idea/
+/src/data/initial_data.js

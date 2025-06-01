@@ -1,5 +1,7 @@
 import { COLORS } from './colors';
-import { SIZES } from './sizes';
-import { FONTS } from './fonts';
+import { SIDEPANEL} from "./sidepanel";
+import {GLOBAL} from "./global";
+import {SETTINGS} from "./settings";
 
-export { COLORS, SIZES, FONTS };
+
+export { COLORS, SIDEPANEL, GLOBAL, SETTINGS };
