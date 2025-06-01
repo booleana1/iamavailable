@@ -5,9 +5,12 @@ import InputField from "../InputField";
 import {SETTINGS} from "../../styles/settings";
 import { signInWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider, updatePassword } from "firebase/auth";
 import { auth } from '../../../firebase.config';
+import {useUser} from "../../context/UserContext";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const Security = ({loggedUserId}) => {
+const Security = () => {
+    const {loggedUserId} = useUser();
+
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword]       = useState('');
     const [feedbackMessage, setFeedbackMessage] = useState('');

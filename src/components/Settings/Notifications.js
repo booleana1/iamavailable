@@ -5,12 +5,15 @@ import {GLOBAL, SETTINGS, COLORS} from "../../styles/theme";
 
 import { doc, setDoc, getDoc, getDocs,collection } from "firebase/firestore";
 import {app, db, auth} from '../../../firebase.config'
+import {useUser} from "../../context/UserContext";
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const CATEGORY_KEYS = ['groups', 'roles', 'users'];
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const Notifications = ({ loggedUserId }) => {
+const Notifications = () => {
+    const {loggedUserId} = useUser();
+
     const [preferences, setPreferences] = useState({groups: [],roles: [],users: []});
     const [allGroups, setAllGroups] = useState([]);
     const [allRoles, setAllRoles] = useState([]);

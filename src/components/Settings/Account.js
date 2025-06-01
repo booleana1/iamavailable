@@ -6,10 +6,11 @@ import InputField from "../InputField";
 import {SETTINGS} from "../../styles/settings";
 import { db } from '../../../firebase.config'
 import {collection, getDoc, doc, getDocs, query, where, setDoc, updateDoc} from "firebase/firestore";
+import {useUser} from "../../context/UserContext";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const Account = ({loggedUserId}) => {
-
+const Account = () => {
+    const {loggedUserId} = useUser();
     const [name, setName] = useState('');
     const [username, setUsername] = useState('');
     const [photoUrl, setPhotoUrl] = useState('');
