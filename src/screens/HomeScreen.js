@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import AvailabilityCard from '../components/Home/AvailabilityCard';
 import {COLORS} from "../styles/theme";
-import { collection, query, where, getDoc, getDocs, doc, or } from "firebase/firestore";
-import {app, db, auth} from '../../firebase.config'
+import { collection, query, where, getDocs,} from "firebase/firestore";
+import {db} from '../../firebase.config'
 import {useUser} from "../context/UserContext";
+import {useNavigation} from "@react-navigation/native";
 
 const getUserApprovedGroupIds = async (userId) => {
     const q = query(
@@ -103,10 +104,9 @@ export default function HomeScreen() {
     }, [loggedUserId]);
 
 
-
-
     // menu useState
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigation = useNavigation();
 
 
     return (
@@ -174,7 +174,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() =>
-                            alert('Create Chat')
+                            navigation.navigate('CreateChat')
                         }
                     >
                         <Text style={styles.menuText}>Create Chat</Text>
@@ -182,7 +182,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() =>
-                            alert('Create Group')
+                            navigation.navigate('CreateGroup')
                         }
                     >
                         <Text style={styles.menuText}>Create Group</Text>
@@ -190,7 +190,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                         style={styles.menuItem}
                         onPress={() =>
-                            alert('Create Availability')
+                            navigation.navigate('CreateAvailability')
                         }
                     >
                         <Text style={styles.menuText}>Create Availability</Text>

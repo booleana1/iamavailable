@@ -18,7 +18,7 @@ import {createDrawerNavigator, DrawerItemList} from "@react-navigation/drawer";
 
 const Drawer = createDrawerNavigator();
 
-export default function SettingsDrawer({navigation}) {
+export default function SettingsDrawer() {
 
     return (
         <Drawer.Navigator
@@ -40,6 +40,7 @@ export default function SettingsDrawer({navigation}) {
             <Drawer.Screen name="Security" component={Security} />
             <Drawer.Screen name="Notifications" component={Notifications} />
         </Drawer.Navigator>
+
     );
 }
 

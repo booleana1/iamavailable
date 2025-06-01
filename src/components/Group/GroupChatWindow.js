@@ -7,10 +7,16 @@ import IconPressButton from "../IconPressButton";
 import {CHAT} from "../../styles/chat";
 import {app, db, auth} from '../../../firebase.config'
 import {collection, query, doc, where, writeBatch, onSnapshot, getDoc, setDoc, updateDoc, increment} from "firebase/firestore";
+import {useRoute} from "@react-navigation/native";
+import {useUser} from "../../context/UserContext";
 
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const GroupChatView = ({group, loggedUserId}) => {
+const GroupChatWindow = () => {
+    const route = useRoute();
+    const { group } = route.params;
+    const {loggedUserId} = useUser();
+
     const [items, setItems] = useState([]);
     const [messages, setMessages] = useState([]);
     const [availabilities, setAvailabilities] = useState([]);
@@ -92,7 +98,7 @@ const GroupChatView = ({group, loggedUserId}) => {
 
         // refs
         const groupRef = doc(db, 'groups', group.id);
-        const itemRef  = doc(collection(groupRef, 'messages'));
+        const itemRef  = doc(collection(groupRef, 'messages'), newMsg.created_at);
 
         // batch
         const batch = writeBatch(db);
@@ -243,7 +249,7 @@ const GroupChatView = ({group, loggedUserId}) => {
     );
 };
 
-export default GroupChatView;
+export default GroupChatWindow;
 
 // ─────────────────────────────── STYLES ─────────────────────────────── //
 const styles = StyleSheet.create({

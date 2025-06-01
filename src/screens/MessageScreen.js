@@ -25,7 +25,7 @@ const MessageScreen = () => {
     return (
         <View style={styles.container}>
 
-        <View style={styles.body}>
+            <View style={styles.body}>
                 <SidePanel selected={selected}
                            onChange={setSelected}
                            loggedUserId={loggedUserId} />

@@ -6,6 +6,10 @@ import {COLORS, GLOBAL} from "../../styles/theme";
 import {SIDEPANEL} from "../../styles/sidepanel";
 import {app, db, auth} from '../../../firebase.config'
 import {collection,  query, where, onSnapshot, doc, getDocs, documentId, orderBy} from "firebase/firestore";
+import {useNavigation} from "@react-navigation/native";
+import {useUser} from "../../context/UserContext";
+
+export const NEW_GROUP = "__NEW_GROUP__";
 
 
 // ─────────────────────────────── UTILS ─────────────────────────────── //
@@ -33,10 +37,15 @@ const makeChunks = (arr, size = 10) => {
 };
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUsers}) => {
+const SidePanel = () => {
+    const navigation = useNavigation();
+    const {loggedUserId} = useUser();
+
     const [queryText, setQueryText] = useState("");
     const [myGroups, setMyGroups] = useState([]);
     const [otherGroups, setOtherGroups] = useState([]);
+    const [selected, setSelected] = useState(null);
+
 
     // Get groups the user is in, wither by being main actor, or secondary actor
     useEffect(() => {
@@ -109,10 +118,17 @@ const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUser
 
     // handle when user select a group to see the chat
     const handleSelect = useCallback(
-        (value) => {
-            onChange?.(value); // group -> {id,name}
+        (item) => {
+            setSelected(item);
+
+            if (item === NEW_GROUP) {
+                navigation.navigate('CreateChat');
+            } else {
+                console.log(item)
+                navigation.navigate('Groups', { screen: 'GroupWindow', params: { group: item } });
+            }
         },
-        [onChange]
+        [navigation]
     );
 
     // render group icon and name
@@ -177,7 +193,7 @@ const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUser
             {/* New group button */}
             <View style={styles.newGroupContainer}>
                 <TouchableOpacity
-                    onPress={() => alert("Create new group")}
+                    onPress={() => handleSelect(NEW_GROUP)}
                     style={styles.newGroupButton}
                 >
                     <Ionicons name="add-circle-outline" size={56} />

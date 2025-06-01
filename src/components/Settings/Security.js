@@ -39,7 +39,6 @@ const Security = () => {
     const handleSave = async () => {
         const user = auth.currentUser;
 
-
         if (!currentPassword || !newPassword) {
             setFeedbackMessage("Please fill in both fields.");
             return;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import SidePanel from "../components/Group/SidePanel";
-import MyGroupView from "../components/Group/View";
+import MyGroupView from "../components/Group/GroupChatWindow";
 import EmptyState from "../components/EmptyState";
 import {useUser} from "../context/UserContext";
 

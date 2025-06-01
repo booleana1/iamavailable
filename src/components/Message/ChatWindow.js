@@ -5,9 +5,15 @@ import IconPressButton from "../IconPressButton";
 import {CHAT} from "../../styles/chat";
 import {app, db, auth} from '../../../firebase.config'
 import {collection, query, doc, writeBatch, onSnapshot, orderBy} from "firebase/firestore";
+import {useUser} from "../../context/UserContext";
+import {useRoute} from "@react-navigation/native";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const ChatWindow = ({chat, loggedUserId}) => {
+const ChatWindow = () => {
+    const route = useRoute();
+    const { chat } = route.params;
+    const {loggedUserId} = useUser();
+
     const [messages, setMessages] = useState([]);
     const [text, setText] = useState("");
     // allows auto scrolling to last msg sent

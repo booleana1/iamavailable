@@ -7,11 +7,13 @@ import {
     addDoc, serverTimestamp, orderBy, startAt, endAt, setDoc
 } from 'firebase/firestore';
 import { db } from '../../../firebase.config';
+import {useUser} from "../../context/UserContext";
 
 const makePairId = (a, b) => [a, b].sort().join('_');
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const NewChat = ({ onStart, loggedUserId }) => {
+const NewChat = ({ onStart }) => {
+    const {loggedUserId} = useUser();
     const [queryText, setQueryText] = useState("");
     const [allUsers, setAllUsers]   = useState([]);
 
@@ -21,7 +23,10 @@ const NewChat = ({ onStart, loggedUserId }) => {
             try {
                 const snap = await getDocs(collection(db, 'users'));
                 const list = snap.docs
-                    .map(d => ({ id: d.id, ...d.data() }))
+                    .map(d => {
+                        const { id: _discardedId, ...data } = d.data();
+                        return { id: d.id, ...data };
+                    })
                     .filter(u => u.id && u.name);
                 setAllUsers(list);
             } catch (e) {
@@ -46,6 +51,7 @@ const NewChat = ({ onStart, loggedUserId }) => {
         if (!selected) return;
 
         const otherId = selected.id;
+        console.log(otherId);
         const pairId  = makePairId(loggedUserId, otherId);
         const now     = serverTimestamp();
 

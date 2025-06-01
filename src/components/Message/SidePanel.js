@@ -4,15 +4,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS, SIDEPANEL, GLOBAL } from "../../styles/theme";
 import {app, db, auth} from '../../../firebase.config'
 import {collection,  query, where, onSnapshot, doc, getDoc, Timestamp, orderBy} from "firebase/firestore";
+import {useUser} from "../../context/UserContext";
+import {useNavigation} from "@react-navigation/native";
 
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 export const NEW_CHAT = "__NEW_CHAT__";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-const SidePanel = ({ selected, onChange, loggedUserId}) => {
+const SidePanel = () => {
+    const navigation = useNavigation();
+
+    const {loggedUserId} = useUser();
     const [search, setSearch] = useState('');
     const [contacts, setContacts] = useState([]);
+    const [selected, setSelected] = useState(null);
 
     useEffect(() => {
         if (!loggedUserId) return;
@@ -52,10 +58,17 @@ const SidePanel = ({ selected, onChange, loggedUserId}) => {
     }, [contacts, search]);
 
     const handleSelect = useCallback(
-        (value) => {
-            onChange?.(value);
+        (item) => {
+            setSelected(item);
+
+            if (item === NEW_CHAT) {
+                navigation.navigate('Messages', { screen: 'NewChat' });
+            } else {
+                console.log(item)
+                navigation.navigate('Messages', { screen: 'ChatWindow', params: { chat: item } });
+            }
         },
-        [onChange]
+        [navigation]
     );
 
     const renderItem = ({ item }) => {
