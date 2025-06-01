@@ -3,15 +3,19 @@ import { View, ActivityIndicator, Alert } from 'react-native';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import ManageAvailabilityForm from '../components/ManageAvailability/ManageAvailability';
+import {useNavigation} from "@react-navigation/native";
 
-export default function ManageAvailabilityScreen({ availabilityId }) {
+export default function ManageAvailabilityScreen({route}) {
+  const navigation = useNavigation();
+  const {availabilityId} = route.params;
+
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const docRef = doc(db, 'availabilities', availabilityId);
+        const docRef = doc(db, 'availabilities', String(availabilityId));
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -44,8 +48,10 @@ export default function ManageAvailabilityScreen({ availabilityId }) {
   }
 
   const handleSuccess = (updatedData) => {
-    Alert.alert('Success', 'Availability updated successfully');
     setAvailability(updatedData);
+    navigation.goBack();
+    alert('Availability updated successfully!');
+
   };
 
   return (

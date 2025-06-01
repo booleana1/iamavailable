@@ -3,10 +3,10 @@ import { View, StyleSheet } from 'react-native';
 import Forms from '../components/Forms';
 import { COLORS } from '../styles/theme';
 
-export default function RegisterScreen({ navigation }) {
+export default function RegisterScreen() {
   return (
     <View style={styles.container}>
-      <Forms navigation={navigation} />
+      <Forms  />
     </View>
   );
 }

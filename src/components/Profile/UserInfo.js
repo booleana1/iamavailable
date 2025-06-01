@@ -4,7 +4,7 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { db } from '../../../firebase.config';
 import { COLORS } from '../../styles/theme';
 
-export default function AccountInfo({ loggedUserId }) {
+export default function AccountInfo({ userId }) {
   const [user, setUser] = useState(null);
   const [userRoles, setUserRoles] = useState([]);
   const [userGroups, setUserGroups] = useState([]);
@@ -14,30 +14,15 @@ export default function AccountInfo({ loggedUserId }) {
     const loadUserInfo = async () => {
       try {
         // Get user info
-        const userSnap = await getDoc(doc(db, 'users', String(loggedUserId)));
+        const userSnap = await getDoc(doc(db, 'users', String(userId)));
         if (userSnap.exists()) {
           setUser(userSnap.data());
         } else {
           setUser(null);
         }
 
-        // Get roles
-        const rolesRef = collection(db, 'user_has_role');
-        const rolesQuery = query(rolesRef, where('user_id', '==', loggedUserId), where('active', '==', true));
-        const rolesSnap = await getDocs(rolesQuery);
-        const roleIds = rolesSnap.docs.map(doc => doc.data().role_id);
-
-        let roleNames = [];
-        if (roleIds.length > 0) {
-          const rolesDataQuery = query(collection(db, 'roles'), where('__name__', 'in', roleIds));
-          const rolesDataSnap = await getDocs(rolesDataQuery);
-          roleNames = rolesDataSnap.docs.map(doc => doc.data().role_name);
-        }
-
-        setUserRoles(roleNames);
-
         // Get groups
-        const groupsQuery = query(collection(db, 'groups'), where('user_id', '==', loggedUserId));
+        const groupsQuery = query(collection(db, 'groups'), where('user_id', '==', userId));
         const groupsSnap = await getDocs(groupsQuery);
         const groups = groupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -50,7 +35,7 @@ export default function AccountInfo({ loggedUserId }) {
     };
 
     loadUserInfo();
-  }, [loggedUserId]);
+  }, [userId]);
 
   if (loading) {
     return (
@@ -80,8 +65,6 @@ export default function AccountInfo({ loggedUserId }) {
       <Text style={styles.label}>Complete Name:</Text>
       <Text style={styles.value}>{user.name}</Text>
 
-      <Text style={styles.label}>Roles:</Text>
-      <Text style={styles.value}>{userRoles.length ? userRoles.join(', ') : 'No roles assigned'}</Text>
 
       <Text style={styles.label}>Groups to which it belongs:</Text>
       {userGroups.length ? (

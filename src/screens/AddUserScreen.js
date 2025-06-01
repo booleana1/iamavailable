@@ -1,6 +1,6 @@
 import { View, StyleSheet } from 'react-native';
 import Header from '../components/Header';
-import BlurredAddUser from '../components/BlurredAddUser';
+import BlurredAddUser from '../components/Group/BlurredAddUser';
 import { COLORS } from '../styles/theme';
 
 export default function AddUserScreen({ navigation, route }) {

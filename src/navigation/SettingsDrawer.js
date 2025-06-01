@@ -45,7 +45,6 @@ export default function SettingsDrawer() {
 }
 
 const styles = StyleSheet.create({
-
     body: {
         flex: 1,
         flexDirection: 'row'

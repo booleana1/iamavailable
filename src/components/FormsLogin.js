@@ -1,56 +1,110 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebase.config';
+import { useNavigation } from '@react-navigation/native';
 
-export default function FormsLogin({ navigation }) {
-  const [username, setUsername] = useState('');
+export default function FormsLogin() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Aquí puedes manejar la lógica de autenticación con username y password
+  const navigation = useNavigation();
+
+  const validate = () => {
+    const errors = [];
+    if (!email.trim()) errors.push('E‑mail é obrigatório');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('E‑mail inválido');
+    if (!password) errors.push('Senha é obrigatória');
+    return errors;
+  };
+
+  const handleLogin = async () => {
+    const errs = validate();
+    if (errs.length) {
+      Alert.alert('Validação', errs.join('\n'));
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate('Home');
+    } catch (error) {
+      let message = 'Falha ao entrar.';
+      if (error.code === 'auth/user-not-found') message = 'Usuário não encontrado';
+      if (error.code === 'auth/wrong-password') message = 'Senha incorreta';
+      Alert.alert('Erro', message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.form}>
-        <Text style={styles.title}>Login</Text>
+      <View style={styles.container}>
+        <View style={styles.form}>
+          <Text style={styles.title}>Login</Text>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            placeholder="Username"
-            value={username}
-            onChangeText={setUsername}
-            style={styles.input}
-          />
-        </View>
+          <View style={styles.field}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                returnKeyType="next"
+            />
+          </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            style={styles.input}
-            secureTextEntry
-          />
-        </View>
+          <View style={styles.field}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                style={styles.input}
+                secureTextEntry
+                returnKeyType="done"
+            />
+          </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Login</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+              style={styles.loginButton}
+              onPress={handleLogin}
+              disabled={loading}
+          >
+            {loading ? (
+                <ActivityIndicator color="#fff" />
+            ) : (
+                <Text style={styles.loginButtonText}>Login</Text>
+            )}
+          </TouchableOpacity>
 
-        <Text style={styles.footerText}>
-          Don't have an account?
-          <Text style={styles.signUp} onPress={() => navigation.navigate('Register')}>
-            Sign up
+          <Text style={styles.footerText}>
+            Don't have an account?{' '}
+            <Text style={styles.signUp} onPress={() => navigation.navigate('Register')}>
+              Sign up
+            </Text>
           </Text>
-        </Text>
 
-        <Text style={styles.forgotPasswordText} onPress={() => navigation.navigate('ForgotPassword')}>
-          Forgot your password?
-        </Text>
+          <Text
+              style={styles.forgotPasswordText}
+              onPress={() => navigation.navigate('ForgotPassword')}
+          >
+            Forgot your password?
+          </Text>
+        </View>
       </View>
-    </View>
   );
 }
 

@@ -1,18 +1,21 @@
 import { View, StyleSheet } from 'react-native';
-import Header from '../components/Header';
 import AvailabilityDetails from '../components/AvailabilityDetails/AvailabilityDetails';
 import DoneButton from '../components/DoneButton';  // importa el botón
 import { COLORS } from '../styles/theme';
+import {useNavigation} from "@react-navigation/native";
 
-export default function AvailabilityDetailsScreen({ availabilityId }) {
+export default function AvailabilityDetailsScreen({route}) {
+    const navigation = useNavigation();
+    const {availabilityId} = route.params;
+
   const handleDonePress = () => {
     // Aquí iría la lógica para cambiar de pantalla
-    console.log('Done pressed');
+      navigation.goBack();
+      console.log('Done pressed');
   };
 
   return (
     <View style={styles.container}>
-      <Header />
       <AvailabilityDetails availabilityId={availabilityId} />
 
       {/* Contenedor absoluto para el botón */}

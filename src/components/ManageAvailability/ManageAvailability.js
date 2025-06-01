@@ -52,7 +52,6 @@ export default function ManageAvailabilityForm({ initialData, onSuccess }) {
         longitude,
       });
 
-      alert('Success', 'Availability updated successfully!');
       if (onSuccess)
         onSuccess({
           ...initialData,

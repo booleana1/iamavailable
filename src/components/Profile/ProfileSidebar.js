@@ -2,15 +2,27 @@ import React, { useState, useCallback } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../styles/theme';
 import SettingButton from './SettingButton';
+import {Ionicons} from "@expo/vector-icons";
+import {useUser} from "../../context/UserContext";
 
+const SidePanel = () => {
+    const { logout } = useUser();
 
-
-const SidePanel = ({selected, onChange}) => {
-
+    /* ---------- handler de logout ---------- */
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (err) {
+            alert('Não foi possível sair.');
+        }
+    };
 
     return (
         <View style={styles.container}>
-            <SettingButton size={64} style = {styles.button}/>
+            <SettingButton size={64} style={styles.button} />
+            <TouchableOpacity style={styles.button} onPress={handleLogout}>
+                <Ionicons name="log-out-outline" size={64} color="white" />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -20,12 +32,12 @@ export default SidePanel;
 
 const styles = StyleSheet.create({
     container: {
-        width: '15%',
+        width: 160,
         height: '100%',
         alignItems: 'center',
         backgroundColor: COLORS.primary,
         paddingTop: 40,
-        gap: 30,
+        justifyContent: 'space-evenly',
     },
     header: {
         color: '#fff',
@@ -37,7 +49,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         paddingVertical: 8,
-        marginTop:'200%'
     },
     buttonSelected: {
         backgroundColor: COLORS.secondary,

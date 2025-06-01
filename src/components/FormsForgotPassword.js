@@ -7,10 +7,6 @@ export default function FormsForgotPassword({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleRecoverPassword = async () => {
-    if (!email.trim()) {
-      Alert.alert('Error', 'Email cannot be empty');
-      return;
-    }
 
     setLoading(true);
 

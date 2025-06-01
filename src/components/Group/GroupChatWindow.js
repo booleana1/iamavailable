@@ -7,7 +7,7 @@ import IconPressButton from "../IconPressButton";
 import {CHAT} from "../../styles/chat";
 import {app, db, auth} from '../../../firebase.config'
 import {collection, query, doc, where, writeBatch, onSnapshot, getDoc, setDoc, updateDoc, increment} from "firebase/firestore";
-import {useRoute} from "@react-navigation/native";
+import {useNavigation, useRoute} from "@react-navigation/native";
 import {useUser} from "../../context/UserContext";
 
 
@@ -16,6 +16,7 @@ const GroupChatWindow = () => {
     const route = useRoute();
     const { group } = route.params;
     const {loggedUserId} = useUser();
+    const navigation = useNavigation();
 
     const [items, setItems] = useState([]);
     const [messages, setMessages] = useState([]);
@@ -112,8 +113,7 @@ const GroupChatWindow = () => {
 
     //
     const handleNewAvailability = () => {
-        alert("Create new availability");
-        // TODO: in last assignment call availability create
+        navigation.navigate('CreateAvailability');
     };
 
     // handle vote
@@ -187,8 +187,10 @@ const GroupChatWindow = () => {
                 <View style={styles.groupHeader}>
                     <Text style={styles.title}>{group.name}</Text>
                     <TouchableOpacity style={styles.iconHeader} onPress={() => {
-                        alert("Group settings")
-                    }}>
+                        navigation.navigate('Groups', {
+                            screen: 'GroupSettings',
+                            params: { groupId: group.id }
+                        });                    }}>
                         <Ionicons name={"settings-outline"} size={30}/>
                     </TouchableOpacity>
 
@@ -199,7 +201,10 @@ const GroupChatWindow = () => {
                     <Text style={styles.title}>{group.name}</Text>
 
                     <TouchableOpacity style={styles.iconHeader} onPress={() => {
-                        alert("Group members")
+                        navigation.navigate('Groups', {
+                            screen: 'GroupMembers',
+                            params: { groupId: group.id }
+                        });
                     }}>
                         <Ionicons name={"people-outline"} size={30}/>
                     </TouchableOpacity>

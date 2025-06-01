@@ -90,13 +90,6 @@ export default function FormsCreateGroupsScreen({ navigation }) {
           />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>User Default Role</Text>
-          <TextInput
-            placeholder="User Default Role"
-            style={styles.input}
-          />
-        </View>
 
         <View style={styles.field}>
           <Text style={styles.label}>Public/Private</Text>

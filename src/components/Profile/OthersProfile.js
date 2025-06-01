@@ -1,69 +1,87 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from 'firebase/firestore';
 import { db } from '../../../firebase.config';
 import { COLORS } from '../../styles/theme';
 
-export default function AccountInfo({ loggedUserId }) {
+export default function AccountInfo({ userId }) {
   const [user, setUser] = useState(null);
   const [userRoles, setUserRoles] = useState([]);
-  const [userGroups, setUserGroups] = useState([]);          // grupos donde es miembro
-  const [userGroupsCreated, setUserGroupsCreated] = useState([]);  // grupos creados
+  const [userGroups, setUserGroups] = useState([]);          // grupos onde é membro
+  const [userGroupsCreated, setUserGroupsCreated] = useState([]); // grupos que criou
   const [loading, setLoading] = useState(true);
 
+  /* --------------------------- DATA FETCH --------------------------- */
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
-        // Get user info
-        const userSnap = await getDoc(doc(db, 'users', String(loggedUserId)));
-        if (userSnap.exists()) {
-          setUser(userSnap.data());
-        } else {
-          setUser(null);
-        }
+        /* ---------- User ---------- */
+        const userSnap = await getDoc(doc(db, 'users', String(userId)));
+        setUser(userSnap.exists() ? userSnap.data() : null);
 
-        // Get roles
-        const rolesRef = collection(db, 'user_has_role');
-        const rolesQuery = query(rolesRef, where('user_id', '==', loggedUserId), where('active', '==', true));
-        const rolesSnap = await getDocs(rolesQuery);
-        const roleIds = rolesSnap.docs.map(doc => doc.data().role_id);
+        /* ---------- Roles ---------- */
+        const rolesSnap = await getDocs(
+            query(
+                collection(db, 'user_has_role'),
+                where('user_id', '==', userId),
+                where('active', '==', true)
+            )
+        );
+        const roleIds = rolesSnap.docs.map((d) => d.data().role_id);
 
         let roleNames = [];
-        if (roleIds.length > 0) {
-          const rolesDataQuery = query(collection(db, 'roles'), where('__name__', 'in', roleIds));
-          const rolesDataSnap = await getDocs(rolesDataQuery);
-          roleNames = rolesDataSnap.docs.map(doc => doc.data().role_name);
+        if (roleIds.length) {
+          const rolesDataSnap = await getDocs(
+              query(collection(db, 'roles'), where('__name__', 'in', roleIds))
+          );
+          roleNames = rolesDataSnap.docs.map((d) => d.data().role_name);
         }
-
         setUserRoles(roleNames);
 
-        // Get group memberships from group_users
-        const groupUsersRef = collection(db, 'group_users');
-        const groupUsersQuery = query(groupUsersRef, where('user_id', '==', loggedUserId));
-        const groupUsersSnap = await getDocs(groupUsersQuery);
-        const memberGroupIds = groupUsersSnap.docs.map(doc => doc.data().group_id);
+        /* ---------- Groups as member ---------- */
+        const groupUsersSnap = await getDocs(
+            query(collection(db, 'group_users'), where('user_id', '==', userId))
+        );
+        const memberGroupIds = groupUsersSnap.docs.map((d) => d.data().group_id);
 
         let memberGroups = [];
-        if (memberGroupIds.length > 0) {
+        if (memberGroupIds.length) {
           const groupsRef = collection(db, 'groups');
-          // Firestore limit: max 10 in a 'where in' clause
-          const chunkSize = 10;
+          const chunkSize = 10; // Firestore “in” limit
           for (let i = 0; i < memberGroupIds.length; i += chunkSize) {
             const chunk = memberGroupIds.slice(i, i + chunkSize);
-            // QUERY con campo 'id' y no __name__
-            const groupsQuery = query(groupsRef, where('id', 'in', chunk));
-            const groupsSnap = await getDocs(groupsQuery);
-            memberGroups = memberGroups.concat(groupsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            const groupsSnap = await getDocs(
+                query(groupsRef, where('id', 'in', chunk))
+            );
+            memberGroups = memberGroups.concat(
+                groupsSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
+            );
           }
         }
         setUserGroups(memberGroups);
 
-        // Get groups created by user (where user_id == loggedUserId)
-        const groupsCreatedQuery = query(collection(db, 'groups'), where('user_id', '==', loggedUserId));
-        const groupsCreatedSnap = await getDocs(groupsCreatedQuery);
-        const createdGroups = groupsCreatedSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        /* ---------- Groups created by user ---------- */
+        const groupsCreatedSnap = await getDocs(
+            query(collection(db, 'groups'), where('user_id', '==', userId))
+        );
+        const createdGroups = groupsCreatedSnap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
         setUserGroupsCreated(createdGroups);
-
       } catch (err) {
         console.error('Error loading user info:', err);
       } finally {
@@ -72,71 +90,76 @@ export default function AccountInfo({ loggedUserId }) {
     };
 
     loadUserInfo();
-  }, [loggedUserId]);
+  }, [userId]);
 
+  /* --------------------------- RENDER --------------------------- */
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-      </View>
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
     );
   }
 
   if (!user) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.value}>User not found</Text>
-      </View>
+        <View style={styles.container}>
+          <Text style={styles.value}>User not found</Text>
+        </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Account</Text>
+      <View style={styles.container}>
+        <Text style={styles.title}>Account</Text>
 
-      <Image source={{ uri: user.photo_url }} style={styles.pfp} />
+        <Image source={{ uri: user.photo_url }} style={styles.pfp} />
 
-      <Text style={styles.label}>Username:</Text>
-      <Text style={styles.value}>@{user.hashtag}</Text>
+        <Text style={styles.label}>Username:</Text>
+        <Text style={styles.value}>@{user.hashtag}</Text>
 
-      <Text style={styles.label}>Complete Name:</Text>
-      <Text style={styles.value}>{user.name}</Text>
+        <Text style={styles.label}>Complete Name:</Text>
+        <Text style={styles.value}>{user.name}</Text>
 
-      <Text style={styles.label}>Roles:</Text>
-      <Text style={styles.value}>{userRoles.length ? userRoles.join(', ') : 'No roles assigned'}</Text>
+        <Text style={styles.label}>Roles:</Text>
+        <Text style={styles.value}>
+          {userRoles.length ? userRoles.join(', ') : 'No roles assigned'}
+        </Text>
 
-      <Text style={styles.label}>Groups to which it belongs:</Text>
-      {userGroups.length ? (
-        userGroups.map(group => (
-          <View key={group.id} style={styles.groupRow}>
-            <Text style={styles.groupTextName}>@{group.hashtag}</Text>
-            <Text style={styles.groupText}>{group.name}</Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.value}>No groups assigned</Text>
-      )}
+        <Text style={styles.label}>Groups to which it belongs:</Text>
+        {userGroups.length ? (
+            userGroups.map((group) => (
+                <View key={group.id} style={styles.groupRow}>
+                  <Text style={styles.groupTextName}>@{group.hashtag}</Text>
+                  <Text style={styles.groupText}>{group.name}</Text>
+                </View>
+            ))
+        ) : (
+            <Text style={styles.value}>No groups assigned</Text>
+        )}
 
-      <Text style={[styles.label, { marginTop: 20 }]}>Groups created by the user:</Text>
-      {userGroupsCreated.length ? (
-        userGroupsCreated.map(group => (
-          <View key={group.id} style={styles.groupRow}>
-            <Text style={styles.groupTextName}>@{group.hashtag}</Text>
-            <Text style={styles.groupText}>{group.name}</Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.value}>No groups created</Text>
-      )}
-
-    </View>
+        <Text style={[styles.label, { marginTop: 20 }]}>
+          Groups created by the user:
+        </Text>
+        {userGroupsCreated.length ? (
+            userGroupsCreated.map((group) => (
+                <View key={group.id} style={styles.groupRow}>
+                  <Text style={styles.groupTextName}>@{group.hashtag}</Text>
+                  <Text style={styles.groupText}>{group.name}</Text>
+                </View>
+            ))
+        ) : (
+            <Text style={styles.value}>No groups created</Text>
+        )}
+      </View>
   );
 }
 
+/* --------------------------- STYLES --------------------------- */
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFF',
     flex: 1,
+    backgroundColor: '#FFF',
     paddingLeft: '17.5%',
     paddingRight: '50%',
   },
@@ -174,10 +197,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   groupText: {
-    margin: 0,
-    paddingRight: 25,
     fontSize: 14,
     color: COLORS.text,
+    paddingRight: 25,
   },
   groupTextName: {
     fontSize: 14,
