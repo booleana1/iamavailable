@@ -1,68 +1,134 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../firebase.config';
+import CalendarComp from './CalendarComp';
+import LocationMap from './LocationMap';
 import { COLORS, FONTS } from '../../styles/theme';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../../firebase.config';
 
 export default function AvailabilityDetails({ availabilityId }) {
   const [availability, setAvailability] = useState(null);
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
-  const [group, setGroup] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function fetchAvailability() {
       try {
-        const availabilityDoc = await getDoc(doc(db, 'availabilities', availabilityId));
-        const availabilityData = availabilityDoc.data();
-        if (!availabilityData) return;
+        const q = query(
+          collection(db, 'availabilities'),
+          where('id', '==', Number(availabilityId))
+        );
+        const querySnapshot = await getDocs(q);
 
-        setAvailability(availabilityData);
-
-        const [userDoc, roleDoc, groupDoc] = await Promise.all([
-          getDoc(doc(db, 'users', String(availabilityData.user_id))),
-          getDoc(doc(db, 'roles', String(availabilityData.role_id))),
-          getDoc(doc(db, 'groups', String(availabilityData.group_id)))
-        ]);
-
-        setUser(userDoc.data());
-        setRole(roleDoc.data());
-        setGroup(groupDoc.data());
+        if (!querySnapshot.empty) {
+          const docData = querySnapshot.docs[0].data();
+          setAvailability(docData);
+        } else {
+          alert('Availability not found');
+          setAvailability(null);
+        }
       } catch (error) {
-        console.error("Error loading availability details:", error);
+        console.error('Error fetching availability:', error);
+        setAvailability(null);
+      } finally {
+        setLoading(false);
       }
-    };
+    }
 
-    fetchData();
+    if (availabilityId) {
+      fetchAvailability();
+    }
   }, [availabilityId]);
 
-  if (!availability || !user || !role || !group) {
-    return <Text>Loading...</Text>;
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text>Loading availability...</Text>
+      </View>
+    );
   }
+
+  if (!availability) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text>No availability data to display.</Text>
+      </View>
+    );
+  }
+
+  const {
+    name = '-',
+    role_id,
+    group_id,
+    location,
+    periodicity = '-',
+    start_date,
+    end_date,
+    latitude,
+    longitude,
+  } = availability;
+
+  const role = role_id != null ? String(role_id) : '-';
+  const group = group_id != null ? String(group_id) : '-';
+  const link = location || '-';
+
+  const date = start_date ? start_date.split('T')[0] : null;
+  const hour = start_date && start_date.includes('T') ? start_date.split('T')[1].slice(0, 5) : '';
+  const endHour = end_date && end_date.includes('T') ? end_date.split('T')[1].slice(0, 5) : '';
+
+  const isValidCoord = (v) => typeof v === 'number' && !isNaN(v);
+  const lat = isValidCoord(latitude) ? latitude : null;
+  const lng = isValidCoord(longitude) ? longitude : null;
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>Availability Details</Text>
+      <Text style={styles.title}>Availability Details</Text>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Name</Text>
-          <Text style={styles.value}>{user.name}</Text>
+      <View style={styles.row}>
+        <View style={styles.form}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Name</Text>
+            <Text style={styles.input}>{name}</Text>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Role</Text>
+            <Text style={styles.input}>{role}</Text>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Group Hashtag</Text>
+            <Text style={styles.input}>{group}</Text>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Link (if online)</Text>
+            <Text style={styles.input}>{link}</Text>
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Periodicity</Text>
+            <Text style={styles.input}>{periodicity}</Text>
+          </View>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Role</Text>
-          <Text style={styles.value}>{role.role_name || "Unknown"}</Text>
+        <View style={styles.calendar}>
+          <CalendarComp
+            date={date}
+            setDate={() => {}}
+            hour={hour}
+            setHour={() => {}}
+            endHour={endHour}
+            setEndHour={() => {}}
+            readonly
+          />
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Group</Text>
-          <Text style={styles.value}>{group.name || "Unknown"}</Text>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Location</Text>
-          <Text style={styles.value}>{availability.location || "Geolocated"}</Text>
+        <View style={styles.map}>
+          {lat != null && lng != null ? (
+            <LocationMap latitude={lat} longitude={lng} readonly />
+          ) : (
+            <Text>No location data available</Text>
+          )}
         </View>
       </View>
     </View>
@@ -71,30 +137,57 @@ export default function AvailabilityDetails({ availabilityId }) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
+    paddingTop: 40,
+    paddingHorizontal: 20,
     backgroundColor: COLORS.background,
   },
-  card: {
-    padding: 20,
-    backgroundColor: 'white',
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 30,
+    fontSize: 28,
     fontFamily: FONTS.bold,
     textAlign: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    width: '100%',
+    gap: 30,
+  },
+  form: {
+    flex: 1,
+    padding: 10,
+  },
+  calendar: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  map: {
+    flex: 1.2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   field: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   label: {
-    fontSize: 20,
-    fontFamily: FONTS.regular,
-    marginBottom: 8,
+    fontSize: 16,
+    fontFamily: FONTS.medium,
+    marginBottom: 6,
   },
-  value: {
-    fontSize: 18,
+  input: {
+    fontSize: 16,
     fontFamily: FONTS.regular,
-    color: '#000',
+    color: '#333',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#f4f4f4',
+    borderRadius: 6,
   },
 });

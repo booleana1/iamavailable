@@ -45,74 +45,83 @@ export default function Forms() {
   };
 
   const handleSubmit = async () => {
-    if (!name || !role || !group || !date || !hour) {
-      alert('Please complete all required fields.');
-      return;
+  if (!name || !role || !group || !date || !hour) {
+    alert('Please complete all required fields.');
+    return;
+  }
+
+  const roleId = await getRoleIdFromName(role);
+  if (!roleId) {
+    alert('The role name entered is invalid.');
+    return;
+  }
+
+  const groupId = await getGroupIdFromHashtag(group);
+  if (!groupId) {
+    alert('The group hashtag entered is invalid.');
+    return;
+  }
+
+  const userId = 1;
+  const startDateTime = new Date(`${date}T${hour}`);
+  const endDateTime = new Date(`${date}T${endHour || hour}`);
+
+  if (endDateTime <= startDateTime) {
+    alert('End time must be after start time.');
+    return;
+  }
+
+  const availabilitiesRef = collection(db, 'availabilities');
+  const snapshot = await getDocs(availabilitiesRef);
+
+  const conflict = snapshot.docs.some(doc => {
+    const data = doc.data();
+    if (data.user_id !== userId) return false;
+    const existingStart = new Date(data.start_date);
+    return existingStart.getTime() === startDateTime.getTime();
+  });
+
+  if (conflict) {
+    alert('You already have an availability at that date and time.');
+    return;
+  }
+
+  // ✅ Obtener el siguiente ID disponible
+  let maxId = 0;
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (typeof data.id === 'number' && data.id > maxId) {
+      maxId = data.id;
     }
+  });
+  const nextId = maxId + 1;
 
-    const roleId = await getRoleIdFromName(role);
-    if (!roleId) {
-      alert('The role name entered is invalid.');
-      return;
-    }
-
-    const groupId = await getGroupIdFromHashtag(group);
-    if (!groupId) {
-      alert('The group hashtag entered is invalid.');
-      return;
-    }
-
-    const userId = 1;
-    const startDateTime = new Date(`${date}T${hour}`);
-    const endDateTime = new Date(`${date}T${endHour || hour}`);
-
-    if (endDateTime <= startDateTime) {
-      alert('End time must be after start time.');
-      return;
-    }
-
-    const availabilitiesRef = collection(db, 'availabilities');
-    const snapshot = await getDocs(availabilitiesRef);
-
-    const conflict = snapshot.docs.some(doc => {
-      const data = doc.data();
-      if (data.user_id !== userId) return false;
-      const existingStart = new Date(data.start_date);
-      return existingStart.getTime() === startDateTime.getTime();
-    });
-
-    if (conflict) {
-      alert('You already have an availability at that date and time.');
-      return;
-    }
-
-    const availability = {
-      name,
-      role_id: roleId,
-      group_id: groupId,
-      location: link || '',
-      start_date: startDateTime.toISOString(),
-      end_date: endDateTime.toISOString(),
-      periodicity,
-      is_geolocated: latitude !== null && longitude !== null,
-      latitude: latitude ?? null,
-      longitude: longitude ?? null,
-      radius: null,
-      user_id: userId,
-    };
-
-    const cleanString = (str) =>
-      str.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
-
-    try {
-      const newId = `${cleanString(name)}_${cleanString(group)}_${Date.now()}`;
-      await setDoc(doc(db, 'availabilities', newId), availability);
-      alert('Availability created successfully!');
-    } catch (error) {
-      console.error('Error saving availability:', error);
-      alert('Failed to save availability');
-    }
+  const availability = {
+    id: nextId, // 👈 aquí va el id autoincrementado
+    name,
+    role_id: roleId,
+    group_id: groupId,
+    location: link || '',
+    start_date: startDateTime.toISOString(),
+    end_date: endDateTime.toISOString(),
+    periodicity,
+    is_geolocated: latitude !== null && longitude !== null,
+    latitude: latitude ?? null,
+    longitude: longitude ?? null,
+    radius: null,
+    user_id: userId,
   };
+
+  try {
+    const docId = `${nextId}`; // o usa el `newId` que tenías si lo prefieres
+    await setDoc(doc(db, 'availabilities', docId), availability);
+    alert('Availability created successfully!');
+  } catch (error) {
+    console.error('Error saving availability:', error);
+    alert('Failed to save availability');
+  }
+};
+
 
   return (
     <View style={styles.container}>
