@@ -5,9 +5,10 @@ import EmptyState from "../components/EmptyState";
 import NewChat from "../components/Message/NewChat";
 import ChatWindow from "../components/Message/ChatWindow";
 import { COLORS } from "../styles/theme";
+import {useUser} from "../context/UserContext";
 
-
-const MessageScreen = ({loggedUserId}) => {
+const MessageScreen = () => {
+    const {loggedUserId} = useUser();
     const [selected, setSelected] = useState(null);
 
     const renderContent = () => {

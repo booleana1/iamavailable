@@ -5,10 +5,11 @@ import Account from '../components/Settings/Account';
 import Security from '../components/Settings/Security';
 import Notifications from '../components/Settings/Notifications';
 import {COLORS} from "../styles/theme";
+import {useUser} from "../context/UserContext";
 
+export default function SettingsScreen() {
 
-
-export default function SettingsScreen({loggedUserId, dataGroups, dataRoles, dataUsers}) {
+    const {loggedUserId} = useUser();
     const [selected, setSelected] = useState('Account');
 
     return (

@@ -4,23 +4,26 @@ import {Ionicons} from "@expo/vector-icons";
 import React, {useEffect, useState} from "react";
 import {doc,onSnapshot} from "firebase/firestore";
 import {app, db, auth} from '../../firebase.config'
-
+import {useNavigation, useNavigationState} from "@react-navigation/native";
+import {useUser} from "../context/UserContext";
 
 // ─────────────────────────────── CONSTANT ─────────────────────────────── //
 const PAGES = {
-    HOME: "HomeScreen",
-    MESSAGES: "MessageScreen",
-    GROUPS: "GroupScreen",
-    SETTINGS: "SettingScreen",
+    HOME: "Home",
+    MESSAGES: "Messages",
+    GROUPS: "Groups",
+    SETTINGS: "Profile",
 };
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
-export default function Header({onChange, loggedUserId}) {
-    // TODO: change navigability
+export default function Header() {
+    const {loggedUserId} = useUser();
     const [photoUrl, setPhotoUrl] = useState("");
-
-    // this page/setPage is used to underline or not "Messages" and "Groups" on header
-    const [page, setPage] = useState('');
+    const navigation = useNavigation();
+    const routeName = useNavigationState(state => {
+        if (!state || !state.routes) return null;
+        return state.routes[state.index]?.name;
+    });
 
     useEffect(() => {
         const userRef = doc(db, 'users', String(loggedUserId));
@@ -38,15 +41,11 @@ export default function Header({onChange, loggedUserId}) {
         return () => unsubscribe();
     }, []);
 
-    const handlePageChange = (p) => {
-        onChange(p);
-        setPage(p);
-    }
 
     return (
         <View style={styles.container}>
             {/* Logo */}
-            <TouchableOpacity onPress={() => handlePageChange(PAGES.HOME)}>
+            <TouchableOpacity onPress={() => navigation.navigate(PAGES.HOME)}>
                 <Image source={require('../assets/logo.png')} style={styles.logo}></Image>
             </TouchableOpacity>
 
@@ -55,15 +54,15 @@ export default function Header({onChange, loggedUserId}) {
                 {/* Messages */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handlePageChange(PAGES.MESSAGES)}>
-                    <Text style={[styles.buttonText, page === PAGES.MESSAGES && styles.selected]}>Messages</Text>
+                    onPress={() => navigation.navigate(PAGES.MESSAGES)}>
+                    <Text style={[styles.buttonText, routeName === PAGES.MESSAGES && styles.selected]}>Messages</Text>
                 </TouchableOpacity>
 
                 {/* Groups */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handlePageChange(PAGES.GROUPS)}>
-                    <Text style={[styles.buttonText, page === PAGES.GROUPS && styles.selected]}>Groups</Text>
+                    onPress={() => navigation.navigate(PAGES.GROUPS)}>
+                    <Text style={[styles.buttonText, routeName === PAGES.GROUPS && styles.selected]}>Groups</Text>
                 </TouchableOpacity>
 
                 {/* Search Bar */}
@@ -80,7 +79,7 @@ export default function Header({onChange, loggedUserId}) {
                 {/* Profile (Settings for demo) */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => handlePageChange(PAGES.SETTINGS)}>
+                    onPress={() => navigation.navigate(PAGES.SETTINGS)}>
                     <View style={GLOBAL.avatarWrapper}>
                         {photoUrl && photoUrl.startsWith('data:image') ? (
                                 <Image

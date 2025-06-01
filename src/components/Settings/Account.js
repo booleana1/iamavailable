@@ -106,7 +106,7 @@ const Account = ({loggedUserId}) => {
             photo_url: photoUrl
         };
 
-        await setDoc(doc(db, 'users', String(loggedUserId)), updatedUser);
+        await updateDoc(doc(db, 'users', String(loggedUserId)), updatedUser);
 
         // create roles/associate created roles with user
         for (const role of roles) {
@@ -158,7 +158,6 @@ const Account = ({loggedUserId}) => {
             }
         }
 
-        // delete roles TODO: corrigir
         for (const role of remRoles) {
             const q = query(
                 collection(db, 'roles'),

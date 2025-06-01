@@ -3,8 +3,10 @@ import { View, StyleSheet } from "react-native";
 import SidePanel from "../components/Group/SidePanel";
 import MyGroupView from "../components/Group/View";
 import EmptyState from "../components/EmptyState";
+import {useUser} from "../context/UserContext";
 
-const GroupsScreen = ({ loggedUserId }) => {
+const GroupsScreen = () => {
+    const {loggedUserId} = useUser();
     const [selected, setSelected] = useState(null);
 
     const renderContent = () => {

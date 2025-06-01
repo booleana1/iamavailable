@@ -29,23 +29,20 @@ const Security = ({loggedUserId}) => {
             console.log("Erro login:", err);
         }
     };
-/*useEffect(() => {
+    useEffect(() => {
         login();
-    }, []);*/
+    }, []);
 
     const handleSave = async () => {
         const user = auth.currentUser;
 
-        if (!user) {
-            setFeedbackMessage("User not authenticated.");
-            return;
-        }
 
         if (!currentPassword || !newPassword) {
             setFeedbackMessage("Please fill in both fields.");
             return;
         }
 
+        // TODO: take out
         const cred = EmailAuthProvider.credential("giuliadkvieira@gmail.com", currentPassword);
 
         try {

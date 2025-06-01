@@ -4,7 +4,7 @@ import {COLORS} from "../../styles/theme";
 import IconPressButton from "../IconPressButton";
 import {CHAT} from "../../styles/chat";
 import {app, db, auth} from '../../../firebase.config'
-import {collection,  query, doc, writeBatch, onSnapshot} from "firebase/firestore";
+import {collection, query, doc, writeBatch, onSnapshot, orderBy} from "firebase/firestore";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const ChatWindow = ({chat, loggedUserId}) => {
@@ -19,13 +19,14 @@ const ChatWindow = ({chat, loggedUserId}) => {
         if(!chat){return;}
         const msgQuery = query(
             collection(db, 'chats', chat.chatId, 'messages'),
+            orderBy('__name__')
         );
 
         const unsubscribe = onSnapshot(msgQuery, (snapshot) => {
-            const msgData = snapshot.docs
-                .map(doc => ({ id: doc.id, ...doc.data() }))
-                .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-            ;
+            const msgData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }))
 
             setMessages(msgData);
         });
@@ -49,7 +50,7 @@ const ChatWindow = ({chat, loggedUserId}) => {
 
         // refs
         const chatRef = doc(db, 'chats', chat.chatId);
-        const msgRef  = doc(collection(chatRef, 'messages'));
+        const msgRef  = doc(collection(chatRef, 'messages'),newMsg.created_at);
 
         // batch
         const batch = writeBatch(db);

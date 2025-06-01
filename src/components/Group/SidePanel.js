@@ -125,7 +125,6 @@ const SidePanel = ({ selected, onChange, loggedUserId, dataGroups, dataGroupUser
                 onPress={() => handleSelect(item)} // chat id
                 activeOpacity={0.6}
             >
-                {/*TODO: when doing backend put group avatar here*/}
                 <View style={GLOBAL.avatarWrapperMsg}>
                     {item.photo_url && item.photo_url.startsWith('data:image') ? (
                         <Image

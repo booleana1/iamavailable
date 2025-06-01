@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {View, TextInput, TouchableOpacity, Text, StyleSheet, FlatList} from "react-native";
 import { COLORS } from "../../styles/theme";
 import {GLOBAL} from "../../styles/global";
-import { collection, query, where, limit, getDocs,
-    addDoc,  serverTimestamp, orderBy, startAt, endAt} from 'firebase/firestore';
+import {
+    collection, doc, getDoc, limit, getDocs,
+    addDoc, serverTimestamp, orderBy, startAt, endAt, setDoc
+} from 'firebase/firestore';
 import { db } from '../../../firebase.config';
-
 
 const makePairId = (a, b) => [a, b].sort().join('_');
 
@@ -49,28 +50,23 @@ const NewChat = ({ onStart, loggedUserId }) => {
         const now     = serverTimestamp();
 
         try {
-            const q = query(
-                collection(db, 'chats'),
-                where('pairId', '==', pairId),
-                limit(1)
-            );
-            const snap = await getDocs(q);
+            const chatRef = doc(db, 'chats', pairId);
+            const chatSnap = await getDoc(chatRef);
 
             let chatDoc, chatId;
 
-            if (snap.empty) {
+            if (!chatSnap.exists()) {
                 chatDoc = {
                     pairId,
                     participants: [String(loggedUserId), String(otherId)],
                     createdAt: now,
                     updatedAt: now
                 };
-                const docRef = await addDoc(collection(db, 'chats'), chatDoc);
-                chatId = docRef.id;
+                const chatRef = await setDoc(doc(db, 'chats', pairId),chatDoc);
+                chatId = pairId;
             } else {
-                const docSnap = snap.docs[0];
-                chatId  = docSnap.id;
-                chatDoc = docSnap.data();
+                chatId  = chatSnap.id;
+                chatDoc = chatSnap.data();
             }
 
             const chatInfo = {
@@ -82,6 +78,7 @@ const NewChat = ({ onStart, loggedUserId }) => {
             };
 
             onStart?.(chatInfo);
+            console.log('Starting chat with', chatInfo);
             setQueryText('');
         } catch (e) {
             console.error(e);

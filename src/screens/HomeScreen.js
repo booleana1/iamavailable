@@ -4,6 +4,7 @@ import AvailabilityCard from '../components/Home/AvailabilityCard';
 import {COLORS} from "../styles/theme";
 import { collection, query, where, getDoc, getDocs, doc, or } from "firebase/firestore";
 import {app, db, auth} from '../../firebase.config'
+import {useUser} from "../context/UserContext";
 
 const getUserApprovedGroupIds = async (userId) => {
     const q = query(
@@ -28,7 +29,8 @@ const buildAvailability = (aval, usersMap, rolesMap, groupsMap) => ({
 });
 
 
-export default function HomeScreen({loggedUserId, setPhotoUrl}) {
+export default function HomeScreen() {
+    const {loggedUserId} = useUser();
     const [myAvailabilities, setMyAvailabilities] = useState({});
     const [otherAvailabilities, setOtherAvailabilities] = useState({});
 
