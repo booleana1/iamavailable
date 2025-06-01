@@ -1,59 +1,64 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { getAuth, confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { getFirestore, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
-export default function FormsRecoverPasswordScreen() {
+export default function FormsRecoverPasswordScreen({ navigation, email }) {
   const [verificationCode, setVerificationCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleResetPassword = async () => {
-    if (newPassword !== repeatPassword) {
-      setMessage('Passwords do not match.');
+  const handleRecoverPassword = async () => {
+    if (verificationCode !== '11111') {
+      Alert.alert('Error', 'Invalid verification code.');
       return;
     }
 
-    setLoading(true);
-    setMessage('');
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
 
     try {
-      const auth = getAuth();
+      const db = getFirestore();
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
 
-      // Verificar el código de verificación
-      const email = await verifyPasswordResetCode(auth, verificationCode);
-
-      // Confirmar el cambio de contraseña
-      await confirmPasswordReset(auth, verificationCode, newPassword);
-
-      setMessage('Password reset successfully!');
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        await updateDoc(userDoc.ref, {
+          password_hash: newPassword,
+        });
+        Alert.alert('Success', 'Password updated successfully!');
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('Error', 'User not found.');
+      }
     } catch (error) {
-      setMessage(error.message);
-    } finally {
-      setLoading(false);
+      Alert.alert('Error', error.message);
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Recover password</Text>
+        <Text style={styles.title}>Recover Password</Text>
 
         <View style={styles.field}>
-          <Text style={styles.label}>Verification code</Text>
+          <Text style={styles.label}>Verification Code</Text>
           <TextInput
-            placeholder="Code"
+            placeholder="Verification Code"
             value={verificationCode}
             onChangeText={setVerificationCode}
             style={styles.input}
+            keyboardType="numeric"
           />
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>New password</Text>
+          <Text style={styles.label}>New Password</Text>
           <TextInput
-            placeholder="New password"
+            placeholder="New Password"
             value={newPassword}
             onChangeText={setNewPassword}
             style={styles.input}
@@ -62,29 +67,19 @@ export default function FormsRecoverPasswordScreen() {
         </View>
 
         <View style={styles.field}>
-          <Text style={styles.label}>Repeat the password</Text>
+          <Text style={styles.label}>Confirm Password</Text>
           <TextInput
-            placeholder="Repeat the password"
-            value={repeatPassword}
-            onChangeText={setRepeatPassword}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             style={styles.input}
             secureTextEntry
           />
         </View>
 
-        <TouchableOpacity style={styles.doneButton} onPress={handleResetPassword} disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.doneButtonText}>Done</Text>
-          )}
+        <TouchableOpacity style={styles.doneButton} onPress={handleRecoverPassword}>
+          <Text style={styles.doneButtonText}>Done</Text>
         </TouchableOpacity>
-
-        <Text style={styles.footerText}>
-          Go back
-        </Text>
-
-        {message ? <Text style={styles.message}>{message}</Text> : null}
       </View>
     </View>
   );
@@ -144,16 +139,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  footerText: {
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 14,
-    color: 'black',
-  },
-  message: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: 'green',
   },
 });

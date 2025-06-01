@@ -3,16 +3,16 @@ import FormsForgotPassword from '../components/FormsForgotPassword';
 import { COLORS } from '../styles/theme';
 
 export default function ForgotPasswordScreen({ navigation }) {
-    return (
-        <View style={styles.container}>
-            <FormsForgotPassword navigation={navigation} />
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <FormsForgotPassword navigation={navigation} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
 });

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function FormsForgotPassword({ navigation }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
 
   const handleRecoverPassword = async () => {
+    if (!email.trim()) {
+      Alert.alert('Error', 'Email cannot be empty');
+      return;
+    }
+
     setLoading(true);
-    setMessage('');
 
     try {
       const db = getFirestore();
@@ -18,13 +21,12 @@ export default function FormsForgotPassword({ navigation }) {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        setMessage('Verification code sent! Please check your email.');
         navigation.navigate('RecoverPassword', { email });
       } else {
-        setMessage('Email not found. Please enter a registered email.');
+        Alert.alert('Error', 'Email not found. Please enter a registered email.');
       }
     } catch (error) {
-      setMessage(error.message);
+      Alert.alert('Error', error.message);
     } finally {
       setLoading(false);
     }
@@ -33,7 +35,7 @@ export default function FormsForgotPassword({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Recover password</Text>
+        <Text style={styles.title}>Recover Password</Text>
 
         <View style={styles.field}>
           <Text style={styles.label}>Email</Text>
@@ -47,18 +49,12 @@ export default function FormsForgotPassword({ navigation }) {
         </View>
 
         <Text style={styles.instruction}>
-          Enter your registered email so we can send you the verification code.
+          Enter your registered email to receive the verification code.
         </Text>
 
         <TouchableOpacity style={styles.doneButton} onPress={handleRecoverPassword} disabled={loading}>
           {loading ? <ActivityIndicator color="white" /> : <Text style={styles.doneButtonText}>Done</Text>}
         </TouchableOpacity>
-
-        <Text style={styles.footerText} onPress={() => navigation.navigate('Login')}>
-          Go back
-        </Text>
-
-        {message ? <Text style={styles.message}>{message}</Text> : null}
       </View>
     </View>
   );
@@ -124,16 +120,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  footerText: {
-    marginTop: 20,
-    textAlign: 'center',
-    fontSize: 14,
-    color: 'black',
-  },
-  message: {
-    marginTop: 10,
-    textAlign: 'center',
-    color: 'green',
   },
 });

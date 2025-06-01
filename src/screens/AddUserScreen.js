@@ -3,13 +3,13 @@ import Header from '../components/Header';
 import BlurredAddUser from '../components/BlurredAddUser';
 import { COLORS } from '../styles/theme';
 
+export default function AddUserScreen({ navigation, route }) {
+    const { loggedUserId } = route.params || {};
 
-export default function AddUserScreen() {
     return (
         <View style={styles.container}>
-            <Header/>
-            <BlurredAddUser loggedUserId={1}/>
-
+            <Header />
+            <BlurredAddUser navigation={navigation} loggedUserId={loggedUserId} />
         </View>
     );
 }

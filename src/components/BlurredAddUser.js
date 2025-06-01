@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 export default function BlurredAddUser({ navigation, loggedUserId }) {
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [username, setUsername] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleAddUser = async () => {
     if (!username.trim()) {
@@ -17,14 +18,21 @@ export default function BlurredAddUser({ navigation, loggedUserId }) {
       await addDoc(collection(db, 'users'), {
         name: username,
         created_at: serverTimestamp(),
-        // Añade otros campos necesarios aquí
       });
-      console.log('User added successfully!');
-      navigation.navigate('GroupManagement', { loggedUserId });
+      setSuccessMessage('User added successfully!');
+      setTimeout(() => {
+        setIsModalVisible(false);
+        navigation.navigate('GroupManagement', { loggedUserId });
+      }, 2000); // Wait for 2 seconds before navigating back
     } catch (error) {
       console.error('Error adding user:', error);
       Alert.alert('Error', 'Failed to add user');
     }
+  };
+
+  const handleGoBack = () => {
+    setIsModalVisible(false);
+    navigation.navigate('GroupManagement', { loggedUserId });
   };
 
   return (
@@ -33,10 +41,7 @@ export default function BlurredAddUser({ navigation, loggedUserId }) {
         animationType="fade"
         transparent={true}
         visible={isModalVisible}
-        onRequestClose={() => {
-          setIsModalVisible(false);
-          navigation.navigate('GroupManagement', { loggedUserId });
-        }}
+        onRequestClose={handleGoBack}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
@@ -52,6 +57,13 @@ export default function BlurredAddUser({ navigation, loggedUserId }) {
               onPress={handleAddUser}
             >
               <Text style={styles.addButtonText}>Add User</Text>
+            </TouchableOpacity>
+            {successMessage ? <Text style={styles.successText}>{successMessage}</Text> : null}
+            <TouchableOpacity
+              style={styles.goBackButton}
+              onPress={handleGoBack}
+            >
+              <Text style={styles.goBackButtonText}>Go Back</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -96,10 +108,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 10,
+    marginBottom: 10,
   },
   addButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
+  },
+  goBackButton: {
+    marginTop: 10,
+  },
+  goBackButtonText: {
+    fontSize: 16,
+    color: '#000',
+    textDecorationLine: 'underline',
+  },
+  successText: {
+    marginTop: 10,
+    color: 'green',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
