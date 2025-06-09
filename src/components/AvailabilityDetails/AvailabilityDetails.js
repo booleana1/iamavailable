@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import CalendarComp from './CalendarComp';
 import LocationMap from './LocationMap';
 import { COLORS, FONTS } from '../../styles/theme';
-import {getDoc, doc} from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase.config';
 
 export default function AvailabilityDetails({ availabilityId }) {
@@ -13,11 +13,14 @@ export default function AvailabilityDetails({ availabilityId }) {
   useEffect(() => {
     async function fetchAvailability() {
       try {
-        const q = doc(db, 'availabilities', String(availabilityId))
-        const querySnapshot = await getDoc(q);
+        const q = query(
+          collection(db, 'availabilities'),
+          where('id', '==', Number(availabilityId))
+        );
+        const querySnapshot = await getDocs(q);
 
-        if (querySnapshot.exists()) {
-          const docData = querySnapshot.data();
+        if (!querySnapshot.empty) {
+          const docData = querySnapshot.docs[0].data();
           setAvailability(docData);
         } else {
           alert('Availability not found');

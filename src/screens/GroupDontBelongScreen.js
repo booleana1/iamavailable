@@ -1,16 +1,17 @@
 import { View, StyleSheet } from 'react-native';
 import Header from '../components/Header';
-import UserInfo from '../components/Profile/UserInfo';
-import Sidebar from '../components/Profile/ProfileSidebar';
+import GroupDontBelong from '../components/GroupDontBelong';
+import DoneButton from '../components/DoneButton';
 import { COLORS } from '../styles/theme';
 
 
-export default function ProfileScreen() {
+export default function GroupDontBelongScreen() {
     return (
         <View style={styles.container}>
             <Header/>
-            <UserInfo loggedUserId={1}/>
-            <Sidebar/>
+            <GroupDontBelong loggedUserId={1}/>
+            <DoneButton style={{bottom:80, right:120}}/>
+
         </View>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Picker } from 'react-native';
-import {doc, setDoc, collection, getDocs, query, where} from 'firebase/firestore';
+import { View, Text, TextInput, StyleSheet, Alert, Picker } from 'react-native';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase.config';
 import { COLORS, FONTS } from '../../styles/theme';
 import CalendarComp from './CalendarComp';
@@ -20,26 +20,15 @@ export default function Forms() {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
 
-  const getRoleIdFromName = async (roleN) => {
-    const groupsSnap = await getDocs(
-        query(collection(db, 'groups'), where('hashtag', '==', group))
-    );
-
-    if (groupsSnap.empty) return null;
-
-    const groupId = groupsSnap.docs[0].id;
-
-    const rolesSnap = await getDocs(
-        collection(db, 'groups', groupId, 'roles')
-    );
-
+  const getRoleIdFromName = async (roleName) => {
+    const rolesRef = collection(db, 'roles');
+    const querySnapshot = await getDocs(rolesRef);
     let roleId = null;
-    rolesSnap.forEach((d) => {
-      if (d.data().name?.toLowerCase() === roleN.toLowerCase()) {
-        roleId = d.id;
+    querySnapshot.forEach((doc) => {
+      if (doc.data().role_name.toLowerCase() === roleName.toLowerCase()) {
+        roleId = doc.id;
       }
     });
-
     return roleId;
   };
 
@@ -111,7 +100,7 @@ export default function Forms() {
     id: nextId, // 👈 aquí va el id autoincrementado
     name,
     role_id: roleId,
-    group_id: String(groupId),
+    group_id: groupId,
     location: link || '',
     start_date: startDateTime.toISOString(),
     end_date: endDateTime.toISOString(),
@@ -120,7 +109,7 @@ export default function Forms() {
     latitude: latitude ?? null,
     longitude: longitude ?? null,
     radius: null,
-    user_id: String(userId),
+    user_id: userId,
   };
 
   try {
@@ -146,17 +135,17 @@ export default function Forms() {
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Group Hashtag</Text>
-            <TextInput value={group} onChangeText={setGroup} placeholder="Group Hashtag" style={styles.input} />
-          </View>
-
-          <View style={styles.field}>
             <Text style={styles.label}>Role</Text>
             <TextInput value={role} onChangeText={setRole} placeholder="Role Name" style={styles.input} />
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Link (if online) or Room</Text>
+            <Text style={styles.label}>Group Hashtag</Text>
+            <TextInput value={group} onChangeText={setGroup} placeholder="Group Hashtag" style={styles.input} />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Link (if online)</Text>
             <TextInput value={link} onChangeText={setLink} placeholder="Optional link" style={styles.input} />
           </View>
 

@@ -122,7 +122,7 @@ const SidePanel = () => {
             setSelected(item);
 
             if (item === NEW_GROUP) {
-                navigation.navigate('CreateGroup');
+                navigation.navigate('CreateChat');
             } else {
                 console.log(item)
                 navigation.navigate('Groups', { screen: 'GroupWindow', params: { group: item } });

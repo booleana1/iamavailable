@@ -3,11 +3,10 @@ import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS } from "../../styles/theme";
 import IconPressButton from "../IconPressButton";
-import {useNavigation} from "@react-navigation/native";
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
 const AvailabilityText = ({ name, date, time,availabilityId,yesCount,noCount,onVote }) => {
-    const navigation = useNavigation();
+
     return (
         <View style={styles.container}>
             {/* AVAILABILITY */}
@@ -20,9 +19,7 @@ const AvailabilityText = ({ name, date, time,availabilityId,yesCount,noCount,onV
                     </View>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => {
-                            navigation.navigate("AvailabilityDetails", {availabilityId: availabilityId});
-                        }}
+                        onPress={() => alert("Availability details")}
                     >
                         <Text style={styles.buttonText}>View details</Text>
                     </TouchableOpacity>

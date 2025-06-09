@@ -12,15 +12,13 @@ const PAGES = {
     HOME: "Home",
     MESSAGES: "Messages",
     GROUPS: "Groups",
-    PROFILE: "Profile",
+    SETTINGS: "Profile",
 };
 
 // ─────────────────────────────── COMPONENT ─────────────────────────────── //
 export default function Header() {
     const {loggedUserId} = useUser();
     const [photoUrl, setPhotoUrl] = useState("");
-    const [inputValue, setInputValue] = useState('');
-
     const navigation = useNavigation();
     const routeName = useNavigationState(state => {
         if (!state || !state.routes) return null;
@@ -74,16 +72,14 @@ export default function Header() {
                     placeholder="Search"
                     placeholderTextColor="#999"
                     style={styles.searchInput}
-                    onChangeText={setInputValue}
-                    onSubmitEditing={() => navigation.navigate('Search', { inputValue })}
+                    onSubmitEditing={()=>alert("SearchScreen")}
                 />
                 </View>
 
                 {/* Profile (Settings for demo) */}
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate(PAGES.PROFILE, { userId: loggedUserId })}
-                >
+                    onPress={() => navigation.navigate(PAGES.SETTINGS)}>
                     <View style={GLOBAL.avatarWrapper}>
                         {photoUrl && photoUrl.startsWith('data:image') ? (
                                 <Image

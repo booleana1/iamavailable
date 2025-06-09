@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Modal, Alert } from 'react-native';
-import { db } from '../../../firebase.config';
+import { db } from '../../firebase.config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import {useUser} from "../../context/UserContext";
-import {useNavigation} from "@react-navigation/native";
 
-export default function BlurredAddUser() {
-  const {loggedUserId} = useUser();
-  const navigation = useNavigation();
+export default function BlurredAddUser({ navigation, loggedUserId }) {
   const [isModalVisible, setIsModalVisible] = useState(true);
   const [username, setUsername] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -26,7 +22,7 @@ export default function BlurredAddUser() {
       setSuccessMessage('User added successfully!');
       setTimeout(() => {
         setIsModalVisible(false);
-        navigation.goBack();
+        navigation.navigate('GroupManagement', { loggedUserId });
       }, 2000); // Wait for 2 seconds before navigating back
     } catch (error) {
       console.error('Error adding user:', error);
@@ -36,7 +32,7 @@ export default function BlurredAddUser() {
 
   const handleGoBack = () => {
     setIsModalVisible(false);
-    navigation.goBack();
+    navigation.navigate('GroupManagement', { loggedUserId });
   };
 
   return (

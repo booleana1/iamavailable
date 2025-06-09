@@ -24,7 +24,7 @@ const ChatWindow = () => {
 
         if(!chat){return;}
         const msgQuery = query(
-            collection(db, 'chats', String(chat.chatId), 'messages'),
+            collection(db, 'chats', chat.chatId, 'messages'),
             orderBy('__name__')
         );
 
@@ -55,7 +55,7 @@ const ChatWindow = () => {
         };
 
         // refs
-        const chatRef = doc(db, 'chats', String(chat.chatId));
+        const chatRef = doc(db, 'chats', chat.chatId);
         const msgRef  = doc(collection(chatRef, 'messages'),newMsg.created_at);
 
         // batch

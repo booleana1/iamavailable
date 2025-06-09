@@ -1,8 +1,8 @@
-import {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import AvailabilityCard from '../components/Home/AvailabilityCard';
 import {COLORS} from "../styles/theme";
-import {collection, query, where, getDocs, doc,} from "firebase/firestore";
+import { collection, query, where, getDocs,} from "firebase/firestore";
 import {db} from '../../firebase.config'
 import {useUser} from "../context/UserContext";
 import {useNavigation} from "@react-navigation/native";
@@ -18,9 +18,10 @@ const getUserApprovedGroupIds = async (userId) => {
     return snap.docs.map(doc => doc.data().group_id);
 };
 
-const buildAvailability = (aval, usersMap, groupsMap) => ({
+const buildAvailability = (aval, usersMap, rolesMap, groupsMap) => ({
     id: aval.id,
     userName: usersMap[aval.user_id]?.name || '',
+    roleName: rolesMap[aval.role_id]?.role_name || '',
     groupName: groupsMap[aval.group_id]?.name || '',
     location: aval.location,
     start: aval.start_date,
@@ -45,32 +46,28 @@ export default function HomeScreen() {
 
                 // get approved groups id -> Other Availabilities
                 const groupIds = await getUserApprovedGroupIds(loggedUserId);
-                console.log(groupIds);
 
                 // get availabilities from approved groups -> Other Availabilities
-                let groupSnap = {docs: []};
+                let groupSnap = { docs: [] };
                 if (groupIds.length > 0) {
                     groupSnap = await getDocs(
                         query(collection(db, 'availabilities'), where('group_id', 'in', groupIds))
                     );
                 }
 
-                groupSnap.docs.forEach((docSnapshot) => {
-                    console.log("userID", docSnapshot.data().user_id);
-                });
-
-
                 // all the availabilities needed -> My and Other Availabilities
                 const allDocs = [...userSnap.docs, ...groupSnap.docs];
 
                 // get user, roles and groups snaps
-                const [usersSnap, groupsSnap] = await Promise.all([
+                const [usersSnap, rolesSnap, groupsSnap] = await Promise.all([
                     getDocs(collection(db, 'users')),
+                    getDocs(collection(db, 'roles')),
                     getDocs(collection(db, 'groups')),
                 ]);
 
-                // get user,  and groups data
+                // get user, roles, and groups data
                 const usersMap = Object.fromEntries(usersSnap.docs.map(d => [d.id, d.data()]));
+                const rolesMap = Object.fromEntries(rolesSnap.docs.map(d => [d.id, d.data()]));
                 const groupsMap = Object.fromEntries(groupsSnap.docs.map(d => [d.id, d.data()]));
 
                 // separate in my and other groups
@@ -79,29 +76,23 @@ export default function HomeScreen() {
 
                 await Promise.all(
                     allDocs.map(async (docSnap) => {
-
                         // get single availability
-                        const availabilities = {id: docSnap.id, ...docSnap.data()};
-
+                        const availabilities = { id: docSnap.id, ...docSnap.data() };
                         // see if is already included
                         if ((availabilities.user_id === loggedUserId && my[availabilities.id]) ||
                             (groupIds.includes(availabilities.group_id) && others[availabilities.id])) {
                             return;
                         }
                         // get data structures with all the needed data to show
-                        const enriched = buildAvailability(availabilities, usersMap, groupsMap);
+                        const enriched = buildAvailability(availabilities, usersMap, rolesMap, groupsMap);
                         // distribute between my and other availabilities
-
-                        if (availabilities.user_id === loggedUserId) {
+                        if (availabilities.user_id === loggedUserId)
                             my[enriched.id] = enriched;
-
-                        } else{
+                        else if (groupIds.includes(availabilities.group_id))
                             others[enriched.id] = enriched;
-                        }
-
                     }),
                 );
-                console.log(others)
+
                 setMyAvailabilities(my);
                 setOtherAvailabilities(others);
             } catch (error) {
@@ -130,7 +121,7 @@ export default function HomeScreen() {
                             <TouchableOpacity
                                 key={item.id}
                                 onPress={() =>
-                                    navigation.navigate('ManageAvailabilityScreen', {availabilityId: item.id})
+                                    alert('Here we go to Availability Details')
                                 }
                             >
                                 <AvailabilityCard
@@ -153,8 +144,8 @@ export default function HomeScreen() {
                             <TouchableOpacity
                                 key={item.id}
                                 onPress={() =>
-                                    navigation.navigate('AvailabilityDetails', {availabilityId: item.id})
-                                }>
+                                alert('Here we go to Availability Details')
+                            }>
                                 <AvailabilityCard
                                     key={item.id}
                                     name={item.userName}
